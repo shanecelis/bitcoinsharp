@@ -1,0 +1,1 @@
+To get started, ensure you have the latest .net SDK installed and run "msbuild" from the src folder.

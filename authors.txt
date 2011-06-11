@@ -1,0 +1,3 @@
+Mike Hearn <hearn@google.com>
+Thilo Planz <thilo@cpan.org>
+Nathan Baulch <nathan.baulch@gmail.com>
