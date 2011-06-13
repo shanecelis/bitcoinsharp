@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -690,7 +690,7 @@ namespace BitCoinSharp
         }
 
         /// <summary>
-        /// Returns the AVAILABLE balance of this wallet. See <see cref="BalanceType#AVAILABLE">BalanceType#AVAILABLE</see> for details on what this
+        /// Returns the available balance of this wallet. See <see cref="BalanceType.Available">BalanceType.Available</see> for details on what this
         /// means.
         /// </summary>
         /// <remarks>

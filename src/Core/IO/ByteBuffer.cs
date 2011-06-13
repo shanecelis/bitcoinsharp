@@ -31,7 +31,6 @@ namespace BitCoinSharp.IO
     /// The following invariant holds for the mark, position, limit, and capacity values: 
     /// 0 &lt;= mark &lt;= position &lt;= limit &lt;= capacity 
     /// </summary>
-    [CLSCompliant(false)]
     internal class ByteBuffer : Stream
     {
         private MemoryStream _stream;

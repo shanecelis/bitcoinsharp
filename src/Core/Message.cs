@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,9 +34,6 @@ namespace BitCoinSharp
     public abstract class Message
     {
         public const int MaxSize = 0x02000000;
-
-        // Useful to ensure serialize/deserialize are consistent with each other.
-        private const bool _selfCheck = false;
 
         [NonSerialized] private int _offset;
         [NonSerialized] private int _cursor;
@@ -94,7 +91,9 @@ namespace BitCoinSharp
             Bytes = msg;
             Cursor = Offset = offset;
             Parse();
-            if (_selfCheck && !GetType().Name.Equals("VersionMessage"))
+#if DEBUG
+            // Useful to ensure serialize/deserialize are consistent with each other.
+            if (!GetType().Name.Equals("VersionMessage"))
             {
                 var msgbytes = new byte[Cursor - offset];
                 Array.Copy(msg, offset, msgbytes, 0, Cursor - offset);
@@ -104,6 +103,7 @@ namespace BitCoinSharp
                                         Utils.BytesToHexString(reserialized) + " vs \n" +
                                         Utils.BytesToHexString(msgbytes));
             }
+#endif
             Bytes = null;
         }
 

@@ -259,7 +259,7 @@ namespace BitCoinSharp.Collections
         /// <param name="key">The key of the entry to add.</param>
         /// <param name="value">The value of the entry to add. This value can be <null/>.</param>
         /// <remarks>A key cannot be <null/>, but a value can be.
-        /// <para>You can also use the <see cref="OrderedDictionary{TKey,TValue}.Item(TKey)"/> property to add new elements by setting the value of a key that does not exist in the <see cref="OrderedDictionary{TKey,TValue}">OrderedDictionary&lt;TKey,TValue&gt;</see> collection; however, if the specified key already exists in the <see cref="OrderedDictionary{TKey,TValue}">OrderedDictionary&lt;TKey,TValue&gt;</see>, setting the <see cref="OrderedDictionary{TKey,TValue}.Item(TKey)"/> property overwrites the old value. In contrast, the <see cref="Add"/> method does not modify existing elements.</para></remarks>
+        /// <para>You can also use the indexer property to add new elements by setting the value of a key that does not exist in the <see cref="OrderedDictionary{TKey,TValue}">OrderedDictionary&lt;TKey,TValue&gt;</see> collection; however, if the specified key already exists in the <see cref="OrderedDictionary{TKey,TValue}">OrderedDictionary&lt;TKey,TValue&gt;</see>, setting the indexer property overwrites the old value. In contrast, the <see cref="Add"/> method does not modify existing elements.</para></remarks>
         /// <exception cref="ArgumentNullException"><paramref name="key"/> is <null/></exception>
         /// <exception cref="ArgumentException">An element with the same key already exists in the <see cref="OrderedDictionary{TKey,TValue}">OrderedDictionary&lt;TKey,TValue&gt;</see></exception>
         void IDictionary<TKey, TValue>.Add(TKey key, TValue value)
@@ -274,7 +274,7 @@ namespace BitCoinSharp.Collections
         /// <param name="value">The value of the entry to add. This value can be <null/>.</param>
         /// <returns>The index of the newly added entry</returns>
         /// <remarks>A key cannot be <null/>, but a value can be.
-        /// <para>You can also use the <see cref="OrderedDictionary{TKey,TValue}.Item(TKey)"/> property to add new elements by setting the value of a key that does not exist in the <see cref="OrderedDictionary{TKey,TValue}">OrderedDictionary&lt;TKey,TValue&gt;</see> collection; however, if the specified key already exists in the <see cref="OrderedDictionary{TKey,TValue}">OrderedDictionary&lt;TKey,TValue&gt;</see>, setting the <see cref="OrderedDictionary{TKey,TValue}.Item(TKey)"/> property overwrites the old value. In contrast, the <see cref="Add"/> method does not modify existing elements.</para></remarks>
+        /// <para>You can also use the indexer property to add new elements by setting the value of a key that does not exist in the <see cref="OrderedDictionary{TKey,TValue}">OrderedDictionary&lt;TKey,TValue&gt;</see> collection; however, if the specified key already exists in the <see cref="OrderedDictionary{TKey,TValue}">OrderedDictionary&lt;TKey,TValue&gt;</see>, setting the indexer property overwrites the old value. In contrast, the <see cref="Add"/> method does not modify existing elements.</para></remarks>
         /// <exception cref="ArgumentNullException"><paramref name="key"/> is <null/></exception>
         /// <exception cref="ArgumentException">An element with the same key already exists in the <see cref="OrderedDictionary{TKey,TValue}">OrderedDictionary&lt;TKey,TValue&gt;</see></exception>
         public int Add(TKey key, TValue value)
