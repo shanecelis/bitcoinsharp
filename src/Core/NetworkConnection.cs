@@ -67,9 +67,8 @@ namespace BitCoinSharp
         /// <param name="params">Defines which network to connect to and details of the protocol.</param>
         /// <param name="bestHeight">How many blocks are in our best chain</param>
         /// <param name="connectTimeout">Timeout in milliseconds when initially connecting to peer</param>
-        /// <exception cref="System.IO.IOException">if there is a network related failure.</exception>
-        /// <exception cref="ProtocolException">if the version negotiation failed.</exception>
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="System.IO.IOException">If there is a network related failure.</exception>
+        /// <exception cref="BitCoinSharp.ProtocolException">If the version negotiation failed.</exception>
         public NetworkConnection(IPAddress remoteIp, NetworkParameters @params, int bestHeight, int connectTimeout)
         {
             _params = @params;
@@ -114,7 +113,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Sends a "ping" message to the remote node. The protocol doesn't presently use this feature much.
         /// </summary>
-        /// <exception cref="System.IO.IOException">System.IO.IOException</exception>
+        /// <exception cref="System.IO.IOException" />
         public void Ping()
         {
             WriteMessage("ping", new byte[] {});
@@ -172,9 +171,8 @@ namespace BitCoinSharp
         /// Reads a network message from the wire, blocking until the message is fully received.
         /// </summary>
         /// <returns>An instance of a Message subclass</returns>
-        /// <exception cref="ProtocolException">if the message is badly formatted, failed checksum or there was a TCP failure.</exception>
+        /// <exception cref="BitCoinSharp.ProtocolException">If the message is badly formatted, failed checksum or there was a TCP failure.</exception>
         /// <exception cref="System.IO.IOException" />
-        /// <exception cref="BitCoinSharp.ProtocolException" />
         public Message ReadMessage()
         {
             // A BitCoin protocol message has the following format.
@@ -329,7 +327,7 @@ namespace BitCoinSharp
         /// this should be "tx" for example. It's safe to call this from multiple threads simultaneously,
         /// the actual writing will be serialized.
         /// </summary>
-        /// <exception cref="System.IO.IOException">System.IO.IOException</exception>
+        /// <exception cref="System.IO.IOException" />
         public void WriteMessage(string tag, Message message)
         {
             // TODO: Requiring "tag" here is redundant, the message object should know its own protocol tag.

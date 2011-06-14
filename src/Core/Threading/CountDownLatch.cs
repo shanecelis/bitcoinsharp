@@ -133,7 +133,7 @@ namespace BitCoinSharp.Threading
         /// <p/>
         /// A <see cref="System.Threading.ThreadInterruptedException"/> is thrown if the thread is interrupted.
         /// </remarks>
-        /// <exception cref="System.Threading.ThreadInterruptedException">if the current thread is interrupted.</exception>
+        /// <exception cref="System.Threading.ThreadInterruptedException">If the current thread is interrupted.</exception>
         public void Await()
         {
             lock (this)
@@ -169,7 +169,7 @@ namespace BitCoinSharp.Threading
         /// <returns><see lang="true"/> if the count reached zero  and <see lang="false"/>
         /// if the waiting time elapsed before the count reached zero.
         /// </returns>
-        /// <exception cref="System.Threading.ThreadInterruptedException">if the current thread is interrupted.</exception>
+        /// <exception cref="System.Threading.ThreadInterruptedException">If the current thread is interrupted.</exception>
         public bool Await(TimeSpan duration)
         {
             var durationToWait = duration;

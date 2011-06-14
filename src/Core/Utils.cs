@@ -71,7 +71,7 @@ namespace BitCoinSharp
         /// This takes string in a format understood by <see cref="System.Double.Parse(string)">System.Double(string)</see>,
         /// for example "0", "1", "0.10", "1.23E3", "1234.5E-5".
         /// </remarks>
-        /// <exception cref="ArithmeticException">if you try to specify fractional nanocoins</exception>
+        /// <exception cref="System.ArithmeticException">If you try to specify fractional nanocoins.</exception>
         public static BigInteger ToNanoCoins(string coins)
         {
             var value = decimal.Parse(coins, NumberStyles.Float)*100000000;

@@ -227,7 +227,7 @@ namespace BitCoinSharp
         /// whether it's done later.
         /// </summary>
         /// <param name="blockHash">Hash of the block you were requesting.</param>
-        /// <exception cref="System.IO.IOException">System.IO.IOException</exception>
+        /// <exception cref="System.IO.IOException" />
         public GetDataFuture<Block> GetBlock(byte[] blockHash)
         {
             var getdata = new InventoryMessage(_params);
@@ -316,7 +316,7 @@ namespace BitCoinSharp
         /// Send the given Transaction, ie, make a payment with BitCoins. To create a transaction you can broadcast, use
         /// a <see cref="Wallet">Wallet</see>. After the broadcast completes, confirm the send using the wallet confirmSend() method.
         /// </summary>
-        /// <exception cref="System.IO.IOException">System.IO.IOException</exception>
+        /// <exception cref="System.IO.IOException" />
         internal void BroadcastTransaction(Transaction tx)
         {
             _conn.WriteMessage(NetworkConnection.MsgTx, tx);

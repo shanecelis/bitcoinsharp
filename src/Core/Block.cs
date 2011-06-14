@@ -379,7 +379,6 @@ namespace BitCoinSharp
         /// transactions don't hash to the value in the merkle root field. This is <b>not</b> everything that is required
         /// for a block to be valid, only what is checkable independent of the chain.
         /// </summary>
-        /// <exception cref="VerificationException">VerificationException</exception>
         /// <exception cref="BitCoinSharp.VerificationException" />
         public void Verify()
         {

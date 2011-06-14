@@ -134,8 +134,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Convenience method that returns the from address of this input by parsing the scriptSig.
         /// </summary>
-        /// <exception cref="ScriptException">if the scriptSig could not be understood (eg, if this is a coinbase transaction).</exception>
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="BitCoinSharp.ScriptException">If the scriptSig could not be understood (eg, if this is a coinbase transaction).</exception>
         public Address FromAddress
         {
             get

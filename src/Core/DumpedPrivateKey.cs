@@ -42,8 +42,7 @@ namespace BitCoinSharp
         /// </summary>
         /// <param name="params">The expected network parameters of the key. If you don't care, provide null.</param>
         /// <param name="encoded">The base58 encoded string.</param>
-        /// <exception cref="AddressFormatException">If the string is invalid or the header byte doesn't match the network params.</exception>
-        /// <exception cref="BitCoinSharp.AddressFormatException" />
+        /// <exception cref="BitCoinSharp.AddressFormatException">If the string is invalid or the header byte doesn't match the network params.</exception>
         public DumpedPrivateKey(NetworkParameters @params, string encoded)
             : base(encoded)
         {

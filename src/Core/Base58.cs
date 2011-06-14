@@ -105,8 +105,7 @@ namespace BitCoinSharp
         /// Uses the checksum in the last 4 bytes of the decoded data to verify the rest are correct. The checksum is
         /// removed from the returned data.
         /// </summary>
-        /// <exception cref="AddressFormatException">If the input is not base 58 or the checksum does not validate.</exception>
-        /// <exception cref="BitCoinSharp.AddressFormatException" />
+        /// <exception cref="BitCoinSharp.AddressFormatException">If the input is not base 58 or the checksum does not validate.</exception>
         public static byte[] DecodeChecked(string input)
         {
             var tmp = Decode(input);

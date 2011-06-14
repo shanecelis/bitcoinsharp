@@ -77,7 +77,6 @@ namespace BitCoinSharp
         /// <param name="programBytes">Array of program bytes from a transaction.</param>
         /// <param name="offset">How many bytes into programBytes to start reading from.</param>
         /// <param name="length">How many bytes to read.</param>
-        /// <exception cref="ScriptException">ScriptException</exception>
         /// <exception cref="BitCoinSharp.ScriptException" />
         public Script(NetworkParameters @params, byte[] programBytes, int offset, int length)
         {
