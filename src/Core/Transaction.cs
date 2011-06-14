@@ -38,7 +38,7 @@ namespace BitCoinSharp
     [Serializable]
     public class Transaction : Message
     {
-        // These are serialized in both bitcoin and java serialization.
+        // These are serialized in both BitCoin and java serialization.
         private long _version;
         private List<TransactionInput> _inputs;
         private List<TransactionOutput> _outputs;

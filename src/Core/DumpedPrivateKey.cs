@@ -20,7 +20,7 @@ using Org.BouncyCastle.Math;
 namespace BitCoinSharp
 {
     /// <summary>
-    /// Parses and generates private keys in the form used by the Bitcoin "dumpprivkey" command. This is the private key
+    /// Parses and generates private keys in the form used by the BitCoin "dumpprivkey" command. This is the private key
     /// bytes with a header byte and 4 checksum bytes at the end.
     /// </summary>
     public class DumpedPrivateKey : VersionedChecksummedBytes
@@ -38,7 +38,7 @@ namespace BitCoinSharp
         }
 
         /// <summary>
-        /// Parses the given private key as created by the "dumpprivkey" Bitcoin C++ RPC.
+        /// Parses the given private key as created by the "dumpprivkey" BitCoin C++ RPC.
         /// </summary>
         /// <param name="params">The expected network parameters of the key. If you don't care, provide null.</param>
         /// <param name="encoded">The base58 encoded string.</param>

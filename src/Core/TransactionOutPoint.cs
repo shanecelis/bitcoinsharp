@@ -39,7 +39,7 @@ namespace BitCoinSharp
         /// </summary>
         internal long Index { get; private set; }
 
-        // This is not part of Bitcoin serialization. It's included in Java serialization.
+        // This is not part of BitCoin serialization. It's included in Java serialization.
         // It points to the connected transaction.
         internal Transaction FromTx { get; set; }
 

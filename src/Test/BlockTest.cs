@@ -156,7 +156,7 @@ namespace BitCoinSharp.Test
                 tx2 = (Transaction) ois.Deserialize(bos);
             }
 
-            // Note that this will actually check the transactions are equal by doing bitcoin serialization and checking
+            // Note that this will actually check the transactions are equal by doing BitCoin serialization and checking
             // the bytestreams are the same! A true "deep equals" is not implemented for Transaction. The primary purpose
             // of this test is to ensure no errors occur during the Java serialization/deserialization process.
             Assert.AreEqual(tx, tx2);

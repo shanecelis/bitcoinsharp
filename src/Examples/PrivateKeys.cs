@@ -34,7 +34,7 @@ namespace BitCoinSharp.Examples
             var @params = NetworkParameters.ProdNet();
             try
             {
-                // Decode the private key from Satoshi's Base58 variant. If 51 characters long then it's from Bitcoins
+                // Decode the private key from Satoshi's Base58 variant. If 51 characters long then it's from BitCoins
                 // "dumpprivkey" command and includes a version byte and checksum. Otherwise assume it's a raw key.
                 EcKey key;
                 if (args[0].Length == 51)

@@ -70,7 +70,7 @@ namespace BitCoinSharp
             {
                 _running = true;
             }
-            _thread.Name = "Bitcoin peer thread: " + _conn;
+            _thread.Name = "BitCoin peer thread: " + _conn;
             _thread.Start();
         }
 

@@ -248,7 +248,7 @@ namespace BitCoinSharp
                     (0xFF & _chunks[4][0]) != OpCheckSig)
                     throw new ScriptException("Script not in the standard scriptPubKey form");
 
-                // Otherwise, the third element is the hash of the public key, ie the bitcoin address.
+                // Otherwise, the third element is the hash of the public key, ie the BitCoin address.
                 return _chunks[2];
             }
         }
@@ -292,7 +292,6 @@ namespace BitCoinSharp
         /// <summary>
         /// Gets the destination address from this script, if it's in the required form (see getPubKey).
         /// </summary>
-        /// <exception cref="ScriptException">ScriptException</exception>
         /// <exception cref="BitCoinSharp.ScriptException" />
         public Address ToAddress
         {
