@@ -18,9 +18,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using BitCoinSharp.Common;
-using BitCoinSharp.IO;
 using log4net;
 
 namespace BitCoinSharp
@@ -38,26 +36,15 @@ namespace BitCoinSharp
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (NetworkConnection));
 
-        private const int _commandLen = 12;
-
-        // Message strings.
-        internal const string MsgVersion = "version";
-        internal const string MsgInventory = "inv";
-        internal const string MsgBlock = "block";
-        internal const string MsgGetblocks = "getblocks";
-        internal const string MsgGetdata = "getdata";
-        internal const string MsgTx = "tx";
-        internal const string MsgAddr = "addr";
-        internal const string MsgVerack = "verack";
-
         private Socket _socket;
         private Stream _out;
         private Stream _in;
         // The IP address to which we are connecting.
         private readonly IPAddress _remoteIp;
-        private readonly bool _usesChecksumming;
         private readonly NetworkParameters _params;
         private readonly VersionMessage _versionMessage;
+
+        private readonly BitcoinSerializer _serializer;
 
         /// <summary>
         /// Connect to the given IP address using the port specified as part of the network parameters. Once construction
@@ -82,15 +69,18 @@ namespace BitCoinSharp
             _out = new NetworkStream(_socket, FileAccess.Write);
             _in = new NetworkStream(_socket, FileAccess.Read);
 
+            // the version message never uses check-summing. Update check-summing property after version is read.
+            _serializer = new BitcoinSerializer(@params, false);
+
             // Announce ourselves. This has to come first to connect to clients beyond v0.30.20.2 which wait to hear
             // from us until they send their version message back.
-            WriteMessage(MsgVersion, new VersionMessage(@params, bestHeight));
+            WriteMessage(new VersionMessage(@params, bestHeight));
             // When connecting, the remote peer sends us a version message with various bits of
             // useful data in it. We need to know the peer protocol version before we can talk to it.
             _versionMessage = (VersionMessage) ReadMessage();
             // Now it's our turn ...
             // Send an ACK message stating we accept the peers protocol version.
-            WriteMessage(MsgVerack, new byte[] {});
+            WriteMessage(new VersionAck());
             // And get one back ...
             ReadMessage();
             // Switch to the new protocol version.
@@ -106,7 +96,8 @@ namespace BitCoinSharp
             // mode nodes because we can't download the data from them we need to find/verify transactions.
             if (!_versionMessage.HasBlockChain())
                 throw new ProtocolException("Peer does not have a copy of the block chain.");
-            _usesChecksumming = peerVersion >= 209;
+            // newer clients use check-summing
+            _serializer.UseChecksumming(peerVersion >= 209);
             // Handshake is done!
         }
 
@@ -116,7 +107,7 @@ namespace BitCoinSharp
         /// <exception cref="System.IO.IOException" />
         public void Ping()
         {
-            WriteMessage("ping", new byte[] {});
+            WriteMessage(new Ping());
         }
 
         /// <summary>
@@ -135,38 +126,6 @@ namespace BitCoinSharp
             return "[" + _remoteIp + "]:" + _params.Port + " (" + (_socket.Connected ? "connected" : "disconnected") + ")";
         }
 
-        /// <exception cref="System.IO.IOException" />
-        private void SeekPastMagicBytes()
-        {
-            var magicCursor = 3; // Which byte of the magic we're looking for currently.
-            while (true)
-            {
-                var b = _in.Read(); // Read a byte.
-                if (b == -1)
-                {
-                    // There's no more data to read.
-                    throw new IOException("Socket is disconnected");
-                }
-                // We're looking for a run of bytes that is the same as the packet magic but we want to ignore partial
-                // magics that aren't complete. So we keep track of where we're up to with magicCursor.
-                var expectedByte = 0xFF & (int) (_params.PacketMagic >> magicCursor*8);
-                if (b == expectedByte)
-                {
-                    magicCursor--;
-                    if (magicCursor < 0)
-                    {
-                        // We found the magic sequence.
-                        return;
-                    }
-                }
-                else
-                {
-                    // We still have further to go to find the next message.
-                    magicCursor = 3;
-                }
-            }
-        }
-
         /// <summary>
         /// Reads a network message from the wire, blocking until the message is fully received.
         /// </summary>
@@ -175,151 +134,7 @@ namespace BitCoinSharp
         /// <exception cref="System.IO.IOException" />
         public Message ReadMessage()
         {
-            // A BitCoin protocol message has the following format.
-            //
-            //   - 4 byte magic number: 0xfabfb5da for the testnet or
-            //                          0xf9beb4d9 for production
-            //   - 12 byte command in ASCII
-            //   - 4 byte payload size
-            //   - 4 byte checksum
-            //   - Payload data
-            //
-            // The checksum is the first 4 bytes of a SHA256 hash of the message payload. It isn't
-            // present for all messages, notably, the first one on a connection.
-            //
-            // Satoshi's implementation ignores garbage before the magic header bytes. We have to do the same because
-            // sometimes it sends us stuff that isn't part of any message.
-            SeekPastMagicBytes();
-            // Now read in the header.
-            var header = new byte[_commandLen + 4 + (_usesChecksumming ? 4 : 0)];
-            var readCursor = 0;
-            while (readCursor < header.Length)
-            {
-                var bytesRead = _in.Read(header, readCursor, header.Length - readCursor);
-                if (bytesRead == -1)
-                {
-                    // There's no more data to read.
-                    throw new IOException("Socket is disconnected");
-                }
-                readCursor += bytesRead;
-            }
-
-            var cursor = 0;
-
-            // The command is a NULL terminated string, unless the command fills all twelve bytes
-            // in which case the termination is implicit.
-            var mark = cursor;
-            for (; header[cursor] != 0 && cursor - mark < _commandLen; cursor++)
-            {
-            }
-            var commandBytes = new byte[cursor - mark];
-            Array.Copy(header, mark, commandBytes, 0, cursor - mark);
-            var command = Encoding.UTF8.GetString(commandBytes, 0, commandBytes.Length);
-            cursor = mark + _commandLen;
-
-            var size = (int) Utils.ReadUint32(header, cursor);
-            cursor += 4;
-
-            if (size > Message.MaxSize)
-                throw new ProtocolException("Message size too large: " + size);
-
-            // Old clients don't send the checksum.
-            var checksum = new byte[4];
-            if (_usesChecksumming)
-            {
-                // Note that the size read above includes the checksum bytes.
-                Array.Copy(header, cursor, checksum, 0, 4);
-            }
-
-            // Now try to read the whole message.
-            readCursor = 0;
-            var payloadBytes = new byte[size];
-            while (readCursor < payloadBytes.Length - 1)
-            {
-                var bytesRead = _in.Read(payloadBytes, readCursor, size - readCursor);
-                if (bytesRead == -1)
-                {
-                    throw new IOException("Socket is disconnected");
-                }
-                readCursor += bytesRead;
-            }
-
-            // Verify the checksum.
-            if (_usesChecksumming)
-            {
-                var hash = Utils.DoubleDigest(payloadBytes);
-                if (checksum[0] != hash[0] || checksum[1] != hash[1] || checksum[2] != hash[2] ||
-                    checksum[3] != hash[3])
-                {
-                    throw new ProtocolException("Checksum failed to verify, actual " +
-                                                Utils.BytesToHexString(hash) +
-                                                " vs " + Utils.BytesToHexString(checksum));
-                }
-            }
-
-            if (_log.IsDebugEnabled)
-            {
-                _log.DebugFormat("Received {0} byte '{1}' message: {2}",
-                                 size,
-                                 command,
-                                 Utils.BytesToHexString(payloadBytes)
-                    );
-            }
-            try
-            {
-                Message message;
-                if (command.Equals(MsgVersion))
-                    message = new VersionMessage(_params, payloadBytes);
-                else if (command.Equals(MsgInventory))
-                    message = new InventoryMessage(_params, payloadBytes);
-                else if (command.Equals(MsgBlock))
-                    message = new Block(_params, payloadBytes);
-                else if (command.Equals(MsgGetdata))
-                    message = new GetDataMessage(_params, payloadBytes);
-                else if (command.Equals(MsgTx))
-                    message = new Transaction(_params, payloadBytes);
-                else if (command.Equals(MsgAddr))
-                    message = new AddressMessage(_params, payloadBytes);
-                else
-                    message = new UnknownMessage(_params, command, payloadBytes);
-                return message;
-            }
-            catch (Exception e)
-            {
-                throw new ProtocolException("Error deserializing message " + Utils.BytesToHexString(payloadBytes) + "\n", e);
-            }
-        }
-
-        /// <exception cref="System.IO.IOException" />
-        private void WriteMessage(string name, byte[] payload)
-        {
-            var header = new byte[4 + _commandLen + 4 + (_usesChecksumming ? 4 : 0)];
-
-            Utils.Uint32ToByteArrayBe(_params.PacketMagic, header, 0);
-
-            // The header array is initialized to zero by Java so we don't have to worry about
-            // NULL terminating the string here.
-            for (var i = 0; i < name.Length && i < _commandLen; i++)
-            {
-                header[4 + i] = (byte) (name[0] & 0xFF);
-            }
-
-            Utils.Uint32ToByteArrayLe(payload.Length, header, 4 + _commandLen);
-
-            if (_usesChecksumming)
-            {
-                var hash = Utils.DoubleDigest(payload);
-                Array.Copy(hash, 0, header, 4 + _commandLen + 4, 4);
-            }
-
-            _log.DebugFormat("Sending {0} message: {1}", name, Utils.BytesToHexString(payload));
-
-            // Another writeMessage call may be running concurrently.
-            lock (_out)
-            {
-                _out.Write(header);
-                _out.Write(payload);
-            }
+            return _serializer.Deserialize(_in);
         }
 
         /// <summary>
@@ -328,10 +143,12 @@ namespace BitCoinSharp
         /// the actual writing will be serialized.
         /// </summary>
         /// <exception cref="System.IO.IOException" />
-        public void WriteMessage(string tag, Message message)
+        public void WriteMessage(Message message)
         {
-            // TODO: Requiring "tag" here is redundant, the message object should know its own protocol tag.
-            WriteMessage(tag, message.BitcoinSerialize());
+            lock (_out)
+            {
+                _serializer.Serialize(message, _out);
+            }
         }
 
         /// <summary>

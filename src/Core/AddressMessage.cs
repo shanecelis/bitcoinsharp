@@ -25,11 +25,17 @@ namespace BitCoinSharp
     {
         private const long _maxAddresses = 1024;
 
-        private IList<PeerAddress> _addresses;
+        internal IList<PeerAddress> Addresses { get; private set; }
 
         /// <exception cref="BitCoinSharp.ProtocolException" />
-        internal AddressMessage(NetworkParameters @params, byte[] payload, int offset = 0)
+        internal AddressMessage(NetworkParameters @params, byte[] payload, int offset)
             : base(@params, payload, offset)
+        {
+        }
+
+        /// <exception cref="BitCoinSharp.ProtocolException" />
+        internal AddressMessage(NetworkParameters @params, byte[] payload)
+            : base(@params, payload, 0)
         {
         }
 
@@ -40,11 +46,11 @@ namespace BitCoinSharp
             // Guard against ultra large messages that will crash us.
             if (numAddresses > _maxAddresses)
                 throw new ProtocolException("Address message too large.");
-            _addresses = new List<PeerAddress>((int) numAddresses);
+            Addresses = new List<PeerAddress>((int) numAddresses);
             for (var i = 0; i < numAddresses; i++)
             {
                 var addr = new PeerAddress(Params, Bytes, Cursor, ProtocolVersion);
-                _addresses.Add(addr);
+                Addresses.Add(addr);
                 Cursor += addr.MessageSize;
             }
         }
@@ -53,7 +59,7 @@ namespace BitCoinSharp
         {
             var builder = new StringBuilder();
             builder.Append("addr: ");
-            foreach (var a in _addresses)
+            foreach (var a in Addresses)
             {
                 builder.Append(a.ToString());
                 builder.Append(" ");

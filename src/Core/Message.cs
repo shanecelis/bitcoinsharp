@@ -91,7 +91,7 @@ namespace BitCoinSharp
             Bytes = msg;
             Cursor = Offset = offset;
             Parse();
-#if DEBUG
+#if SELF_CHECK
             // Useful to ensure serialize/deserialize are consistent with each other.
             if (!GetType().Name.Equals("VersionMessage"))
             {

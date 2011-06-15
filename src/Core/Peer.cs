@@ -196,8 +196,9 @@ namespace BitCoinSharp
             // enough to be a problem.
             var topBlock = _blockChain.UnconnectedBlock;
             var topHash = (topBlock != null ? topBlock.Hash : null);
-            if (inv.Items.Count == 1 && inv.Items[0].Type == InventoryItem.ItemType.Block && topHash != null &&
-                inv.Items[0].Hash.SequenceEqual(topHash))
+            var items = inv.Items;
+            if (items.Count == 1 && items[0].Type == InventoryItem.ItemType.Block && topHash != null &&
+                items[0].Hash.SequenceEqual(topHash))
             {
                 // An inv with a single hash containing our most recent unconnected block is a special inv,
                 // it's kind of like a tickle from the peer telling us that it's time to download more blocks to catch up to
@@ -206,18 +207,20 @@ namespace BitCoinSharp
                 BlockChainDownload(topHash);
                 return;
             }
-            var getdata = new InventoryMessage(_params);
-            foreach (var item in inv.Items)
+            var getdata = new GetDataMessage(_params);
+            var dirty = false;
+            foreach (var item in items)
             {
                 if (item.Type != InventoryItem.ItemType.Block) continue;
-                getdata.Items.Add(item);
+                getdata.AddItem(item);
+                dirty = true;
             }
             // No blocks to download. This probably contained transactions instead, but right now we can't prove they are
             // valid so we don't bother downloading transactions that aren't in blocks yet.
-            if (getdata.Items.Count == 0)
+            if (!dirty)
                 return;
             // This will cause us to receive a bunch of block messages.
-            _conn.WriteMessage(NetworkConnection.MsgGetdata, getdata);
+            _conn.WriteMessage(getdata);
         }
 
         /// <summary>
@@ -232,7 +235,7 @@ namespace BitCoinSharp
         {
             var getdata = new InventoryMessage(_params);
             var inventoryItem = new InventoryItem(InventoryItem.ItemType.Block, blockHash);
-            getdata.Items.Add(inventoryItem);
+            getdata.AddItem(inventoryItem);
             var future = new GetDataFuture<Block>(this, inventoryItem);
             // Add to the list of things we're waiting for. It's important this come before the network send to avoid
             // race conditions.
@@ -240,7 +243,7 @@ namespace BitCoinSharp
             {
                 _pendingGetBlockFutures.Add(future);
             }
-            _conn.WriteMessage(NetworkConnection.MsgGetdata, getdata);
+            _conn.WriteMessage(getdata);
             return future;
         }
 
@@ -319,7 +322,7 @@ namespace BitCoinSharp
         /// <exception cref="System.IO.IOException" />
         internal void BroadcastTransaction(Transaction tx)
         {
-            _conn.WriteMessage(NetworkConnection.MsgTx, tx);
+            _conn.WriteMessage(tx);
         }
 
         /// <exception cref="System.IO.IOException" />
@@ -363,7 +366,7 @@ namespace BitCoinSharp
             if (!topBlock.Equals(_params.GenesisBlock))
                 blockLocator.AddFirst(topBlock.Hash);
             var message = new GetBlocksMessage(_params, blockLocator.ToList(), toHash);
-            _conn.WriteMessage(NetworkConnection.MsgGetblocks, message);
+            _conn.WriteMessage(message);
         }
 
         /// <summary>

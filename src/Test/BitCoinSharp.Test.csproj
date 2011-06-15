@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="AddressTest.cs" />
     <Compile Include="Base58Test.cs" />
+    <Compile Include="BitcoinSerializerTest.cs" />
     <Compile Include="BlockChainTest.cs" />
     <Compile Include="BlockTest.cs" />
     <Compile Include="BoundedOverheadBlockStoreTest.cs" />

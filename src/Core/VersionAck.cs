@@ -1,5 +1,5 @@
-/*
- * Copyright 2011 Google Inc.
+﻿/*
+ * Copyright 2011 Noa Resare.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-using System;
-
 namespace BitCoinSharp
 {
-    [Serializable]
-    public class GetDataMessage : ListMessage
+    /// <summary>
+    /// The verack message, sent by a client accepting the version message they received from their peer.
+    /// </summary>
+    public class VersionAck : Message
     {
-        /// <exception cref="BitCoinSharp.ProtocolException" />
-        public GetDataMessage(NetworkParameters @params, byte[] payloadBytes)
-            : base(@params, payloadBytes)
+        public VersionAck()
         {
         }
 
-        public GetDataMessage(NetworkParameters @params)
-            : base(@params)
+        // this is needed by the BitcoinSerializer
+        public VersionAck(NetworkParameters @params, byte[] payload)
         {
+        }
+
+        /// <exception cref="BitCoinSharp.ProtocolException" />
+        protected override void Parse()
+        {
+            // nothing to parse for now
         }
     }
 }

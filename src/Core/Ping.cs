@@ -1,5 +1,5 @@
-/*
- * Copyright 2011 Google Inc.
+﻿/*
+ * Copyright 2011 Noa Resare
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-using System;
-
 namespace BitCoinSharp
 {
-    [Serializable]
-    public class GetDataMessage : ListMessage
+    public class Ping : Message
     {
         /// <exception cref="BitCoinSharp.ProtocolException" />
-        public GetDataMessage(NetworkParameters @params, byte[] payloadBytes)
-            : base(@params, payloadBytes)
+        protected override void Parse()
         {
-        }
-
-        public GetDataMessage(NetworkParameters @params)
-            : base(@params)
-        {
+            // nothing to parse
         }
     }
 }

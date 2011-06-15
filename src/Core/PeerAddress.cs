@@ -30,8 +30,8 @@ namespace BitCoinSharp
     [Serializable]
     public class PeerAddress : Message
     {
-        private IPAddress _addr;
-        private int _port;
+        internal IPAddress Addr { get; private set; }
+        internal int Port { get; private set; }
         private BigInteger _services;
         private long _time;
 
@@ -43,8 +43,8 @@ namespace BitCoinSharp
 
         public PeerAddress(IPAddress addr, int port, int protocolVersion)
         {
-            _addr = addr;
-            _port = port;
+            Addr = addr;
+            Port = port;
             ProtocolVersion = protocolVersion;
         }
 
@@ -58,7 +58,7 @@ namespace BitCoinSharp
             }
             Utils.Uint64ToByteStreamLe(BigInteger.Zero, stream); // nServices.
             // Java does not provide any utility to map an IPv4 address into IPv6 space, so we have to do it by hand.
-            var ipBytes = _addr.GetAddressBytes();
+            var ipBytes = Addr.GetAddressBytes();
             if (ipBytes.Length == 4)
             {
                 var v6Addr = new byte[16];
@@ -69,8 +69,8 @@ namespace BitCoinSharp
             }
             stream.Write(ipBytes);
             // And write out the port.
-            stream.Write((byte) (0xFF & _port));
-            stream.Write((byte) (0xFF & (_port >> 8)));
+            stream.Write((byte) (0xFF & Port));
+            stream.Write((byte) (0xFF & (Port >> 8)));
         }
 
         /// <exception cref="BitCoinSharp.ProtocolException" />
@@ -87,13 +87,13 @@ namespace BitCoinSharp
                 _time = -1;
             _services = ReadUint64();
             var addrBytes = ReadBytes(16);
-            _addr = new IPAddress(addrBytes);
-            _port = ((0xFF & Bytes[Cursor++]) << 8) | (0xFF & Bytes[Cursor++]);
+            Addr = new IPAddress(addrBytes);
+            Port = ((0xFF & Bytes[Cursor++]) << 8) | (0xFF & Bytes[Cursor++]);
         }
 
         public override string ToString()
         {
-            return "[" + _addr + "]:" + _port;
+            return "[" + Addr + "]:" + Port;
         }
     }
 }
