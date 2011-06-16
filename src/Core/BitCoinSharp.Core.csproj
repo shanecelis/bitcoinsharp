@@ -81,6 +81,7 @@
     <Compile Include="ProtocolException.cs" />
     <Compile Include="Script.cs" />
     <Compile Include="ScriptException.cs" />
+    <Compile Include="SeedPeers.cs" />
     <Compile Include="Sha256Hash.cs" />
     <Compile Include="StoredBlock.cs" />
     <Compile Include="Threading\CountDownLatch.cs" />

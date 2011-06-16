@@ -62,6 +62,7 @@
     <Compile Include="EcKeyTest.cs" />
     <Compile Include="IrcDiscoveryTest.cs" />
     <Compile Include="ScriptTest.cs" />
+    <Compile Include="SeedPeersTest.cs" />
     <Compile Include="UtilsTest.cs" />
     <Compile Include="VarIntTest.cs" />
     <Compile Include="WalletTest.cs" />
