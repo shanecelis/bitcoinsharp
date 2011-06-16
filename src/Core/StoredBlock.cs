@@ -116,7 +116,8 @@ namespace BitCoinSharp
 
         public override string ToString()
         {
-            return "Block at height " + Height + ": " + Header;
+            return string.Format("Block {0} at height {1}: {2}",
+                                 Header.HashAsString, Height, Header);
         }
     }
 }

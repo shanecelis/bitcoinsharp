@@ -120,7 +120,12 @@ namespace BitCoinSharp
                     _statsLastTime = Environment.TickCount;
                     _statsBlocksAdded = 0;
                 }
-                // We don't check for double adds here to avoid potentially expensive block chain misses.
+                // We check only the chain head for double adds here to avoid potentially expensive block chain misses.
+                if (block.Equals(_chainHead.Header))
+                {
+                    // Duplicate add of the block at the top of the chain, can be a natural artifact of the download process.
+                    return true;
+                }
 
                 // Prove the block is internally valid: hash is lower than target, merkle root is correct and so on.
                 try
@@ -190,7 +195,10 @@ namespace BitCoinSharp
                 }
                 else
                 {
-                    _log.Info("Block forks the chain, but it did not cause a reorganize.");
+                    var splitPoint = FindSplit(newStoredBlock, _chainHead);
+                    var splitPointHash = splitPoint != null ? splitPoint.Header.HashAsString : "?";
+                    _log.InfoFormat("Block forks the chain at {0}, but it did not cause a reorganize:\n{1}",
+                                    splitPointHash, newStoredBlock);
                 }
 
                 // We may not have any transactions if we received only a header. That never happens today but will in

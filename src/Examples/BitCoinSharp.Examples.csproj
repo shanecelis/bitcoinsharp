@@ -55,6 +55,7 @@
     <Compile Include="PrintPeers.cs" />
     <Compile Include="PrivateKeys.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="RefreshWallet.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

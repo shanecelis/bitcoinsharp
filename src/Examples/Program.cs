@@ -20,6 +20,7 @@ namespace BitCoinSharp.Examples
                                {"PingService", PingService.Run},
                                {"PrintPeers", PrintPeers.Run},
                                {"PrivateKeys", PrivateKeys.Run},
+                               {"RefreshWallet", RefreshWallet.Run}
                            };
 
             var name = args[0];
