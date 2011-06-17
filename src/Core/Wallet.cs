@@ -745,46 +745,46 @@ namespace BitCoinSharp
             lock (this)
             {
                 var builder = new StringBuilder();
-                builder.Append(string.Format("Wallet containing {0} BTC in:\n", Utils.BitcoinValueToFriendlyString(GetBalance())));
-                builder.Append(string.Format("  {0} unspent transactions\n", Unspent.Count));
-                builder.Append(string.Format("  {0} spent transactions\n", Spent.Count));
-                builder.Append(string.Format("  {0} pending transactions\n", Pending.Count));
-                builder.Append(string.Format("  {0} inactive transactions\n", _inactive.Count));
-                builder.Append(string.Format("  {0} dead transactions\n", _dead.Count));
+                builder.AppendFormat("Wallet containing {0} BTC in:", Utils.BitcoinValueToFriendlyString(GetBalance())).AppendLine();
+                builder.AppendFormat("  {0} unspent transactions", Unspent.Count).AppendLine();
+                builder.AppendFormat("  {0} spent transactions", Spent.Count).AppendLine();
+                builder.AppendFormat("  {0} pending transactions", Pending.Count).AppendLine();
+                builder.AppendFormat("  {0} inactive transactions", _inactive.Count).AppendLine();
+                builder.AppendFormat("  {0} dead transactions", _dead.Count).AppendLine();
                 // Do the keys.
-                builder.Append("\nKeys:\n");
+                builder.AppendLine().AppendLine("Keys:");
                 foreach (var key in Keychain)
                 {
                     builder.Append("  addr:");
                     builder.Append(key.ToAddress(_params));
                     builder.Append(" ");
                     builder.Append(key.ToString());
-                    builder.Append("\n");
+                    builder.AppendLine();
                 }
                 // Print the transactions themselves
                 if (Unspent.Count > 0)
                 {
-                    builder.Append("\nUNSPENT:\n");
+                    builder.AppendLine().AppendLine("UNSPENT:");
                     foreach (var tx in Unspent.Values) builder.Append(tx);
                 }
                 if (Spent.Count > 0)
                 {
-                    builder.Append("\nSPENT:\n");
+                    builder.AppendLine().AppendLine("SPENT:");
                     foreach (var tx in Spent.Values) builder.Append(tx);
                 }
                 if (Pending.Count > 0)
                 {
-                    builder.Append("\nPENDING:\n");
+                    builder.AppendLine().AppendLine("PENDING:");
                     foreach (var tx in Pending.Values) builder.Append(tx);
                 }
                 if (_inactive.Count > 0)
                 {
-                    builder.Append("\nINACTIVE:\n");
+                    builder.AppendLine().AppendLine("INACTIVE:");
                     foreach (var tx in _inactive.Values) builder.Append(tx);
                 }
                 if (_dead.Count > 0)
                 {
-                    builder.Append("\nDEAD:\n");
+                    builder.AppendLine().AppendLine("DEAD:");
                     foreach (var tx in _dead.Values) builder.Append(tx);
                 }
                 return builder.ToString();

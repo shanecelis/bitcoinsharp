@@ -99,8 +99,8 @@ namespace BitCoinSharp
                 Array.Copy(msg, offset, msgbytes, 0, Cursor - offset);
                 var reserialized = BitcoinSerialize();
                 if (!reserialized.SequenceEqual(msgbytes))
-                    throw new Exception("Serialization is wrong: \n" +
-                                        Utils.BytesToHexString(reserialized) + " vs \n" +
+                    throw new Exception("Serialization is wrong: " + Environment.NewLine +
+                                        Utils.BytesToHexString(reserialized) + " vs " + Environment.NewLine +
                                         Utils.BytesToHexString(msgbytes));
             }
 #endif

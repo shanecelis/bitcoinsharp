@@ -151,7 +151,7 @@ namespace BitCoinSharp
         private void LogAndSend(TextWriter writer, string command)
         {
             OnIrcSend(command);
-            writer.Write(command + "\n");
+            writer.WriteLine(command);
         }
 
         // Visible for testing.

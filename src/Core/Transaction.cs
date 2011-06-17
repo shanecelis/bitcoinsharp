@@ -266,7 +266,7 @@ namespace BitCoinSharp
             var s = new StringBuilder();
             s.Append("  ");
             s.Append(HashAsString);
-            s.Append("\n");
+            s.AppendLine();
             if (IsCoinBase)
             {
                 var script = "???";
@@ -295,7 +295,7 @@ namespace BitCoinSharp
                     s.Append("[exception: ").Append(e.Message).Append("]");
                     throw;
                 }
-                s.Append("\n");
+                s.AppendLine();
             }
             foreach (var @out in _outputs)
             {
@@ -313,7 +313,7 @@ namespace BitCoinSharp
                 {
                     s.Append("[exception: ").Append(e.Message).Append("]");
                 }
-                s.Append("\n");
+                s.AppendLine();
             }
             return s.ToString();
         }

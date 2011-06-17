@@ -82,7 +82,7 @@ namespace BitCoinSharp
         {
             _blockStore = blockStore;
             _chainHead = blockStore.GetChainHead();
-            _log.InfoFormat("chain head is:\n{0}", _chainHead.Header);
+            _log.InfoFormat("chain head is:{0}{1}", Environment.NewLine, _chainHead.Header);
             _params = @params;
             _wallet = wallet;
         }
@@ -197,8 +197,8 @@ namespace BitCoinSharp
                 {
                     var splitPoint = FindSplit(newStoredBlock, _chainHead);
                     var splitPointHash = splitPoint != null ? splitPoint.Header.HashAsString : "?";
-                    _log.InfoFormat("Block forks the chain at {0}, but it did not cause a reorganize:\n{1}",
-                                    splitPointHash, newStoredBlock);
+                    _log.InfoFormat("Block forks the chain at {0}, but it did not cause a reorganize:{1}{2}",
+                                    splitPointHash, Environment.NewLine, newStoredBlock);
                 }
 
                 // We may not have any transactions if we received only a header. That never happens today but will in

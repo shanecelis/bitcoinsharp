@@ -235,7 +235,7 @@ namespace BitCoinSharp
             }
             catch (Exception e)
             {
-                throw new ProtocolException("Error deserializing message " + Utils.BytesToHexString(payloadBytes) + "\n", e);
+                throw new ProtocolException("Error deserializing message " + Utils.BytesToHexString(payloadBytes) + Environment.NewLine + e.Message, e);
             }
         }
 

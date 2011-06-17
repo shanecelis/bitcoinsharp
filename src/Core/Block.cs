@@ -212,15 +212,16 @@ namespace BitCoinSharp
         /// </summary>
         public override string ToString()
         {
-            var s = new StringBuilder("v" + _version + " block: \n" +
-                                      "   previous block: " + Utils.BytesToHexString(_prevBlockHash) + "\n" +
-                                      "   merkle root: " + Utils.BytesToHexString(MerkleRoot) + "\n" +
-                                      "   time: [" + _time + "] " + new DateTime(_time*1000) + "\n" +
-                                      "   difficulty target (nBits): " + _difficultyTarget + "\n" +
-                                      "   nonce: " + _nonce + "\n");
+            var s = new StringBuilder();
+            s.AppendFormat("v{0} block:", _version).AppendLine();
+            s.AppendFormat("   previous block: {0}", Utils.BytesToHexString(_prevBlockHash)).AppendLine();
+            s.AppendFormat("   merkle root: {0}", Utils.BytesToHexString(MerkleRoot)).AppendLine();
+            s.AppendFormat("   time: [{0}] {1}", _time, new DateTime(_time*1000)).AppendLine();
+            s.AppendFormat("   difficulty target (nBits): {0}", _difficultyTarget).AppendLine();
+            s.AppendFormat("   nonce: {0}", _nonce).AppendLine();
             if (Transactions != null && Transactions.Count > 0)
             {
-                s.Append("   with ").Append(Transactions.Count).Append(" transaction(s):\n");
+                s.AppendFormat("   with {0} transaction(s):", Transactions.Count).AppendLine();
                 foreach (var tx in Transactions)
                 {
                     s.Append(tx.ToString());

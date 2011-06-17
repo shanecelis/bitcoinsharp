@@ -43,7 +43,8 @@ namespace BitCoinSharp.Examples
             wallet.CoinsReceived +=
                 (sender, e) =>
                 {
-                    Console.WriteLine("\nReceived tx " + e.Tx.HashAsString);
+                    Console.WriteLine();
+                    Console.WriteLine("Received tx " + e.Tx.HashAsString);
                     Console.WriteLine(e.Tx.ToString());
                 };
 
@@ -64,7 +65,9 @@ namespace BitCoinSharp.Examples
             }
             peer.Disconnect();
             wallet.SaveToFile(file);
-            Console.WriteLine("\nDone!\n");
+            Console.WriteLine();
+            Console.WriteLine("Done!");
+            Console.WriteLine();
             Console.WriteLine(wallet.ToString());
         }
     }
