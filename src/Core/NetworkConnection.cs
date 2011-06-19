@@ -56,7 +56,7 @@ namespace BitCoinSharp
         /// <param name="connectTimeout">Timeout in milliseconds when initially connecting to peer</param>
         /// <exception cref="System.IO.IOException">If there is a network related failure.</exception>
         /// <exception cref="BitCoinSharp.ProtocolException">If the version negotiation failed.</exception>
-        public NetworkConnection(IPAddress remoteIp, NetworkParameters @params, int bestHeight, int connectTimeout)
+        public NetworkConnection(IPAddress remoteIp, NetworkParameters @params, uint bestHeight, int connectTimeout)
         {
             _params = @params;
             _remoteIp = remoteIp;
@@ -85,7 +85,7 @@ namespace BitCoinSharp
             ReadMessage();
             // Switch to the new protocol version.
             var peerVersion = _versionMessage.ClientVersion;
-            _log.InfoFormat("Connected to peer: version={0}, subVer='{1}', services=0x{2}, time={3}, blocks={4}",
+            _log.InfoFormat("Connected to peer: version={0}, subVer='{1}', services=0x{2:X}, time={3}, blocks={4}",
                             peerVersion,
                             _versionMessage.SubVer,
                             _versionMessage.LocalServices,

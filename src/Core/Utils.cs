@@ -41,7 +41,7 @@ namespace BitCoinSharp
         /// The term nanocoin is very misleading, though, because there are only 100 million
         /// of them in a coin (whereas one would expect 1 billion.
         /// </remarks>
-        public static readonly BigInteger Coin = new BigInteger("100000000", 10);
+        public static readonly ulong Coin = 100000000;
 
         /// <summary>
         /// How many "nanocoins" there are in 0.01 BitCoins.
@@ -51,16 +51,16 @@ namespace BitCoinSharp
         /// The term nanocoin is very misleading, though, because there are only 100 million
         /// of them in a coin (whereas one would expect 1 billion).
         /// </remarks>
-        public static readonly BigInteger Cent = new BigInteger("1000000", 10);
+        public static readonly ulong Cent = 1000000;
 
         /// <summary>
         /// Convert an amount expressed in the way humans are used to into nanocoins.
         /// </summary>
-        public static BigInteger ToNanoCoins(int coins, int cents)
+        public static ulong ToNanoCoins(uint coins, uint cents)
         {
             Debug.Assert(cents < 100);
-            var bi = BigInteger.ValueOf(coins).Multiply(Coin);
-            bi = bi.Add(BigInteger.ValueOf(cents).Multiply(Cent));
+            var bi = coins*Coin;
+            bi += cents*Cent;
             return bi;
         }
 
@@ -72,56 +72,50 @@ namespace BitCoinSharp
         /// for example "0", "1", "0.10", "1.23E3", "1234.5E-5".
         /// </remarks>
         /// <exception cref="System.ArithmeticException">If you try to specify fractional nanocoins.</exception>
-        public static BigInteger ToNanoCoins(string coins)
+        public static ulong ToNanoCoins(string coins)
         {
-            var value = decimal.Parse(coins, NumberStyles.Float)*100000000;
+            var value = decimal.Parse(coins, NumberStyles.Float)*Coin;
             if (value != Math.Round(value))
             {
                 throw new ArithmeticException();
             }
-            return BigInteger.ValueOf((long) value);
+            return checked((ulong) value);
         }
 
-        public static void Uint32ToByteArrayBe(long val, byte[] @out, int offset)
+        public static void Uint32ToByteArrayBe(uint val, byte[] @out, int offset)
         {
-            @out[offset + 0] = (byte) (0xFF & (val >> 24));
-            @out[offset + 1] = (byte) (0xFF & (val >> 16));
-            @out[offset + 2] = (byte) (0xFF & (val >> 8));
-            @out[offset + 3] = (byte) (0xFF & (val >> 0));
+            @out[offset + 0] = (byte) (val >> 24);
+            @out[offset + 1] = (byte) (val >> 16);
+            @out[offset + 2] = (byte) (val >> 8);
+            @out[offset + 3] = (byte) (val >> 0);
         }
 
-        public static void Uint32ToByteArrayLe(long val, byte[] @out, int offset)
+        public static void Uint32ToByteArrayLe(uint val, byte[] @out, int offset)
         {
-            @out[offset + 0] = (byte) (0xFF & (val >> 0));
-            @out[offset + 1] = (byte) (0xFF & (val >> 8));
-            @out[offset + 2] = (byte) (0xFF & (val >> 16));
-            @out[offset + 3] = (byte) (0xFF & (val >> 24));
-        }
-
-        /// <exception cref="System.IO.IOException" />
-        public static void Uint32ToByteStreamLe(long val, Stream stream)
-        {
-            stream.Write((byte) (0xFF & (val >> 0)));
-            stream.Write((byte) (0xFF & (val >> 8)));
-            stream.Write((byte) (0xFF & (val >> 16)));
-            stream.Write((byte) (0xFF & (val >> 24)));
+            @out[offset + 0] = (byte) (val >> 0);
+            @out[offset + 1] = (byte) (val >> 8);
+            @out[offset + 2] = (byte) (val >> 16);
+            @out[offset + 3] = (byte) (val >> 24);
         }
 
         /// <exception cref="System.IO.IOException" />
-        public static void Uint64ToByteStreamLe(BigInteger val, Stream stream)
+        public static void Uint32ToByteStreamLe(uint val, Stream stream)
         {
-            var bytes = val.ToByteArray();
-            if (bytes.Length > 8)
+            stream.Write((byte) (val >> 0));
+            stream.Write((byte) (val >> 8));
+            stream.Write((byte) (val >> 16));
+            stream.Write((byte) (val >> 24));
+        }
+
+        /// <exception cref="System.IO.IOException" />
+        public static void Uint64ToByteStreamLe(ulong val, Stream stream)
+        {
+            var bytes = BitConverter.GetBytes(val);
+            if (!BitConverter.IsLittleEndian)
             {
-                throw new ArgumentException("Input too large to encode into a uint64", "val");
+                Array.Reverse(bytes);
             }
-            bytes = ReverseBytes(bytes);
             stream.Write(bytes);
-            if (bytes.Length < 8)
-            {
-                for (var i = 0; i < 8 - bytes.Length; i++)
-                    stream.Write(0);
-            }
         }
 
         /// <summary>
@@ -157,14 +151,6 @@ namespace BitCoinSharp
         }
 
         /// <summary>
-        /// Work around lack of unsigned types in Java.
-        /// </summary>
-        public static bool IsLessThanUnsigned(long n1, long n2)
-        {
-            return (n1 < n2) ^ ((n1 < 0) != (n2 < 0));
-        }
-
-        /// <summary>
         /// Returns the given byte array hex encoded.
         /// </summary>
         public static string BytesToHexString(byte[] bytes)
@@ -172,7 +158,7 @@ namespace BitCoinSharp
             var buf = new StringBuilder(bytes.Length*2);
             foreach (var b in bytes)
             {
-                var s = (0xFF & b).ToString("x");
+                var s = b.ToString("x");
                 if (s.Length < 2)
                     buf.Append('0');
                 buf.Append(s);
@@ -193,25 +179,25 @@ namespace BitCoinSharp
             return buf;
         }
 
-        public static long ReadUint32(byte[] bytes, int offset)
+        public static uint ReadUint32(byte[] bytes, int offset)
         {
-            return ((bytes[offset++] & 0xFFL) << 0) |
-                   ((bytes[offset++] & 0xFFL) << 8) |
-                   ((bytes[offset++] & 0xFFL) << 16) |
-                   ((bytes[offset] & 0xFFL) << 24);
+            return (((uint) bytes[offset + 0]) << 0) |
+                   (((uint) bytes[offset + 1]) << 8) |
+                   (((uint) bytes[offset + 2]) << 16) |
+                   (((uint) bytes[offset + 3]) << 24);
         }
 
-        public static long ReadUint32Be(byte[] bytes, int offset)
+        public static uint ReadUint32Be(byte[] bytes, int offset)
         {
-            return ((bytes[offset + 0] & 0xFFL) << 24) |
-                   ((bytes[offset + 1] & 0xFFL) << 16) |
-                   ((bytes[offset + 2] & 0xFFL) << 8) |
-                   ((bytes[offset + 3] & 0xFFL) << 0);
+            return (((uint) bytes[offset + 0]) << 24) |
+                   (((uint) bytes[offset + 1]) << 16) |
+                   (((uint) bytes[offset + 2]) << 8) |
+                   (((uint) bytes[offset + 3]) << 0);
         }
 
-        public static int ReadUint16Be(byte[] bytes, int offset)
+        public static ushort ReadUint16Be(byte[] bytes, int offset)
         {
-            return ((bytes[offset] & 0xff) << 8) | (bytes[offset + 1] & 0xff);
+            return (ushort) ((bytes[offset] << 8) | bytes[offset + 1]);
         }
 
         /// <summary>
@@ -228,14 +214,24 @@ namespace BitCoinSharp
         /// <summary>
         /// Returns the given value in nanocoins as a 0.12 type string.
         /// </summary>
-        public static string BitcoinValueToFriendlyString(BigInteger value)
+        public static string BitcoinValueToFriendlyString(long value)
         {
-            var negative = value.CompareTo(BigInteger.Zero) < 0;
+            var negative = value < 0;
             if (negative)
-                value = value.Negate();
-            var coins = value.Divide(Coin);
-            var cents = value.Remainder(Coin);
-            return string.Format("{0}{1}.{2:00}", negative ? "-" : "", coins.IntValue, cents.IntValue/1000000);
+                value = -value;
+            var coins = value/(long) Coin;
+            var cents = value%(long) Coin;
+            return string.Format("{0}{1}.{2:00}", negative ? "-" : "", coins, cents/(long) Cent);
+        }
+
+        /// <summary>
+        /// Returns the given value in nanocoins as a 0.12 type string.
+        /// </summary>
+        public static string BitcoinValueToFriendlyString(ulong value)
+        {
+            var coins = value/Coin;
+            var cents = value%Coin;
+            return string.Format("{0}.{1:00}", coins, cents/Cent);
         }
 
         /// <summary>
@@ -245,7 +241,7 @@ namespace BitCoinSharp
         /// </summary>
         private static BigInteger DecodeMpi(byte[] mpi)
         {
-            var length = (int) ReadUint32Be(mpi, 0);
+            var length = ReadUint32Be(mpi, 0);
             var buf = new byte[length];
             Array.Copy(mpi, 4, buf, 0, length);
             return new BigInteger(1, buf);
@@ -255,12 +251,12 @@ namespace BitCoinSharp
         // hash value in only 32 bits.
         internal static BigInteger DecodeCompactBits(long compact)
         {
-            var size = ((int) (compact >> 24)) & 0xFF;
+            var size = (byte) (compact >> 24);
             var bytes = new byte[4 + size];
-            bytes[3] = (byte) size;
-            if (size >= 1) bytes[4] = (byte) ((compact >> 16) & 0xFF);
-            if (size >= 2) bytes[5] = (byte) ((compact >> 8) & 0xFF);
-            if (size >= 3) bytes[6] = (byte) ((compact >> 0) & 0xFF);
+            bytes[3] = size;
+            if (size >= 1) bytes[4] = (byte) (compact >> 16);
+            if (size >= 2) bytes[5] = (byte) (compact >> 8);
+            if (size >= 3) bytes[6] = (byte) (compact >> 0);
             return DecodeMpi(bytes);
         }
     }

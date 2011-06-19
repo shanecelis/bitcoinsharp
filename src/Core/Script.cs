@@ -101,7 +101,7 @@ namespace BitCoinSharp
                 if (chunk.Length == 1)
                 {
                     string opName;
-                    var opcode = 0xFF & chunk[0];
+                    var opcode = chunk[0];
                     switch (opcode)
                     {
                         case OpDup:
@@ -154,9 +154,9 @@ namespace BitCoinSharp
             }
         }
 
-        private int ReadByte()
+        private byte ReadByte()
         {
-            return 0xFF & _program[_cursor++];
+            return _program[_cursor++];
         }
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace BitCoinSharp
             _cursor = offset;
             while (_cursor < offset + length)
             {
-                var opcode = ReadByte();
+                var opcode = (int) ReadByte();
                 if (opcode >= 0xF0)
                 {
                     // Not a single byte opcode.
@@ -224,7 +224,7 @@ namespace BitCoinSharp
         /// </summary>
         public bool IsSentToIp
         {
-            get { return _chunks.Count == 2 && ((0xFF & _chunks[1][0]) == OpCheckSig && _chunks[0].Length > 1); }
+            get { return _chunks.Count == 2 && (_chunks[1][0] == OpCheckSig && _chunks[0].Length > 1); }
         }
 
         /// <summary>
@@ -242,10 +242,10 @@ namespace BitCoinSharp
                 if (_chunks.Count != 5)
                     throw new ScriptException("Script not of right size to be a scriptPubKey, " +
                                               "expecting 5 but got " + _chunks.Count);
-                if ((0xFF & _chunks[0][0]) != OpDup ||
-                    (0xFF & _chunks[1][0]) != OpHash160 ||
-                    (0xFF & _chunks[3][0]) != OpEqualVerify ||
-                    (0xFF & _chunks[4][0]) != OpCheckSig)
+                if (_chunks[0][0] != OpDup ||
+                    _chunks[1][0] != OpHash160 ||
+                    _chunks[3][0] != OpEqualVerify ||
+                    _chunks[4][0] != OpCheckSig)
                     throw new ScriptException("Script not in the standard scriptPubKey form");
 
                 // Otherwise, the third element is the hash of the public key, ie the BitCoin address.
@@ -310,7 +310,7 @@ namespace BitCoinSharp
             {
                 if (chunk.Length == 1)
                 {
-                    var opcode = 0xFF & chunk[0];
+                    var opcode = chunk[0];
                     switch (opcode)
                     {
                         case OpDup:
@@ -362,7 +362,7 @@ namespace BitCoinSharp
             // is over the contents of the program, minus the signature itself of course.
             var hashType = sigAndHashType[sigAndHashType.Length - 1];
             // The high bit of the hashType byte is set to indicate "anyone can pay".
-            var anyoneCanPay = hashType < 0;
+            var anyoneCanPay = hashType >= 0x80;
             // Mask out the top bit.
             hashType &= 0x7F;
             Transaction.SigHash sigHash;
@@ -460,8 +460,8 @@ namespace BitCoinSharp
             else if (buf.Length < 65536)
             {
                 os.Write(OpPushData2);
-                os.Write((byte) (0xFF & buf.Length));
-                os.Write((byte) (0xFF & (buf.Length >> 8)));
+                os.Write((byte) buf.Length);
+                os.Write((byte) (buf.Length >> 8));
             }
             else
             {

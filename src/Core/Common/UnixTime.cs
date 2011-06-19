@@ -53,9 +53,9 @@ namespace BitCoinSharp.Common
         /// </summary>
         /// <param name="time">The date time to convert to unix time</param>
         /// <returns>The number of seconds between Unix epoch and the input time</returns>
-        public static long ToUnixTime(DateTime time)
+        public static ulong ToUnixTime(DateTime time)
         {
-            return (long) (time.ToUniversalTime() - _unixEpoch).TotalSeconds;
+            return (ulong) (time.ToUniversalTime() - _unixEpoch).TotalSeconds;
         }
 
         /// <summary>
@@ -65,11 +65,8 @@ namespace BitCoinSharp.Common
         /// <param name="unixTime">The number of seconds since Unix epoch (must be >= 0)</param>
         /// <returns>A DateTime object representing the unix time</returns>
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "unix", Justification = "UNIX is a domain term")]
-        public static DateTime FromUnixTime(long unixTime)
+        public static DateTime FromUnixTime(ulong unixTime)
         {
-            if (unixTime < 0)
-                throw new ArgumentOutOfRangeException("unixTime");
-
             return _unixEpoch.AddSeconds(unixTime);
         }
     }

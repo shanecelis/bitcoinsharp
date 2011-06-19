@@ -60,7 +60,7 @@ namespace BitCoinSharp
                 // Then a vector of block hashes. This is actually a "block locator", a set of block
                 // identifiers that spans the entire chain with exponentially increasing gaps between
                 // them, until we end up at the genesis block. See CBlockLocator::Set()
-                buf.Write(new VarInt(_locator.Count).Encode());
+                buf.Write(new VarInt((ulong) _locator.Count).Encode());
                 foreach (var hash in _locator)
                 {
                     // Have to reverse as wire format is little endian.

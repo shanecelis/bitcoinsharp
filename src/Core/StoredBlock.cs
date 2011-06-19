@@ -34,9 +34,9 @@ namespace BitCoinSharp
     {
         private readonly Block _header;
         private readonly BigInteger _chainWork;
-        private readonly int _height;
+        private readonly uint _height;
 
-        public StoredBlock(Block header, BigInteger chainWork, int height)
+        public StoredBlock(Block header, BigInteger chainWork, uint height)
         {
             _header = header;
             _chainWork = chainWork;
@@ -64,7 +64,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Position in the chain for this block. The genesis block has a height of zero.
         /// </summary>
-        public int Height
+        public uint Height
         {
             get { return _height; }
         }
@@ -87,7 +87,7 @@ namespace BitCoinSharp
         public override int GetHashCode()
         {
             // A better hashCode is possible, but this works for now.
-            return _header.GetHashCode() ^ _chainWork.GetHashCode() ^ _height;
+            return _header.GetHashCode() ^ _chainWork.GetHashCode() ^ (int) _height;
         }
 
         /// <summary>

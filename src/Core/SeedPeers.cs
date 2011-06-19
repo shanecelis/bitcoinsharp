@@ -74,10 +74,10 @@ namespace BitCoinSharp
         private static IPAddress ConvertAddress(uint seed)
         {
             var v4Addr = new byte[4];
-            v4Addr[0] = (byte) (0xFF & (seed));
-            v4Addr[1] = (byte) (0xFF & (seed >> 8));
-            v4Addr[2] = (byte) (0xFF & (seed >> 16));
-            v4Addr[3] = (byte) (0xFF & (seed >> 24));
+            v4Addr[0] = (byte) seed;
+            v4Addr[1] = (byte) (seed >> 8);
+            v4Addr[2] = (byte) (seed >> 16);
+            v4Addr[3] = (byte) (seed >> 24);
             return new IPAddress(v4Addr);
         }
 

@@ -42,21 +42,21 @@ namespace BitCoinSharp.Test
         [Test]
         public void TestInts()
         {
-            var a = new VarInt(0xAABBCCDDL);
+            var a = new VarInt(0xAABBCCDD);
             Assert.AreEqual(5, a.SizeInBytes);
             Assert.AreEqual(5, a.Encode().Length);
             var bytes = a.Encode();
-            Assert.AreEqual(0xAABBCCDDL, 0xFFFFFFFFL & new VarInt(bytes, 0).Value);
+            Assert.AreEqual(0xAABBCCDD, new VarInt(bytes, 0).Value);
         }
 
         [Test]
         public void TestLong()
         {
-            var a = new VarInt(unchecked((long) 0xCAFEBABEDEADBEEFL));
+            var a = new VarInt(0xCAFEBABEDEADBEEF);
             Assert.AreEqual(9, a.SizeInBytes);
             Assert.AreEqual(9, a.Encode().Length);
             var bytes = a.Encode();
-            Assert.AreEqual(unchecked((long) 0xCAFEBABEDEADBEEFL), new VarInt(bytes, 0).Value);
+            Assert.AreEqual(0xCAFEBABEDEADBEEF, new VarInt(bytes, 0).Value);
         }
     }
 }

@@ -28,7 +28,7 @@ namespace BitCoinSharp.Test
             // String version
             Assert.AreEqual(Utils.Cent, Utils.ToNanoCoins("0.01"));
             Assert.AreEqual(Utils.Cent, Utils.ToNanoCoins("1E-2"));
-            Assert.AreEqual(Utils.Coin.Add(Utils.Cent), Utils.ToNanoCoins("1.01"));
+            Assert.AreEqual(Utils.Coin + Utils.Cent, Utils.ToNanoCoins("1.01"));
             try
             {
                 Utils.ToNanoCoins("2E-20");
@@ -40,18 +40,13 @@ namespace BitCoinSharp.Test
 
             // int version
             Assert.AreEqual(Utils.Cent, Utils.ToNanoCoins(0, 1));
-
-            // TODO: should this really pass?
-            Assert.AreEqual(Utils.Coin.Subtract(Utils.Cent), Utils.ToNanoCoins(1, -1));
-            Assert.AreEqual(Utils.Coin.Negate(), Utils.ToNanoCoins(-1, 0));
-            Assert.AreEqual(Utils.Coin.Negate(), Utils.ToNanoCoins("-1"));
         }
 
         [Test]
         public void TestFormatting()
         {
             Assert.AreEqual("1.23", Utils.BitcoinValueToFriendlyString(Utils.ToNanoCoins(1, 23)));
-            Assert.AreEqual("-1.23", Utils.BitcoinValueToFriendlyString(Utils.ToNanoCoins(1, 23).Negate()));
+            Assert.AreEqual("-1.23", Utils.BitcoinValueToFriendlyString(-(long) Utils.ToNanoCoins(1, 23)));
         }
     }
 }

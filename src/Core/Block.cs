@@ -47,22 +47,22 @@ namespace BitCoinSharp
         /// </summary>
         public const int HeaderSize = 80;
 
-        private const long _allowedTimeDrift = 2*60*60; // Same value as official client.
+        private const uint _allowedTimeDrift = 2*60*60; // Same value as official client.
 
         /// <summary>
         /// A value for difficultyTarget (nBits) that allows half of all possible hash solutions. Used in unit testing.
         /// </summary>
-        internal const long EasiestDifficultyTarget = 0x207fFFFFL;
+        internal const uint EasiestDifficultyTarget = 0x207FFFFF;
 
         // For unit testing. If not zero, use this instead of the current time.
-        internal static long FakeClock;
-        private long _version;
+        internal static ulong FakeClock;
+        private uint _version;
         private byte[] _prevBlockHash;
         private byte[] _merkleRoot;
-        private long _time;
-        private long _difficultyTarget; // "nBits"
+        private uint _time;
+        private uint _difficultyTarget; // "nBits"
 
-        private long _nonce;
+        private uint _nonce;
 
         /// <summary>
         /// If null, it means this object holds only the headers.
@@ -82,8 +82,8 @@ namespace BitCoinSharp
         {
             // Set up a few basic things. We are not complete after this though.
             _version = 1;
-            _difficultyTarget = 0x1d07fff8L;
-            _time = UnixTime.ToUnixTime(DateTime.UtcNow);
+            _difficultyTarget = 0x1d07fff8;
+            _time = (uint) UnixTime.ToUnixTime(DateTime.UtcNow);
             _prevBlockHash = new byte[32]; // All zeros.
         }
 
@@ -141,7 +141,7 @@ namespace BitCoinSharp
             WriteHeader(stream);
             // We may only have enough data to write the header.
             if (Transactions == null) return;
-            stream.Write(new VarInt(Transactions.Count).Encode());
+            stream.Write(new VarInt((ulong) Transactions.Count).Encode());
             foreach (var tx in Transactions)
             {
                 tx.BitcoinSerializeToStream(stream);
@@ -467,7 +467,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Returns the time at which the block was solved and broadcast, according to the clock of the solving node.
         /// </summary>
-        public long Time
+        public uint Time
         {
             get { return _time; }
             set
@@ -482,7 +482,7 @@ namespace BitCoinSharp
         /// <see cref="BlockChain">BlockChain</see> verifies that this is not too easy by looking at the length of the chain when the block is
         /// added. To find the actual value the hash should be compared against, use getDifficultyTargetBI.
         /// </summary>
-        public long DifficultyTarget
+        public uint DifficultyTarget
         {
             get { return _difficultyTarget; }
             internal set
@@ -496,7 +496,7 @@ namespace BitCoinSharp
         /// Returns the nonce, an arbitrary value that exists only to make the hash of the block header fall below the
         /// difficulty target.
         /// </summary>
-        public long Nonce
+        public uint Nonce
         {
             get { return _nonce; }
             internal set
@@ -533,7 +533,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Returns a solved block that builds on top of this one. This exists for unit tests.
         /// </summary>
-        internal Block CreateNextBlock(Address to, long time)
+        internal Block CreateNextBlock(Address to, uint time)
         {
             var b = new Block(Params);
             b.DifficultyTarget = _difficultyTarget;
@@ -547,7 +547,7 @@ namespace BitCoinSharp
 
         internal Block CreateNextBlock(Address to)
         {
-            return CreateNextBlock(to, UnixTime.ToUnixTime(DateTime.UtcNow));
+            return CreateNextBlock(to, (uint) UnixTime.ToUnixTime(DateTime.UtcNow));
         }
     }
 }

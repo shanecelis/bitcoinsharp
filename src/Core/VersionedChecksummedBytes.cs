@@ -34,7 +34,7 @@ namespace BitCoinSharp
         protected VersionedChecksummedBytes(string encoded)
         {
             var tmp = Base58.DecodeChecked(encoded);
-            Version = tmp[0] & 0xFF;
+            Version = tmp[0];
             Bytes = new byte[tmp.Length - 1];
             Array.Copy(tmp, 1, Bytes, 0, tmp.Length - 1);
         }

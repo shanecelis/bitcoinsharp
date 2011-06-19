@@ -609,19 +609,19 @@ namespace BitCoinSharp.IO
         public void WriteMediumInt(int value)
         {
             var bytes = new byte[3];
-            bytes[0] = (byte) (0xFF & (value >> 16));
-            bytes[1] = (byte) (0xFF & (value >> 8));
-            bytes[2] = (byte) (0xFF & (value >> 0));
+            bytes[0] = (byte) (value >> 16);
+            bytes[1] = (byte) (value >> 8);
+            bytes[2] = (byte) (value >> 0);
             Write(bytes, 0, bytes.Length);
         }
 
         public void WriteReverseInt(int value)
         {
             var bytes = new byte[4];
-            bytes[3] = (byte) (0xFF & (value >> 24));
-            bytes[2] = (byte) (0xFF & (value >> 16));
-            bytes[1] = (byte) (0xFF & (value >> 8));
-            bytes[0] = (byte) (0xFF & value);
+            bytes[3] = (byte) (value >> 24);
+            bytes[2] = (byte) (value >> 16);
+            bytes[1] = (byte) (value >> 8);
+            bytes[0] = (byte) value;
             Write(bytes, 0, bytes.Length);
         }
 

@@ -111,7 +111,7 @@ namespace BitCoinSharp.Test
             Block.FakeClock = UnixTime.ToUnixTime(DateTime.UtcNow);
             for (var i = 0; i < _unitTestParams.Interval - 1; i++)
             {
-                var newBlock = prev.CreateNextBlock(_coinbaseTo, Block.FakeClock);
+                var newBlock = prev.CreateNextBlock(_coinbaseTo, (uint) Block.FakeClock);
                 Assert.True(_chain.Add(newBlock));
                 prev = newBlock;
                 // The fake chain should seem to be "fast" for the purposes of difficulty calculations.
@@ -128,8 +128,8 @@ namespace BitCoinSharp.Test
             }
             // Create a new block with the right difficulty target given our blistering speed relative to the huge amount
             // of time it's supposed to take (set in the unit test network parameters).
-            var b = prev.CreateNextBlock(_coinbaseTo, Block.FakeClock);
-            b.DifficultyTarget = 0x201fFFFFL;
+            var b = prev.CreateNextBlock(_coinbaseTo, (uint) Block.FakeClock);
+            b.DifficultyTarget = 0x201FFFFF;
             b.Solve();
             Assert.True(_chain.Add(b));
         }
@@ -186,8 +186,8 @@ namespace BitCoinSharp.Test
         {
             var b2 = new Block(_testNet);
             b2.MerkleRoot = Hex.Decode("addc858a17e21e68350f968ccd384d6439b64aafa6c193c8b9dd66320470838b");
-            b2.Nonce = 2642058077L;
-            b2.Time = 1296734343L;
+            b2.Nonce = 2642058077;
+            b2.Time = 1296734343;
             b2.PrevBlockHash = Hex.Decode("000000033cc282bc1fa9dcae7a533263fd7fe66490f550d80076433340831604");
             Assert.AreEqual("000000037b21cac5d30fc6fda2581cf7b2612908aed2abbcc429c45b0557a15f", b2.HashAsString);
             b2.Verify();

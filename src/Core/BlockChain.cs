@@ -103,7 +103,7 @@ namespace BitCoinSharp
         }
 
         // Stat counters.
-        private long _statsLastTime = Environment.TickCount;
+        private int _statsLastTime = Environment.TickCount;
         private long _statsBlocksAdded;
 
         /// <exception cref="BitCoinSharp.BlockStoreException" />
@@ -409,7 +409,7 @@ namespace BitCoinSharp
             var receivedDifficulty = next.GetDifficultyTargetAsInteger();
 
             // The calculated difficulty is to a higher precision than received, so reduce here.
-            var mask = BigInteger.ValueOf(0xFFFFFFL).ShiftLeft(accuracyBytes*8);
+            var mask = BigInteger.ValueOf(0xFFFFFF).ShiftLeft(accuracyBytes*8);
             newDifficulty = newDifficulty.And(mask);
 
             if (newDifficulty.CompareTo(receivedDifficulty) != 0)

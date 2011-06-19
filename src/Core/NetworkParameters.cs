@@ -36,7 +36,7 @@ namespace BitCoinSharp
         /// <summary>
         /// The protocol version this library implements. A value of 31800 means 0.3.18.00.
         /// </summary>
-        public const int ProtocolVersion = 31800;
+        public const uint ProtocolVersion = 31800;
 
         // TODO: Seed nodes and checkpoint values should be here as well.
 
@@ -65,7 +65,7 @@ namespace BitCoinSharp
         /// <summary>
         /// The header bytes that identify the start of a packet on this network.
         /// </summary>
-        public long PacketMagic { get; private set; }
+        public uint PacketMagic { get; private set; }
 
         /// <summary>
         /// First byte of a base58 encoded address. See <see cref="Address">Address</see>
@@ -126,15 +126,15 @@ namespace BitCoinSharp
             // Genesis hash is 0000000224b1593e3ff16a0e3b61285bbc393a39f78c8aa48c456142671f7110
             // The proof of work limit has to start with 00, as otherwise the value will be interpreted as negative.
             n.ProofOfWorkLimit = new BigInteger("0000000fffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
-            n.PacketMagic = 0xfabfb5daL;
+            n.PacketMagic = 0xfabfb5da;
             n.Port = 18333;
             n.AddressHeader = 111;
             n.DumpedPrivateKeyHeader = 239;
             n.Interval = _interval;
             n.TargetTimespan = _targetTimespan;
             n.GenesisBlock = CreateGenesis(n);
-            n.GenesisBlock.Time = 1296688602L;
-            n.GenesisBlock.DifficultyTarget = 0x1d07fff8L;
+            n.GenesisBlock.Time = 1296688602;
+            n.GenesisBlock.DifficultyTarget = 0x1d07fff8;
             n.GenesisBlock.Nonce = 384568319;
             var genesisHash = n.GenesisBlock.HashAsString;
             Debug.Assert(genesisHash.Equals("00000007199508e34a9ff81e6ec0c477a4cccff2a4767a8eee39c11db367b008"));
@@ -158,14 +158,14 @@ namespace BitCoinSharp
             var n = new NetworkParameters();
             n.ProofOfWorkLimit = new BigInteger("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
             n.Port = 8333;
-            n.PacketMagic = 0xf9beb4d9L;
+            n.PacketMagic = 0xf9beb4d9;
             n.AddressHeader = 0;
             n.DumpedPrivateKeyHeader = 128;
             n.Interval = _interval;
             n.TargetTimespan = _targetTimespan;
             n.GenesisBlock = CreateGenesis(n);
-            n.GenesisBlock.DifficultyTarget = 0x1d00ffffL;
-            n.GenesisBlock.Time = 1231006505L;
+            n.GenesisBlock.DifficultyTarget = 0x1d00ffff;
+            n.GenesisBlock.Time = 1231006505;
             n.GenesisBlock.Nonce = 2083236893;
             var genesisHash = n.GenesisBlock.HashAsString;
             Debug.Assert(genesisHash.Equals("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"), genesisHash);

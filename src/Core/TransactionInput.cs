@@ -37,7 +37,7 @@ namespace BitCoinSharp
         // Allows for altering transactions after they were broadcast. Tx replacement is currently disabled in the C++
         // client so this is always the UINT_MAX.
         // TODO: Document this in more detail and build features that use it.
-        private long _sequence;
+        private uint _sequence;
         // Data needed to connect to the output of the transaction we're gathering coins from.
         internal TransactionOutPoint Outpoint { get; private set; }
         // The "script bytes" might not actually be a script. In coinbase transactions where new coins are minted there
@@ -58,7 +58,7 @@ namespace BitCoinSharp
         {
             ScriptBytes = scriptBytes;
             Outpoint = new TransactionOutPoint(@params, -1, null);
-            _sequence = 0xFFFFFFFFL;
+            _sequence = uint.MaxValue;
             ParentTransaction = parentTransaction;
         }
 
@@ -68,10 +68,10 @@ namespace BitCoinSharp
         internal TransactionInput(NetworkParameters @params, Transaction parentTransaction, TransactionOutput output)
             : base(@params)
         {
-            long outputIndex = output.Index;
+            var outputIndex = output.Index;
             Outpoint = new TransactionOutPoint(@params, outputIndex, output.ParentTransaction);
             ScriptBytes = EmptyArray;
-            _sequence = 0xFFFFFFFFL;
+            _sequence = uint.MaxValue;
             ParentTransaction = parentTransaction;
         }
 
@@ -99,7 +99,7 @@ namespace BitCoinSharp
         public override void BitcoinSerializeToStream(Stream stream)
         {
             Outpoint.BitcoinSerializeToStream(stream);
-            stream.Write(new VarInt(ScriptBytes.Length).Encode());
+            stream.Write(new VarInt((ulong) ScriptBytes.Length).Encode());
             stream.Write(ScriptBytes);
             Utils.Uint32ToByteStreamLe(_sequence, stream);
         }
@@ -176,7 +176,7 @@ namespace BitCoinSharp
             Transaction tx;
             if (!transactions.TryGetValue(h, out tx))
                 return null;
-            var @out = tx.Outputs[(int) Outpoint.Index];
+            var @out = tx.Outputs[Outpoint.Index];
             return @out;
         }
 
@@ -195,7 +195,7 @@ namespace BitCoinSharp
             Transaction tx;
             if (!transactions.TryGetValue(h, out tx))
                 return ConnectionResult.NoSuchTx;
-            var @out = tx.Outputs[(int) Outpoint.Index];
+            var @out = tx.Outputs[Outpoint.Index];
             if (!@out.IsAvailableForSpending)
             {
                 if (disconnect)
@@ -215,7 +215,7 @@ namespace BitCoinSharp
         internal bool Disconnect()
         {
             if (Outpoint.FromTx == null) return false;
-            Outpoint.FromTx.Outputs[(int) Outpoint.Index].MarkAsUnspent();
+            Outpoint.FromTx.Outputs[Outpoint.Index].MarkAsUnspent();
             Outpoint.FromTx = null;
             return true;
         }

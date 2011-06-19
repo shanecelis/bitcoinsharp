@@ -25,7 +25,7 @@ namespace BitCoinSharp.Examples
     /// </summary>
     public static class PrintPeers
     {
-        private static void PrintElapsed(long start)
+        private static void PrintElapsed(int start)
         {
             var now = Environment.TickCount;
             Console.WriteLine("Took {0:0.00} seconds", (now - start)/1000.0);

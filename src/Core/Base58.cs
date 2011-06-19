@@ -71,7 +71,7 @@ namespace BitCoinSharp
             // is because BigIntegers are represented with twos-compliment notation, thus if the high bit of the last
             // byte happens to be 1 another 8 zero bits will be added to ensure the number parses as positive. Detect
             // that case here and chop it off.
-            var stripSignByte = bytes.Length > 1 && bytes[0] == 0 && (bytes[1] & 0x80) == 0x80;
+            var stripSignByte = bytes.Length > 1 && bytes[0] == 0 && bytes[1] >= 0x80;
             // Count the leading zeros, if any.
             var leadingZeros = 0;
             for (var i = 0; input[i] == _alphabet[0]; i++)

@@ -15,7 +15,6 @@
  */
 
 using NUnit.Framework;
-using Org.BouncyCastle.Math;
 
 namespace BitCoinSharp.Test
 {
@@ -112,11 +111,11 @@ namespace BitCoinSharp.Test
             Assert.True(_chain.Add(b2));
             //     genesis -> b1 -> b2
             //                  \-> b3 -> b4
-            Assert.AreEqual(BigInteger.Zero, _wallet.GetBalance());
+            Assert.AreEqual(0, _wallet.GetBalance());
             var b3 = b1.CreateNextBlock(_coinbaseTo);
             var b4 = b3.CreateNextBlock(_someOtherGuy);
             Assert.True(_chain.Add(b3));
-            Assert.AreEqual(BigInteger.Zero, _wallet.GetBalance());
+            Assert.AreEqual(0, _wallet.GetBalance());
             Assert.True(_chain.Add(b4));
             Assert.AreEqual("50.00", Utils.BitcoinValueToFriendlyString(_wallet.GetBalance()));
         }
@@ -132,7 +131,7 @@ namespace BitCoinSharp.Test
             var spend = _wallet.CreateSend(dest, Utils.ToNanoCoins(10, 0));
             _wallet.ConfirmSend(spend);
             // Waiting for confirmation ...
-            Assert.AreEqual(BigInteger.Zero, _wallet.GetBalance());
+            Assert.AreEqual(0, _wallet.GetBalance());
             var b2 = b1.CreateNextBlock(_someOtherGuy);
             b2.AddTransaction(spend);
             b2.Solve();
@@ -146,7 +145,7 @@ namespace BitCoinSharp.Test
             _chain.Add(b4);
             // b4 causes a re-org that should make our spend go inactive. Because the inputs are already spent our
             // available balance drops to zero again.
-            Assert.AreEqual(BigInteger.Zero, _wallet.GetBalance(Wallet.BalanceType.Available));
+            Assert.AreEqual(0, _wallet.GetBalance(Wallet.BalanceType.Available));
             // We estimate that it'll make it back into the block chain (we know we won't double spend).
             // assertEquals(Utils.toNanoCoins(40, 0), wallet.getBalance(Wallet.BalanceType.ESTIMATED));
         }

@@ -34,17 +34,17 @@ namespace BitCoinSharp
         /// <summary>
         /// The version number of the protocol spoken.
         /// </summary>
-        public int ClientVersion { get; private set; }
+        public uint ClientVersion { get; private set; }
 
         /// <summary>
         /// Flags defining what is supported. Right now <see cref="NodeNetwork">NodeNetwork</see> is the only flag defined.
         /// </summary>
-        public long LocalServices { get; private set; }
+        public ulong LocalServices { get; private set; }
 
         /// <summary>
         /// What the other side believes the current time to be, in seconds.
         /// </summary>
-        public long Time { get; private set; }
+        public ulong Time { get; private set; }
 
         /// <summary>
         /// What the other side believes the address of this program is. Not used.
@@ -65,7 +65,7 @@ namespace BitCoinSharp
         /// <summary>
         /// How many blocks are in the chain, according to the other side.
         /// </summary>
-        public long BestHeight { get; private set; }
+        public uint BestHeight { get; private set; }
 
         /// <exception cref="BitCoinSharp.ProtocolException" />
         public VersionMessage(NetworkParameters @params, byte[] msg)
@@ -73,7 +73,7 @@ namespace BitCoinSharp
         {
         }
 
-        public VersionMessage(NetworkParameters @params, int newBestHeight)
+        public VersionMessage(NetworkParameters @params, uint newBestHeight)
             : base(@params)
         {
             ClientVersion = NetworkParameters.ProtocolVersion;
@@ -90,9 +90,9 @@ namespace BitCoinSharp
         /// <exception cref="BitCoinSharp.ProtocolException" />
         protected override void Parse()
         {
-            ClientVersion = (int) ReadUint32();
-            LocalServices = ReadUint64().LongValue;
-            Time = ReadUint64().LongValue;
+            ClientVersion = ReadUint32();
+            LocalServices = ReadUint64();
+            Time = ReadUint64();
             MyAddr = new PeerAddress(Params, Bytes, Cursor, 0);
             Cursor += MyAddr.MessageSize;
             TheirAddr = new PeerAddress(Params, Bytes, Cursor, 0);
@@ -111,10 +111,10 @@ namespace BitCoinSharp
         public override void BitcoinSerializeToStream(Stream buf)
         {
             Utils.Uint32ToByteStreamLe(ClientVersion, buf);
-            Utils.Uint32ToByteStreamLe(LocalServices, buf);
-            Utils.Uint32ToByteStreamLe(LocalServices >> 32, buf);
-            Utils.Uint32ToByteStreamLe(Time, buf);
-            Utils.Uint32ToByteStreamLe(Time >> 32, buf);
+            Utils.Uint32ToByteStreamLe((uint) LocalServices, buf);
+            Utils.Uint32ToByteStreamLe((uint) (LocalServices >> 32), buf);
+            Utils.Uint32ToByteStreamLe((uint) Time, buf);
+            Utils.Uint32ToByteStreamLe((uint) (Time >> 32), buf);
             // My address.
             MyAddr.BitcoinSerializeToStream(buf);
             // Their address.
@@ -126,7 +126,7 @@ namespace BitCoinSharp
             Utils.Uint32ToByteStreamLe(0, buf);
             // Now comes subVer.
             var subVerBytes = Encoding.UTF8.GetBytes(SubVer);
-            buf.Write(new VarInt(subVerBytes.Length).Encode());
+            buf.Write(new VarInt((ulong) subVerBytes.Length).Encode());
             buf.Write(subVerBytes);
             // Size of known block chain.
             Utils.Uint32ToByteStreamLe(BestHeight, buf);

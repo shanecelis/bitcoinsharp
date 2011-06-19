@@ -22,7 +22,6 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using log4net;
-using Org.BouncyCastle.Math;
 
 namespace BitCoinSharp
 {
@@ -238,7 +237,7 @@ namespace BitCoinSharp
 
                 var valueSentFromMe = tx.GetValueSentFromMe(this);
                 var valueSentToMe = tx.GetValueSentToMe(this);
-                var valueDifference = valueSentToMe.Subtract(valueSentFromMe);
+                var valueDifference = (long) (valueSentToMe - valueSentFromMe);
 
                 if (!reorg)
                 {
@@ -260,7 +259,7 @@ namespace BitCoinSharp
                     wtx.AddBlockAppearance(block);
                     if (bestChain)
                     {
-                        if (valueSentToMe.Equals(BigInteger.Zero))
+                        if (valueSentToMe.Equals(0))
                         {
                             // There were no change transactions so this tx is fully spent.
                             _log.Info("  ->spent");
@@ -318,7 +317,7 @@ namespace BitCoinSharp
                 // Inform anyone interested that we have new coins. Note: we may be re-entered by the event listener,
                 // so we must not make assumptions about our state after this loop returns! For example,
                 // the balance we just received might already be spent!
-                if (!reorg && bestChain && valueDifference.CompareTo(BigInteger.Zero) > 0 && CoinsReceived != null)
+                if (!reorg && bestChain && valueDifference > 0 && CoinsReceived != null)
                 {
                     lock (CoinsReceived)
                     {
@@ -338,7 +337,7 @@ namespace BitCoinSharp
             // This TX may spend our existing outputs even though it was not pending. This can happen in unit
             // tests and if keys are moved between wallets.
             UpdateForSpends(tx);
-            if (!tx.GetValueSentToMe(this).Equals(BigInteger.Zero))
+            if (!tx.GetValueSentToMe(this).Equals(0))
             {
                 // It's sending us coins.
                 _log.Info("  new tx ->unspent");
@@ -380,7 +379,7 @@ namespace BitCoinSharp
                     //   A  -> spent by B [pending]
                     //     \-> spent by C [chain]
                     var doubleSpent = input.Outpoint.FromTx; // == A
-                    var connected = doubleSpent.Outputs[(int) input.Outpoint.Index].SpentBy.ParentTransaction;
+                    var connected = doubleSpent.Outputs[input.Outpoint.Index].SpentBy.ParentTransaction;
                     if (Pending.Remove(connected.Hash))
                     {
                         _log.InfoFormat("Saw double spend from chain override pending tx {0}", connected.HashAsString);
@@ -404,7 +403,7 @@ namespace BitCoinSharp
                     // The outputs are already marked as spent by the connect call above, so check if there are any more for
                     // us to use. Move if not.
                     var connected = input.Outpoint.FromTx;
-                    if (connected.GetValueSentToMe(this, false).Equals(BigInteger.Zero))
+                    if (connected.GetValueSentToMe(this, false).Equals(0))
                     {
                         // There's nothing left I can spend in this transaction.
                         if (Unspent.Remove(connected.Hash))
@@ -490,7 +489,7 @@ namespace BitCoinSharp
         /// Transaction objects which are equal. The wallet is not updated to track its pending status or to mark the
         /// coins as spent until confirmSend is called on the result.
         /// </remarks>
-        internal Transaction CreateSend(Address address, BigInteger nanocoins)
+        internal Transaction CreateSend(Address address, ulong nanocoins)
         {
             lock (this)
             {
@@ -512,7 +511,7 @@ namespace BitCoinSharp
         /// The <see cref="Transaction">Transaction</see> that was created or null if there was insufficient balance to send the coins.
         /// </returns>
         /// <exception cref="System.IO.IOException">If there was a problem broadcasting the transaction.</exception>
-        public Transaction SendCoins(Peer peer, Address to, BigInteger nanocoins)
+        public Transaction SendCoins(Peer peer, Address to, ulong nanocoins)
         {
             lock (this)
             {
@@ -543,7 +542,7 @@ namespace BitCoinSharp
         /// <returns>
         /// A new <see cref="Transaction">Transaction</see> or null if we cannot afford this send.
         /// </returns>
-        internal Transaction CreateSend(Address address, BigInteger nanocoins, Address changeAddress)
+        internal Transaction CreateSend(Address address, ulong nanocoins, Address changeAddress)
         {
             lock (this)
             {
@@ -552,7 +551,7 @@ namespace BitCoinSharp
                 // To send money to somebody else, we need to do gather up transactions with unspent outputs until we have
                 // sufficient value. Many coin selection algorithms are possible, we use a simple but suboptimal one.
                 // TODO: Sort coins so we use the smallest first, to combat wallet fragmentation and reduce fees.
-                var valueGathered = BigInteger.Zero;
+                var valueGathered = 0UL;
                 var gathered = new LinkedList<TransactionOutput>();
                 foreach (var tx in Unspent.Values)
                 {
@@ -561,29 +560,29 @@ namespace BitCoinSharp
                         if (!output.IsAvailableForSpending) continue;
                         if (!output.IsMine(this)) continue;
                         gathered.AddLast(output);
-                        valueGathered = valueGathered.Add(output.Value);
+                        valueGathered += output.Value;
                     }
-                    if (valueGathered.CompareTo(nanocoins) >= 0) break;
+                    if (valueGathered >= nanocoins) break;
                 }
                 // Can we afford this?
-                if (valueGathered.CompareTo(nanocoins) < 0)
+                if (valueGathered < nanocoins)
                 {
                     _log.Info("Insufficient value in wallet for send, missing " +
-                              Utils.BitcoinValueToFriendlyString(nanocoins.Subtract(valueGathered)));
+                              Utils.BitcoinValueToFriendlyString(nanocoins - valueGathered));
                     // TODO: Should throw an exception here.
                     return null;
                 }
                 Debug.Assert(gathered.Count > 0);
                 var sendTx = new Transaction(_params);
                 sendTx.AddOutput(new TransactionOutput(_params, sendTx, nanocoins, address));
-                var change = valueGathered.Subtract(nanocoins);
-                if (change.CompareTo(BigInteger.Zero) > 0)
+                var change = (long) (valueGathered - nanocoins);
+                if (change > 0)
                 {
                     // The value of the inputs is greater than what we want to send. Just like in real life then,
                     // we need to take back some coins ... this is called "change". Add another output that sends the change
                     // back to us.
-                    _log.Info("  with " + Utils.BitcoinValueToFriendlyString(change) + " coins change");
-                    sendTx.AddOutput(new TransactionOutput(_params, sendTx, change, changeAddress));
+                    _log.Info("  with " + Utils.BitcoinValueToFriendlyString((ulong) change) + " coins change");
+                    sendTx.AddOutput(new TransactionOutput(_params, sendTx, (ulong) change, changeAddress));
                 }
                 foreach (var output in gathered)
                 {
@@ -698,7 +697,7 @@ namespace BitCoinSharp
         /// actually spend these coins may result in temporary failure. This method returns how much you can safely
         /// provide to <see cref="CreateSend(Address, Org.BouncyCastle.Math.BigInteger)">CreateSend(Address, Org.BouncyCastle.Math.BigInteger)</see>.
         /// </remarks>
-        public BigInteger GetBalance()
+        public ulong GetBalance()
         {
             lock (this)
             {
@@ -709,18 +708,18 @@ namespace BitCoinSharp
         /// <summary>
         /// Returns the balance of this wallet as calculated by the provided balanceType.
         /// </summary>
-        public BigInteger GetBalance(BalanceType balanceType)
+        public ulong GetBalance(BalanceType balanceType)
         {
             lock (this)
             {
-                var available = BigInteger.Zero;
+                var available = 0UL;
                 foreach (var tx in Unspent.Values)
                 {
                     foreach (var output in tx.Outputs)
                     {
                         if (!output.IsMine(this)) continue;
                         if (!output.IsAvailableForSpending) continue;
-                        available = available.Add(output.Value);
+                        available += output.Value;
                     }
                 }
                 if (balanceType == BalanceType.Available)
@@ -733,7 +732,7 @@ namespace BitCoinSharp
                     foreach (var output in tx.Outputs)
                     {
                         if (!output.IsMine(this)) continue;
-                        estimated = estimated.Add(output.Value);
+                        estimated += output.Value;
                     }
                 }
                 return estimated;
@@ -1079,17 +1078,17 @@ namespace BitCoinSharp
         /// <summary>
         /// Balance before the coins were received.
         /// </summary>
-        public BigInteger PrevBalance { get; private set; }
+        public ulong PrevBalance { get; private set; }
 
         /// <summary>
         /// Current balance of the wallet.
         /// </summary>
-        public BigInteger NewBalance { get; private set; }
+        public ulong NewBalance { get; private set; }
 
         /// <param name="tx">The transaction which sent us the coins.</param>
         /// <param name="prevBalance">Balance before the coins were received.</param>
         /// <param name="newBalance">Current balance of the wallet.</param>
-        public WalletCoinsReceivedEventArgs(Transaction tx, BigInteger prevBalance, BigInteger newBalance)
+        public WalletCoinsReceivedEventArgs(Transaction tx, ulong prevBalance, ulong newBalance)
         {
             Tx = tx;
             PrevBalance = prevBalance;

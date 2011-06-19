@@ -67,7 +67,7 @@ namespace BitCoinSharp
             private const int _chainWorkBytes = 16;
             private readonly byte[] _emptyBytes = new byte[_chainWorkBytes];
 
-            private int _height; // 4 bytes
+            private uint _height; // 4 bytes
             private readonly byte[] _chainWork; // 16 bytes
             private readonly byte[] _blockHeader; // 80 bytes
 
@@ -86,7 +86,7 @@ namespace BitCoinSharp
             {
                 using (var buf = ByteBuffer.Allocate(Size))
                 {
-                    buf.PutInt(block.Height);
+                    buf.PutInt((int) block.Height);
                     var chainWorkBytes = block.ChainWork.ToByteArray();
                     Debug.Assert(chainWorkBytes.Length <= _chainWorkBytes, "Ran out of space to store chain work!");
                     if (chainWorkBytes.Length < _chainWorkBytes)
@@ -117,7 +117,7 @@ namespace BitCoinSharp
                 if (bytesRead < Size)
                     return false;
                 buffer.Position = 0;
-                _height = buffer.GetInt();
+                _height = (uint) buffer.GetInt();
                 buffer.Get(_chainWork);
                 buffer.Get(_blockHeader);
                 return true;
@@ -134,7 +134,7 @@ namespace BitCoinSharp
                 return new Block(@params, _blockHeader);
             }
 
-            public int Height
+            public uint Height
             {
                 get { return _height; }
             }
@@ -150,7 +150,7 @@ namespace BitCoinSharp
         public BoundedOverheadBlockStore(NetworkParameters @params, FileInfo file)
         {
             _params = @params;
-            _notFoundMarker = new StoredBlock(null, null, -1);
+            _notFoundMarker = new StoredBlock(null, null, uint.MaxValue);
             try
             {
                 Load(file);

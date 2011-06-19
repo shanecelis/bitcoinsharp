@@ -380,14 +380,14 @@ namespace BitCoinSharp
         public CountDownLatch StartBlockChainDownload()
         {
             // Chain will overflow signed int blocks in ~41,000 years.
-            var chainHeight = (int) _conn.VersionMessage.BestHeight;
-            if (chainHeight <= 0)
+            var chainHeight = _conn.VersionMessage.BestHeight;
+            if (chainHeight == 0)
             {
                 // This should not happen because we shouldn't have given the user a Peer that is to another client-mode
                 // node. If that happens it means the user overrode us somewhere.
                 throw new Exception("Peer does not have block chain");
             }
-            var blocksToGet = chainHeight - _blockChain.ChainHead.Height;
+            var blocksToGet = (int) (chainHeight - _blockChain.ChainHead.Height);
             _chainCompletionLatch = new CountDownLatch(blocksToGet);
             if (blocksToGet > 0)
             {

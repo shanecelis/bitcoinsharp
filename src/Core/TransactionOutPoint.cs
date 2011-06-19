@@ -37,13 +37,13 @@ namespace BitCoinSharp
         /// <summary>
         /// Which output of that transaction we are talking about.
         /// </summary>
-        internal long Index { get; private set; }
+        internal int Index { get; private set; }
 
         // This is not part of BitCoin serialization. It's included in Java serialization.
         // It points to the connected transaction.
         internal Transaction FromTx { get; set; }
 
-        internal TransactionOutPoint(NetworkParameters @params, long index, Transaction fromTx)
+        internal TransactionOutPoint(NetworkParameters @params, int index, Transaction fromTx)
             : base(@params)
         {
             Index = index;
@@ -73,7 +73,7 @@ namespace BitCoinSharp
         protected override void Parse()
         {
             Hash = ReadHash();
-            Index = ReadUint32();
+            Index = (int) ReadUint32();
         }
 
         /// <exception cref="System.IO.IOException" />
@@ -81,7 +81,7 @@ namespace BitCoinSharp
         {
             Debug.Assert(Hash.Length == 32);
             stream.Write(Utils.ReverseBytes(Hash));
-            Utils.Uint32ToByteStreamLe(Index, stream);
+            Utils.Uint32ToByteStreamLe((uint) Index, stream);
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace BitCoinSharp
         /// </summary>
         internal TransactionOutput ConnectedOutput
         {
-            get { return FromTx != null ? FromTx.Outputs[(int) Index] : null; }
+            get { return FromTx != null ? FromTx.Outputs[Index] : null; }
         }
 
         /// <summary>

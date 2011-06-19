@@ -15,7 +15,6 @@
  */
 
 using NUnit.Framework;
-using Org.BouncyCastle.Math;
 
 namespace BitCoinSharp.Test
 {
@@ -44,7 +43,7 @@ namespace BitCoinSharp.Test
             _blockStore.Dispose();
         }
 
-        private static Transaction CreateFakeTx(BigInteger nanocoins, Address to)
+        private static Transaction CreateFakeTx(ulong nanocoins, Address to)
         {
             var t = new Transaction(_params);
             var o1 = new TransactionOutput(_params, t, nanocoins, to);
@@ -126,7 +125,7 @@ namespace BitCoinSharp.Test
             _wallet.CoinsReceived +=
                 (sender, e) =>
                 {
-                    Assert.True(e.PrevBalance.Equals(BigInteger.Zero));
+                    Assert.True(e.PrevBalance.Equals(0));
                     Assert.True(e.NewBalance.Equals(Utils.ToNanoCoins(1, 0)));
                     Assert.AreEqual(e.Tx, fakeTx);
                     Assert.AreEqual(sender, _wallet);

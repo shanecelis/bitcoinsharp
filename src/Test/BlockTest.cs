@@ -44,7 +44,7 @@ namespace BitCoinSharp.Test
             // This number is printed by the official client at startup as the calculated value of chainWork on testnet:
             //
             // SetBestChain: new best=00000007199508e34a9f  height=0  work=536879104
-            Assert.AreEqual(BigInteger.ValueOf(536879104L), work);
+            Assert.AreEqual(BigInteger.ValueOf(536879104), work);
         }
 
         [Test]

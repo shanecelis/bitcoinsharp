@@ -18,7 +18,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Org.BouncyCastle.Math;
 
 namespace BitCoinSharp
 {
@@ -33,12 +32,12 @@ namespace BitCoinSharp
     [Serializable]
     public abstract class Message
     {
-        public const int MaxSize = 0x02000000;
+        public const uint MaxSize = 0x2000000;
 
         [NonSerialized] private int _offset;
         [NonSerialized] private int _cursor;
         [NonSerialized] private byte[] _bytes;
-        [NonSerialized] private int _protocolVersion;
+        [NonSerialized] private uint _protocolVersion;
 
         // The offset is how many bytes into the provided byte array this message starts at.
         protected int Offset
@@ -62,7 +61,7 @@ namespace BitCoinSharp
             set { _bytes = value; }
         }
 
-        protected int ProtocolVersion
+        protected uint ProtocolVersion
         {
             get { return _protocolVersion; }
             set { _protocolVersion = value; }
@@ -84,7 +83,7 @@ namespace BitCoinSharp
         }
 
         /// <exception cref="BitCoinSharp.ProtocolException" />
-        internal Message(NetworkParameters @params, byte[] msg, int offset, int protocolVersion = NetworkParameters.ProtocolVersion)
+        internal Message(NetworkParameters @params, byte[] msg, int offset, uint protocolVersion = NetworkParameters.ProtocolVersion)
         {
             ProtocolVersion = protocolVersion;
             Params = @params;
@@ -136,7 +135,7 @@ namespace BitCoinSharp
             get { return Cursor - Offset; }
         }
 
-        internal long ReadUint32()
+        internal uint ReadUint32()
         {
             var u = Utils.ReadUint32(Bytes, Cursor);
             Cursor += 4;
@@ -154,17 +153,19 @@ namespace BitCoinSharp
             return hash;
         }
 
-        internal BigInteger ReadUint64()
+        internal ulong ReadUint64()
         {
-            // Java does not have an unsigned 64 bit type. So scrape it off the wire then flip.
-            var valbytes = new byte[8];
-            Array.Copy(Bytes, Cursor, valbytes, 0, 8);
-            valbytes = Utils.ReverseBytes(valbytes);
-            Cursor += valbytes.Length;
-            return new BigInteger(1, valbytes);
+            return (((ulong) Bytes[Cursor++]) << 0) |
+                   (((ulong) Bytes[Cursor++]) << 8) |
+                   (((ulong) Bytes[Cursor++]) << 16) |
+                   (((ulong) Bytes[Cursor++]) << 24) |
+                   (((ulong) Bytes[Cursor++]) << 32) |
+                   (((ulong) Bytes[Cursor++]) << 40) |
+                   (((ulong) Bytes[Cursor++]) << 48) |
+                   (((ulong) Bytes[Cursor++]) << 56);
         }
 
-        internal long ReadVarInt()
+        internal ulong ReadVarInt()
         {
             var varint = new VarInt(Bytes, Cursor);
             Cursor += varint.SizeInBytes;
@@ -187,7 +188,7 @@ namespace BitCoinSharp
                 Cursor += 1;
                 return "";
             }
-            var characters = new byte[(int) varInt.Value];
+            var characters = new byte[varInt.Value];
             Array.Copy(Bytes, Cursor, characters, 0, characters.Length);
             Cursor += varInt.SizeInBytes;
             return Encoding.UTF8.GetString(characters, 0, characters.Length);

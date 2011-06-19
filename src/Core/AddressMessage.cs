@@ -23,7 +23,7 @@ namespace BitCoinSharp
     [Serializable]
     public class AddressMessage : Message
     {
-        private const long _maxAddresses = 1024;
+        private const ulong _maxAddresses = 1024;
 
         internal IList<PeerAddress> Addresses { get; private set; }
 
@@ -47,7 +47,7 @@ namespace BitCoinSharp
             if (numAddresses > _maxAddresses)
                 throw new ProtocolException("Address message too large.");
             Addresses = new List<PeerAddress>((int) numAddresses);
-            for (var i = 0; i < numAddresses; i++)
+            for (var i = 0UL; i < numAddresses; i++)
             {
                 var addr = new PeerAddress(Params, Bytes, Cursor, ProtocolVersion);
                 Addresses.Add(addr);

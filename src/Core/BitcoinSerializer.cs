@@ -107,12 +107,12 @@ namespace BitCoinSharp
             // NULL terminating the string here.
             for (var i = 0; i < name.Length && i < _commandLen; i++)
             {
-                header[4 + i] = (byte) (name[i] & 0xFF);
+                header[4 + i] = (byte) name[i];
             }
 
             var payload = message.BitcoinSerialize();
 
-            Utils.Uint32ToByteArrayLe(payload.Length, header, 4 + _commandLen);
+            Utils.Uint32ToByteArrayLe((uint) payload.Length, header, 4 + _commandLen);
 
             if (_usesChecksumming)
             {
@@ -175,7 +175,7 @@ namespace BitCoinSharp
             var command = Encoding.UTF8.GetString(commandBytes);
             cursor = mark + _commandLen;
 
-            var size = (int) Utils.ReadUint32(header, cursor);
+            var size = Utils.ReadUint32(header, cursor);
             cursor += 4;
 
             if (size > Message.MaxSize)
@@ -194,7 +194,7 @@ namespace BitCoinSharp
             var payloadBytes = new byte[size];
             while (readCursor < payloadBytes.Length - 1)
             {
-                var bytesRead = @in.Read(payloadBytes, readCursor, size - readCursor);
+                var bytesRead = @in.Read(payloadBytes, readCursor, (int) (size - readCursor));
                 if (bytesRead == -1)
                 {
                     throw new IOException("Socket is disconnected");
@@ -269,7 +269,7 @@ namespace BitCoinSharp
                 }
                 // We're looking for a run of bytes that is the same as the packet magic but we want to ignore partial
                 // magics that aren't complete. So we keep track of where we're up to with magicCursor.
-                var expectedByte = 0xFF & (int) (_params.PacketMagic >> magicCursor*8);
+                var expectedByte = (byte) (_params.PacketMagic >> magicCursor*8);
                 if (b == expectedByte)
                 {
                     magicCursor--;

@@ -19,7 +19,6 @@ using System.Diagnostics;
 using System.IO;
 using BitCoinSharp.IO;
 using log4net;
-using Org.BouncyCastle.Math;
 
 namespace BitCoinSharp
 {
@@ -34,7 +33,7 @@ namespace BitCoinSharp
 
         // A transaction output has some value and a script used for authenticating that the redeemer is allowed to spend
         // this output.
-        private BigInteger _value;
+        private ulong _value;
         private byte[] _scriptBytes;
 
         // The script bytes are parsed and turned into a Script on demand.
@@ -61,7 +60,7 @@ namespace BitCoinSharp
             _availableForSpending = true;
         }
 
-        internal TransactionOutput(NetworkParameters @params, Transaction parent, BigInteger value, Address to)
+        internal TransactionOutput(NetworkParameters @params, Transaction parent, ulong value, Address to)
             : base(@params)
         {
             _value = value;
@@ -101,7 +100,7 @@ namespace BitCoinSharp
             Debug.Assert(_scriptBytes != null);
             Utils.Uint64ToByteStreamLe(Value, stream);
             // TODO: Move script serialization into the Script class, where it belongs.
-            stream.Write(new VarInt(_scriptBytes.Length).Encode());
+            stream.Write(new VarInt((ulong) _scriptBytes.Length).Encode());
             stream.Write(_scriptBytes);
         }
 
@@ -109,7 +108,7 @@ namespace BitCoinSharp
         /// Returns the value of this output in nanocoins. This is the amount of currency that the destination address
         /// receives.
         /// </summary>
-        public BigInteger Value
+        public ulong Value
         {
             get { return _value; }
         }

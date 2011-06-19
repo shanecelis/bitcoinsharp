@@ -30,7 +30,7 @@ namespace BitCoinSharp.Test
             var testbytes = Encoding.Default.GetBytes("Hello World");
             Assert.AreEqual("JxF12TrwUP45BMd", Base58.Encode(testbytes));
 
-            var bi = BigInteger.ValueOf(3471844090L);
+            var bi = BigInteger.ValueOf(3471844090);
             Assert.AreEqual("16Ho7Hs", Base58.Encode(bi.ToByteArray()));
         }
 

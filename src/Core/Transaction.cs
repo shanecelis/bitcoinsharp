@@ -21,7 +21,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using BitCoinSharp.IO;
-using Org.BouncyCastle.Math;
 
 namespace BitCoinSharp
 {
@@ -39,10 +38,10 @@ namespace BitCoinSharp
     public class Transaction : Message
     {
         // These are serialized in both BitCoin and java serialization.
-        private long _version;
+        private uint _version;
         private List<TransactionInput> _inputs;
         private List<TransactionOutput> _outputs;
-        private long _lockTime;
+        private uint _lockTime;
 
         // This is an in memory helper only.
         [NonSerialized] private Sha256Hash _hash;
@@ -108,15 +107,15 @@ namespace BitCoinSharp
         /// Calculates the sum of the outputs that are sending coins to a key in the wallet. The flag controls whether to
         /// include spent outputs or not.
         /// </summary>
-        internal BigInteger GetValueSentToMe(Wallet wallet, bool includeSpent)
+        internal ulong GetValueSentToMe(Wallet wallet, bool includeSpent)
         {
             // This is tested in WalletTest.
-            var v = BigInteger.Zero;
+            var v = 0UL;
             foreach (var o in _outputs)
             {
                 if (!o.IsMine(wallet)) continue;
                 if (!includeSpent && !o.IsAvailableForSpending) continue;
-                v = v.Add(o.Value);
+                v += o.Value;
             }
             return v;
         }
@@ -124,7 +123,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Calculates the sum of the outputs that are sending coins to a key in the wallet.
         /// </summary>
-        public BigInteger GetValueSentToMe(Wallet wallet)
+        public ulong GetValueSentToMe(Wallet wallet)
         {
             return GetValueSentToMe(wallet, true);
         }
@@ -156,10 +155,10 @@ namespace BitCoinSharp
         /// </summary>
         /// <returns>Sum in nanocoins.</returns>
         /// <exception cref="BitCoinSharp.ScriptException" />
-        public BigInteger GetValueSentFromMe(Wallet wallet)
+        public ulong GetValueSentFromMe(Wallet wallet)
         {
             // This is tested in WalletTest.
-            var v = BigInteger.Zero;
+            var v = 0UL;
             foreach (var input in _inputs)
             {
                 // This input is taking value from an transaction in our wallet. To discover the value,
@@ -171,7 +170,7 @@ namespace BitCoinSharp
                     connected = input.GetConnectedOutput(wallet.Pending);
                 if (connected == null)
                     continue;
-                v = v.Add(connected.Value);
+                v += connected.Value;
             }
             return v;
         }
@@ -228,7 +227,7 @@ namespace BitCoinSharp
             // First come the inputs.
             var numInputs = ReadVarInt();
             _inputs = new List<TransactionInput>((int) numInputs);
-            for (long i = 0; i < numInputs; i++)
+            for (var i = 0UL; i < numInputs; i++)
             {
                 var input = new TransactionInput(Params, this, Bytes, Cursor);
                 _inputs.Add(input);
@@ -237,7 +236,7 @@ namespace BitCoinSharp
             // Now the outputs
             var numOutputs = ReadVarInt();
             _outputs = new List<TransactionOutput>((int) numOutputs);
-            for (long i = 0; i < numOutputs; i++)
+            for (var i = 0UL; i < numOutputs; i++)
             {
                 var output = new TransactionOutput(Params, this, Bytes, Cursor);
                 _outputs.Add(output);
@@ -420,7 +419,7 @@ namespace BitCoinSharp
             {
                 BitcoinSerializeToStream(bos);
                 // We also have to write a hash type.
-                var hashType = (int) type + 1;
+                var hashType = (uint) type + 1;
                 if (anyoneCanPay)
                     hashType |= 0x80;
                 Utils.Uint32ToByteStreamLe(hashType, bos);
@@ -455,10 +454,10 @@ namespace BitCoinSharp
         public override void BitcoinSerializeToStream(Stream stream)
         {
             Utils.Uint32ToByteStreamLe(_version, stream);
-            stream.Write(new VarInt(_inputs.Count).Encode());
+            stream.Write(new VarInt((ulong) _inputs.Count).Encode());
             foreach (var @in in _inputs)
                 @in.BitcoinSerializeToStream(stream);
-            stream.Write(new VarInt(_outputs.Count).Encode());
+            stream.Write(new VarInt((ulong) _outputs.Count).Encode());
             foreach (var @out in _outputs)
                 @out.BitcoinSerializeToStream(stream);
             Utils.Uint32ToByteStreamLe(_lockTime, stream);

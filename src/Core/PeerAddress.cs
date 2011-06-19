@@ -32,16 +32,16 @@ namespace BitCoinSharp
     {
         internal IPAddress Addr { get; private set; }
         internal int Port { get; private set; }
-        private BigInteger _services;
-        private long _time;
+        private ulong _services;
+        private uint _time;
 
         /// <exception cref="BitCoinSharp.ProtocolException" />
-        public PeerAddress(NetworkParameters @params, byte[] payload, int offset, int protocolVersion)
+        public PeerAddress(NetworkParameters @params, byte[] payload, int offset, uint protocolVersion)
             : base(@params, payload, offset, protocolVersion)
         {
         }
 
-        public PeerAddress(IPAddress addr, int port, int protocolVersion)
+        public PeerAddress(IPAddress addr, int port, uint protocolVersion)
         {
             Addr = addr;
             Port = port;
@@ -54,9 +54,9 @@ namespace BitCoinSharp
             if (ProtocolVersion >= 31402)
             {
                 var secs = UnixTime.ToUnixTime(DateTime.UtcNow);
-                Utils.Uint32ToByteStreamLe(secs, stream);
+                Utils.Uint32ToByteStreamLe((uint) secs, stream);
             }
-            Utils.Uint64ToByteStreamLe(BigInteger.Zero, stream); // nServices.
+            Utils.Uint64ToByteStreamLe(0, stream); // nServices.
             // Java does not provide any utility to map an IPv4 address into IPv6 space, so we have to do it by hand.
             var ipBytes = Addr.GetAddressBytes();
             if (ipBytes.Length == 4)
@@ -69,8 +69,8 @@ namespace BitCoinSharp
             }
             stream.Write(ipBytes);
             // And write out the port.
-            stream.Write((byte) (0xFF & Port));
-            stream.Write((byte) (0xFF & (Port >> 8)));
+            stream.Write((byte) Port);
+            stream.Write((byte) (Port >> 8));
         }
 
         /// <exception cref="BitCoinSharp.ProtocolException" />
@@ -84,11 +84,11 @@ namespace BitCoinSharp
             if (ProtocolVersion > 31402)
                 _time = ReadUint32();
             else
-                _time = -1;
+                _time = uint.MaxValue;
             _services = ReadUint64();
             var addrBytes = ReadBytes(16);
             Addr = new IPAddress(addrBytes);
-            Port = ((0xFF & Bytes[Cursor++]) << 8) | (0xFF & Bytes[Cursor++]);
+            Port = (Bytes[Cursor++] << 8) | Bytes[Cursor++];
         }
 
         public override string ToString()

@@ -28,7 +28,7 @@ namespace BitCoinSharp
         // For some reason the compiler complains if this is inside InventoryItem
         private IList<InventoryItem> _items;
 
-        private const long _maxInventoryItems = 50000;
+        private const ulong _maxInventoryItems = 50000;
 
         /// <exception cref="BitCoinSharp.ProtocolException" />
         public ListMessage(NetworkParameters @params, byte[] bytes)
@@ -60,13 +60,13 @@ namespace BitCoinSharp
             if (arrayLen > _maxInventoryItems)
                 throw new ProtocolException("Too many items in INV message: " + arrayLen);
             _items = new List<InventoryItem>((int) arrayLen);
-            for (var i = 0; i < arrayLen; i++)
+            for (var i = 0UL; i < arrayLen; i++)
             {
                 if (Cursor + 4 + 32 > Bytes.Length)
                 {
                     throw new ProtocolException("Ran off the end of the INV");
                 }
-                var typeCode = (int) ReadUint32();
+                var typeCode = ReadUint32();
                 InventoryItem.ItemType type;
                 // See ppszTypeName in net.h
                 switch (typeCode)
@@ -92,11 +92,11 @@ namespace BitCoinSharp
         /// <exception cref="System.IO.IOException" />
         public override void BitcoinSerializeToStream(Stream stream)
         {
-            stream.Write(new VarInt(_items.Count).Encode());
+            stream.Write(new VarInt((ulong) _items.Count).Encode());
             foreach (var i in _items)
             {
                 // Write out the type code.
-                Utils.Uint32ToByteStreamLe((int) i.Type, stream);
+                Utils.Uint32ToByteStreamLe((uint) i.Type, stream);
                 // And now the hash.
                 stream.Write(Utils.ReverseBytes(i.Hash));
             }
