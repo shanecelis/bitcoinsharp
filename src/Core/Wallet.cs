@@ -91,7 +91,7 @@ namespace BitCoinSharp
         /// </summary>
         /// <remarks>
         /// Note: for now we will not allow spends of transactions that did not make it into the block chain. The code
-        /// that handles this in BitCoin C++ is complicated. Satoshis code will not allow you to spend unconfirmed coins,
+        /// that handles this in BitCoin C++ is complicated. Satoshi's code will not allow you to spend unconfirmed coins,
         /// however, it does seem to support dependency resolution entirely within the context of the memory pool so
         /// theoretically you could spend zero-conf coins and all of them would be included together. To simplify we'll
         /// make people wait but it would be a good improvement to resolve this in future.
@@ -504,9 +504,9 @@ namespace BitCoinSharp
         /// <summary>
         /// Sends coins to the given address, via the given <see cref="Peer">Peer</see>. Change is returned to the first key in the wallet.
         /// </summary>
+        /// <param name="peer">The peer to send via.</param>
         /// <param name="to">Which address to send coins to.</param>
-        /// <param name="nanocoins">How many nanocoins to send. You can use Utils.toNanoCoins() to calculate this.
-        /// </param>
+        /// <param name="nanocoins">How many nanocoins to send. You can use Utils.toNanoCoins() to calculate this.</param>
         /// <returns>
         /// The <see cref="Transaction">Transaction</see> that was created or null if there was insufficient balance to send the coins.
         /// </returns>
@@ -695,7 +695,7 @@ namespace BitCoinSharp
         /// <remarks>
         /// Note: the estimated balance is usually the one you want to show to the end user - however attempting to
         /// actually spend these coins may result in temporary failure. This method returns how much you can safely
-        /// provide to <see cref="CreateSend(Address, Org.BouncyCastle.Math.BigInteger)">CreateSend(Address, Org.BouncyCastle.Math.BigInteger)</see>.
+        /// provide to <see cref="CreateSend(Address, ulong)">CreateSend(Address, Org.BouncyCastle.Math.BigInteger)</see>.
         /// </remarks>
         public ulong GetBalance()
         {

@@ -106,8 +106,8 @@ namespace BitCoinSharp
         }
 
         // These methods handle the serialization/deserialization using the custom BitCoin protocol.
-        // It's somewhat painful to work with in Java, so some of these objects support a second 
-        // serialization mechanism - the standard Java serialization system. This is used when things 
+        // It's somewhat painful to work with in Java, so some of these objects support a second
+        // serialization mechanism - the standard Java serialization system. This is used when things
         // are serialized to the wallet.
         /// <exception cref="BitCoinSharp.ProtocolException" />
         protected abstract void Parse();

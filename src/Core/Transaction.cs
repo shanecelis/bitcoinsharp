@@ -384,7 +384,7 @@ namespace BitCoinSharp
                 // Keep the key around for the script creation step below.
                 signingKeys[i] = key;
                 // The anyoneCanPay feature isn't used at the moment.
-                var anyoneCanPay = false;
+                const bool anyoneCanPay = false;
                 var hash = HashTransactionForSignature(hashType, anyoneCanPay);
                 // Set the script to empty again for the next input.
                 input.ScriptBytes = TransactionInput.EmptyArray;

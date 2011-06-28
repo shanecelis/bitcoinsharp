@@ -11,7 +11,7 @@ namespace BitCoinSharp.Threading
     /// </summary>
     /// <remarks>
     /// A <see cref="BitCoinSharp.Threading.CountDownLatch"/> is initialized with a given
-    /// <b>count</b>.  The <see cref="BitCoinSharp.Threading.CountDownLatch.Await()"/> and <see cref="BitCoinSharp.Threading.CountDownLatch.Await(TimeSpan)"/>
+    /// <b>count</b>. The <see cref="BitCoinSharp.Threading.CountDownLatch.Await()"/> and <see cref="BitCoinSharp.Threading.CountDownLatch.Await(TimeSpan)"/>
     /// methods block until the current <see cref="BitCoinSharp.Threading.CountDownLatch.Count"/>
     /// reaches zero due to invocations of the
     /// <see cref="BitCoinSharp.Threading.CountDownLatch.CountDown()"/> method, after which all waiting threads are
@@ -21,9 +21,9 @@ namespace BitCoinSharp.Threading
     ///
     /// <p/>
     /// A <see cref="BitCoinSharp.Threading.CountDownLatch"/> is a versatile synchronization tool
-    /// and can be used for a number of purposes.  A
+    /// and can be used for a number of purposes. A
     /// <see cref="BitCoinSharp.Threading.CountDownLatch"/> initialized with a count of one serves as a
-    /// simple on/off latch, or gate: all threads invoking  <see cref="BitCoinSharp.Threading.CountDownLatch.Await()"/> and <see cref="BitCoinSharp.Threading.CountDownLatch.Await(TimeSpan)"/>
+    /// simple on/off latch, or gate: all threads invoking <see cref="BitCoinSharp.Threading.CountDownLatch.Await()"/> and <see cref="BitCoinSharp.Threading.CountDownLatch.Await(TimeSpan)"/>
     /// wait at the gate until it is opened by a thread invoking <see cref="BitCoinSharp.Threading.CountDownLatch.CountDown()"/>.
     /// A <see cref="BitCoinSharp.Threading.CountDownLatch"/> initialized to <i>N</i>
     /// can be used to make one thread wait until <i>N</i> threads have
@@ -122,7 +122,7 @@ namespace BitCoinSharp.Threading
         /// zero, unless <see cref="System.Threading.Thread.Interrupt()"/> is called on the thread.
         /// </summary>
         /// <remarks>
-        /// If the current <see cref="BitCoinSharp.Threading.CountDownLatch.Count"/>  is zero then this method
+        /// If the current <see cref="BitCoinSharp.Threading.CountDownLatch.Count"/> is zero then this method
         /// returns immediately.
         /// <p/>If the current <see cref="BitCoinSharp.Threading.CountDownLatch.Count"/> is greater than zero then
         /// the current thread becomes disabled for thread scheduling
@@ -150,7 +150,7 @@ namespace BitCoinSharp.Threading
         /// </summary>
         /// <remarks>
         /// <p/>
-        /// If the current <see cref="BitCoinSharp.Threading.CountDownLatch.Count"/>  is zero then this method
+        /// If the current <see cref="BitCoinSharp.Threading.CountDownLatch.Count"/> is zero then this method
         /// returns immediately.
         /// <p/>If the current <see cref="BitCoinSharp.Threading.CountDownLatch.Count"/> is greater than zero then
         /// the current thread becomes disabled for thread scheduling
@@ -164,9 +164,9 @@ namespace BitCoinSharp.Threading
         /// If the specified <paramref name="duration"/> elapses then the value <see lang="false"/>
         /// is returned. If the time is less than or equal to zero, the method will not wait at all.
         /// </remarks>
-        /// <param name="duration">the maximum time to wait
-        /// </param>
-        /// <returns><see lang="true"/> if the count reached zero  and <see lang="false"/>
+        /// <param name="duration">the maximum time to wait</param>
+        /// <returns>
+        /// <see lang="true"/> if the count reached zero and <see lang="false"/>
         /// if the waiting time elapsed before the count reached zero.
         /// </returns>
         /// <exception cref="System.Threading.ThreadInterruptedException">If the current thread is interrupted.</exception>
@@ -177,23 +177,17 @@ namespace BitCoinSharp.Threading
             {
                 if (_count <= 0)
                     return true;
-                else if (durationToWait.Ticks <= 0)
+                if (durationToWait.Ticks <= 0)
                     return false;
-                else
+                var deadline = DateTime.Now.Add(durationToWait);
+                for (;;)
                 {
-                    var deadline = DateTime.Now.Add(durationToWait);
-                    for (;;)
-                    {
-                        Monitor.Wait(this, durationToWait);
-                        if (_count <= 0)
-                            return true;
-                        else
-                        {
-                            durationToWait = deadline.Subtract(DateTime.Now);
-                            if (durationToWait.Ticks <= 0)
-                                return false;
-                        }
-                    }
+                    Monitor.Wait(this, durationToWait);
+                    if (_count <= 0)
+                        return true;
+                    durationToWait = deadline.Subtract(DateTime.Now);
+                    if (durationToWait.Ticks <= 0)
+                        return false;
                 }
             }
         }

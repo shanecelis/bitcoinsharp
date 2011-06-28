@@ -120,7 +120,7 @@ namespace BitCoinSharp
             // Their address.
             TheirAddr.BitcoinSerializeToStream(buf);
             // Next up is the "local host nonce", this is to detect the case of connecting
-            // back to yourself. We don't care about this as we won't be accepting inbound 
+            // back to yourself. We don't care about this as we won't be accepting inbound
             // connections.
             Utils.Uint64ToByteStreamLe(_localHostNonce, buf);
             // Now comes subVer.

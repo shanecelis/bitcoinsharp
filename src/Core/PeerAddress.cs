@@ -80,7 +80,7 @@ namespace BitCoinSharp
             // Format of a serialized address:
             //   uint32 timestamp
             //   uint64 services   (flags determining what the node can do)
-            //   16 bytes ip address
+            //   16 bytes IP address
             //   2 bytes port num
             if (ProtocolVersion > 31402)
                 _time = ReadUint32();

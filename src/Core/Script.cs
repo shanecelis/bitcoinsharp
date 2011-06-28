@@ -148,7 +148,7 @@ namespace BitCoinSharp
             }
             catch (IndexOutOfRangeException e)
             {
-                // We want running out of data in the array to be treated as a handleable script parsing exception,
+                // We want running out of data in the array to be treated as a recoverable script parsing exception,
                 // not something that abnormally terminates the app.
                 throw new ScriptException("Failed read of " + len + " bytes", e);
             }
@@ -358,7 +358,7 @@ namespace BitCoinSharp
         {
             _stack.Pop();
             var sigAndHashType = _stack.Pop();
-            // The signature has an extra byte on the end to indicate the type of hash. The signature 
+            // The signature has an extra byte on the end to indicate the type of hash. The signature
             // is over the contents of the program, minus the signature itself of course.
             var hashType = sigAndHashType[sigAndHashType.Length - 1];
             // The high bit of the hashType byte is set to indicate "anyone can pay".

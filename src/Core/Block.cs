@@ -171,7 +171,7 @@ namespace BitCoinSharp
         }
 
         /// <summary>
-        /// Returns the hash of the block (which for a valid, solved block should be below the target).  Big endian.
+        /// Returns the hash of the block (which for a valid, solved block should be below the target). Big endian.
         /// </summary>
         public byte[] Hash
         {

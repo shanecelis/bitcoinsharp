@@ -41,7 +41,7 @@ namespace BitCoinSharp.Test
         public void TestWork()
         {
             var work = _params.GenesisBlock.GetWork();
-            // This number is printed by the official client at startup as the calculated value of chainWork on testnet:
+            // This number is printed by the official client at start-up as the calculated value of chainWork on testnet:
             //
             // SetBestChain: new best=00000007199508e34a9f  height=0  work=536879104
             Assert.AreEqual(BigInteger.ValueOf(536879104), work);
@@ -125,8 +125,8 @@ namespace BitCoinSharp.Test
         [Test]
         public void TestBitCoinSerialization()
         {
-            // We have to be able to reserialize everything exactly as we found it for hashing to work. This test also
-            // proves that transaction serialization works, along with all its subobjects like scripts and in/outpoints.
+            // We have to be able to re-serialize everything exactly as we found it for hashing to work. This test also
+            // proves that transaction serialization works, along with all its sub-objects like scripts and in/outpoints.
             //
             // NB: This tests the BITCOIN proprietary serialization protocol. A different test checks Java serialization
             // of transactions.
@@ -157,7 +157,7 @@ namespace BitCoinSharp.Test
             }
 
             // Note that this will actually check the transactions are equal by doing BitCoin serialization and checking
-            // the bytestreams are the same! A true "deep equals" is not implemented for Transaction. The primary purpose
+            // the byte streams are the same! A true "deep equals" is not implemented for Transaction. The primary purpose
             // of this test is to ensure no errors occur during the Java serialization/deserialization process.
             Assert.AreEqual(tx, tx2);
         }

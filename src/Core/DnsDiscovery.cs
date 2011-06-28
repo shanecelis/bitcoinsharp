@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using log4net;
 
@@ -103,7 +102,7 @@ namespace BitCoinSharp
                     }
                 }
             }
-            return addresses.ToArray();
+            return addresses;
         }
 
         /// <summary>

@@ -40,6 +40,7 @@ namespace BitCoinSharp
         /// </summary>
         /// <param name="channel">The IRC channel to join, either "#bitcoin" or "#bitcoinTEST" for the production and test networks respectively.</param>
         /// <param name="server">Name or textual IP address of the IRC server to join.</param>
+        /// <param name="port">The port of the IRC server to join.</param>
         public IrcDiscovery(string channel, string server = "irc.lfnet.org", int port = 6667)
         {
             _channel = channel;
@@ -84,7 +85,7 @@ namespace BitCoinSharp
                     {
                         // Generate a random nick for the connection. This is chosen to be clearly identifiable as coming from
                         // BitCoinSharp but not match the standard nick format, so full peers don't try and connect to us.
-                        var nickRnd = string.Format("bcj{0}", new Random().Next(int.MaxValue));
+                        var nickRnd = string.Format("bcs{0}", new Random().Next(int.MaxValue));
                         var command = "NICK " + nickRnd;
                         LogAndSend(writer, command);
                         // USER <user> <mode> <unused> <realname> (RFC 2812)

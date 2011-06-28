@@ -29,7 +29,7 @@ namespace BitCoinSharp
     ///   <li>A base58 encoded "human form" that includes a version and check code, to guard against typos.</li>
     /// </ol><p />
     /// One may question whether the base58 form is really an improvement over the hash160 form, given
-    /// they are both very unfriendly for typists. More useful representations might include  QR codes
+    /// they are both very unfriendly for typists. More useful representations might include QR codes
     /// and identicons.<p />
     /// Note that an address is specific to a network because the first byte is a discriminator value.
     /// </remarks>

@@ -227,7 +227,7 @@ namespace BitCoinSharp
             _channel.Position = _channel.Length - Record.Size;
         }
 
-        // TODO: This is ugly, fixinate!
+        // TODO: This is ugly, fix!
         private readonly Record _dummyRecord = new Record();
 
         /// <exception cref="BitCoinSharp.BlockStoreException" />

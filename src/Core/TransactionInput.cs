@@ -185,10 +185,8 @@ namespace BitCoinSharp
         /// Connecting means updating the internal pointers and spent flags.
         /// </summary>
         /// <param name="transactions">Map of txhash-&gt;transaction.</param>
-        /// <param name="disconnect">Whether to abort if there's a pre-existing connection or not.
-        /// </param>
-        /// <returns>True if connection took place, false if the referenced transaction was not in the list.
-        /// </returns>
+        /// <param name="disconnect">Whether to abort if there's a pre-existing connection or not.</param>
+        /// <returns>True if connection took place, false if the referenced transaction was not in the list.</returns>
         internal ConnectionResult Connect(IDictionary<Sha256Hash, Transaction> transactions, bool disconnect)
         {
             var h = new Sha256Hash(Outpoint.Hash);

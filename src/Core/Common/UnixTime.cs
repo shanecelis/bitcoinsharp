@@ -8,10 +8,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,14 +19,14 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // OAuth.net uses the Common Service Locator interface, released under the MS-PL
 // license. See "CommonServiceLocator License.txt" in the Licenses folder.
-// 
+//
 // The examples and test cases use the Windsor Container from the Castle Project
 // and Common Service Locator Windsor adaptor, released under the Apache License,
 // Version 2.0. See "Castle Project License.txt" in the Licenses folder.
-// 
+//
 // XRDS-Simple.net uses the HTMLAgility Pack. See "HTML Agility Pack License.txt"
 // in the Licenses folder.
 //
@@ -48,7 +48,7 @@ namespace BitCoinSharp.Common
         private static readonly DateTime _unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         /// <summary>
-        /// Converts a DateTime to unix time. Unix time is the number of seconds 
+        /// Converts a DateTime to unix time. Unix time is the number of seconds
         /// between 1970-1-1 0:0:0.0 (unix epoch) and the time (UTC).
         /// </summary>
         /// <param name="time">The date time to convert to unix time</param>
@@ -59,7 +59,7 @@ namespace BitCoinSharp.Common
         }
 
         /// <summary>
-        /// Converts a long representation of a unix time into a DateTime. Unix time is 
+        /// Converts a long representation of a unix time into a DateTime. Unix time is
         /// the number of seconds between 1970-1-1 0:0:0.0 (unix epoch) and the time (UTC).
         /// </summary>
         /// <param name="unixTime">The number of seconds since Unix epoch (must be >= 0)</param>
