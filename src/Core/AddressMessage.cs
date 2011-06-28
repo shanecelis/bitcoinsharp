@@ -16,7 +16,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using BitCoinSharp.IO;
 
 namespace BitCoinSharp
 {
@@ -52,6 +54,15 @@ namespace BitCoinSharp
                 var addr = new PeerAddress(Params, Bytes, Cursor, ProtocolVersion);
                 Addresses.Add(addr);
                 Cursor += addr.MessageSize;
+            }
+        }
+
+        public override void BitcoinSerializeToStream(Stream stream)
+        {
+            stream.Write(new VarInt((ulong) Addresses.Count).Encode());
+            foreach (var addr in Addresses)
+            {
+                addr.BitcoinSerializeToStream(stream);
             }
         }
 

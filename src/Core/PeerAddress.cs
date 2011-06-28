@@ -87,6 +87,12 @@ namespace BitCoinSharp
                 _time = uint.MaxValue;
             _services = ReadUint64();
             var addrBytes = ReadBytes(16);
+            if (new BigInteger(addrBytes, 0, 12).Equals(BigInteger.ValueOf(0xFFFF)))
+            {
+                var newBytes = new byte[4];
+                Array.Copy(addrBytes, 12, newBytes, 0, 4);
+                addrBytes = newBytes;
+            }
             Addr = new IPAddress(addrBytes);
             Port = (Bytes[Cursor++] << 8) | Bytes[Cursor++];
         }

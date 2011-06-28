@@ -56,6 +56,8 @@ namespace BitCoinSharp
         /// </summary>
         public PeerAddress TheirAddr { get; private set; }
 
+        private ulong _localHostNonce;
+
         /// <summary>
         /// An additional string that today the official client sets to the empty string. We treat it as something like an
         /// HTTP User-Agent header.
@@ -100,7 +102,7 @@ namespace BitCoinSharp
             // uint64 localHostNonce  (random data)
             // We don't care about the localhost nonce. It's used to detect connecting back to yourself in cases where
             // there are NATs and proxies in the way. However we don't listen for inbound connections so it's irrelevant.
-            ReadUint64();
+            _localHostNonce = ReadUint64();
             //   string subVer  (currently "")
             SubVer = ReadStr();
             //   int bestHeight (size of known block chain).
@@ -111,10 +113,8 @@ namespace BitCoinSharp
         public override void BitcoinSerializeToStream(Stream buf)
         {
             Utils.Uint32ToByteStreamLe(ClientVersion, buf);
-            Utils.Uint32ToByteStreamLe((uint) LocalServices, buf);
-            Utils.Uint32ToByteStreamLe((uint) (LocalServices >> 32), buf);
-            Utils.Uint32ToByteStreamLe((uint) Time, buf);
-            Utils.Uint32ToByteStreamLe((uint) (Time >> 32), buf);
+            Utils.Uint64ToByteStreamLe(LocalServices, buf);
+            Utils.Uint64ToByteStreamLe(Time, buf);
             // My address.
             MyAddr.BitcoinSerializeToStream(buf);
             // Their address.
@@ -122,8 +122,7 @@ namespace BitCoinSharp
             // Next up is the "local host nonce", this is to detect the case of connecting
             // back to yourself. We don't care about this as we won't be accepting inbound 
             // connections.
-            Utils.Uint32ToByteStreamLe(0, buf);
-            Utils.Uint32ToByteStreamLe(0, buf);
+            Utils.Uint64ToByteStreamLe(_localHostNonce, buf);
             // Now comes subVer.
             var subVerBytes = Encoding.UTF8.GetBytes(SubVer);
             buf.Write(new VarInt((ulong) subVerBytes.Length).Encode());

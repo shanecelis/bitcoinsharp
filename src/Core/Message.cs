@@ -92,7 +92,7 @@ namespace BitCoinSharp
             Parse();
 #if SELF_CHECK
             // Useful to ensure serialize/deserialize are consistent with each other.
-            if (!GetType().Name.Equals("VersionMessage"))
+            if (GetType() != typeof (VersionMessage))
             {
                 var msgbytes = new byte[Cursor - offset];
                 Array.Copy(msg, offset, msgbytes, 0, Cursor - offset);
