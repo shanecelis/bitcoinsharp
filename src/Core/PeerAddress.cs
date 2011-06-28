@@ -56,7 +56,7 @@ namespace BitCoinSharp
                 var secs = UnixTime.ToUnixTime(DateTime.UtcNow);
                 Utils.Uint32ToByteStreamLe((uint) secs, stream);
             }
-            Utils.Uint64ToByteStreamLe(0, stream); // nServices.
+            Utils.Uint64ToByteStreamLe(_services, stream); // nServices.
             // Java does not provide any utility to map an IPv4 address into IPv6 space, so we have to do it by hand.
             var ipBytes = Addr.GetAddressBytes();
             if (ipBytes.Length == 4)
@@ -68,9 +68,9 @@ namespace BitCoinSharp
                 ipBytes = v6Addr;
             }
             stream.Write(ipBytes);
-            // And write out the port.
-            stream.Write((byte) Port);
+            // And write out the port. Unlike the rest of the protocol, address and port is in big endian byte order.
             stream.Write((byte) (Port >> 8));
+            stream.Write((byte) Port);
         }
 
         /// <exception cref="BitCoinSharp.ProtocolException" />
