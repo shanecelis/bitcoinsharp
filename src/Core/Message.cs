@@ -16,7 +16,6 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace BitCoinSharp
@@ -91,7 +90,7 @@ namespace BitCoinSharp
             Cursor = Offset = offset;
             Parse();
 #if SELF_CHECK
-            // Useful to ensure serialize/deserialize are consistent with each other.
+    // Useful to ensure serialize/deserialize are consistent with each other.
             if (GetType() != typeof (VersionMessage))
             {
                 var msgbytes = new byte[Cursor - offset];

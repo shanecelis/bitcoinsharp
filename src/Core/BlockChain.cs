@@ -178,7 +178,7 @@ namespace BitCoinSharp
             {
                 // This block connects to the best known block, it is a normal continuation of the system.
                 ChainHead = newStoredBlock;
-                _log.InfoFormat("Chain is now {0} blocks high", _chainHead.Height);
+                _log.DebugFormat("Chain is now {0} blocks high", _chainHead.Height);
                 if (newTransactions != null)
                     SendTransactionsToWallet(newStoredBlock, NewBlockType.BestChain, newTransactions);
             }

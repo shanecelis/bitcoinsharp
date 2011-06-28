@@ -46,6 +46,7 @@ namespace BitCoinSharp
             Addr = addr;
             Port = port;
             ProtocolVersion = protocolVersion;
+            _services = 0;
         }
 
         /// <exception cref="System.IO.IOException" />

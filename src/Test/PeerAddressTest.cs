@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2011 Noa Resare
+ * Copyright 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using System.Net;
 using NUnit.Framework;
 using Org.BouncyCastle.Utilities.Encoders;
 
@@ -23,13 +24,21 @@ namespace BitCoinSharp.Test
     public class PeerAddressTest
     {
         [Test]
-        public void TestPeerAddressSerialize()
+        public void TestPeerAddressRoundtrip()
         {
             // copied verbatim from https://en.bitcoin.it/wiki/Protocol_specification#Network_address
             const string fromSpec = "010000000000000000000000000000000000ffff0a000001208d";
             var pa = new PeerAddress(NetworkParameters.ProdNet(), Hex.Decode(fromSpec), 0, 0);
             var reserialized = Utils.BytesToHexString(pa.BitcoinSerialize());
             Assert.AreEqual(reserialized, fromSpec);
+        }
+
+        [Test]
+        public void TestBitcoinSerialize()
+        {
+            var pa = new PeerAddress(IPAddress.Loopback, 8333, 0);
+            Assert.AreEqual("000000000000000000000000000000000000ffff7f000001208d",
+                            Utils.BytesToHexString(pa.BitcoinSerialize()));
         }
     }
 }

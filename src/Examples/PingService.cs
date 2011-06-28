@@ -18,7 +18,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
-using Org.BouncyCastle.Math;
 
 namespace BitCoinSharp.Examples
 {
@@ -103,10 +102,15 @@ namespace BitCoinSharp.Examples
                     {
                         Console.WriteLine("Downloading block chain. " + (max > 1000 ? "This may take a while." : ""));
                         var current = max;
+                        var lastPercent = 0;
                         while (current > 0)
                         {
                             var pct = 100.0 - (100.0*(current/(double) max));
-                            Console.WriteLine("Chain download {0}% done", (int) pct);
+                            if ((int) pct != lastPercent)
+                            {
+                                Console.WriteLine(string.Format("Chain download {0}% done", (int) pct));
+                                lastPercent = (int) pct;
+                            }
                             progress.Await(TimeSpan.FromSeconds(1));
                             current = progress.Count;
                         }
