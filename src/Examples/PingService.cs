@@ -82,7 +82,7 @@ namespace BitCoinSharp.Examples
                         (sender, e) =>
                         {
                             // Running on a peer thread.
-                            Debug.Assert(!e.NewBalance.Equals(BigInteger.Zero));
+                            Debug.Assert(!e.NewBalance.Equals(0));
                             // It's impossible to pick one specific identity that you receive coins from in BitCoin as there
                             // could be inputs from many addresses. So instead we just pick the first and assume they were all
                             // owned by the same person.
