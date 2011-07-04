@@ -16,7 +16,6 @@
 
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using BitCoinSharp.Collections;
 using BitCoinSharp.IO;
 using log4net;
@@ -188,8 +187,8 @@ namespace BitCoinSharp.Store
                 // Set up the genesis block. When we start out fresh, it is by definition the top of the chain.
                 var genesis = @params.GenesisBlock.CloneAsHeader();
                 var storedGenesis = new StoredBlock(genesis, genesis.GetWork(), 0);
-                _chainHead = new Sha256Hash(storedGenesis.Header.Hash);
-                _channel.Write(_chainHead.Hash);
+                _chainHead = storedGenesis.Header.Hash;
+                _channel.Write(_chainHead.Bytes);
                 Put(storedGenesis);
             }
             catch (IOException e)
@@ -237,7 +236,7 @@ namespace BitCoinSharp.Store
             {
                 try
                 {
-                    var hash = new Sha256Hash(block.Header.Hash);
+                    var hash = block.Header.Hash;
                     // Append to the end of the file.
                     _dummyRecord.Write(_channel, block);
                     _blockCache[hash] = block;
@@ -254,12 +253,11 @@ namespace BitCoinSharp.Store
         }
 
         /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
-        public StoredBlock Get(byte[] hashBytes)
+        public StoredBlock Get(Sha256Hash hash)
         {
             lock (this)
             {
                 // Check the memory cache first.
-                var hash = new Sha256Hash(hashBytes);
                 StoredBlock fromMem;
                 if (_blockCache.TryGetValue(hash, out fromMem))
                 {
@@ -319,7 +317,7 @@ namespace BitCoinSharp.Store
             {
                 if (!record.Read(_channel, pos, _buf))
                     throw new IOException("Failed to read buffer");
-                if (record.GetHeader(_params).Hash.SequenceEqual(hash.Hash))
+                if (record.GetHeader(_params).Hash.Equals(hash))
                 {
                     // Found it. Update file position for next time.
                     _channel.Position = pos;
@@ -348,7 +346,7 @@ namespace BitCoinSharp.Store
         {
             lock (this)
             {
-                return Get(_chainHead.Hash);
+                return Get(_chainHead);
             }
         }
 
@@ -359,12 +357,12 @@ namespace BitCoinSharp.Store
             {
                 try
                 {
-                    var hash = chainHead.Header.Hash;
-                    _chainHead = new Sha256Hash(hash);
+                    _chainHead = chainHead.Header.Hash;
                     // Write out new hash to the first 32 bytes of the file past one (first byte is version number).
                     var originalPos = _channel.Position;
                     _channel.Position = 1;
-                    _channel.Write(hash, 0, hash.Length);
+                    var bytes = _chainHead.Bytes;
+                    _channel.Write(bytes, 0, bytes.Length);
                     _channel.Position = originalPos;
                 }
                 catch (IOException e)

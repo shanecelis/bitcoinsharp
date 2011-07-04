@@ -98,7 +98,7 @@ namespace BitCoinSharp
                 // Write out the type code.
                 Utils.Uint32ToByteStreamLe((uint) i.Type, stream);
                 // And now the hash.
-                stream.Write(Utils.ReverseBytes(i.Hash));
+                stream.Write(Utils.ReverseBytes(i.Hash.Bytes));
             }
         }
     }

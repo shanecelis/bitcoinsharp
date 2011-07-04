@@ -18,7 +18,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using BitCoinSharp.IO;
 
@@ -473,8 +472,7 @@ namespace BitCoinSharp
 
         public override int GetHashCode()
         {
-            var hash = Hash.Hash;
-            return hash != null ? hash.Aggregate(1, (current, element) => 31*current + element) : 0;
+            return Hash.GetHashCode();
         }
     }
 }

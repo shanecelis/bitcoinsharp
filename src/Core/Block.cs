@@ -18,7 +18,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using BitCoinSharp.Common;
 using BitCoinSharp.IO;
@@ -34,7 +33,7 @@ namespace BitCoinSharp
     /// </summary>
     /// <remarks>
     /// To get a block, you can either build one from the raw bytes you can get from another implementation,
-    /// or request one specifically using <see cref="Peer.GetBlock(byte[])">Peer.GetBlock(byte[])</see>, or grab one from a downloaded
+    /// or request one specifically using <see cref="Peer.GetBlock(Sha256Hash)">Peer.GetBlock(byte[])</see>, or grab one from a downloaded
     /// <see cref="BlockChain">BlockChain</see>.
     /// </remarks>
     [Serializable]
@@ -57,8 +56,8 @@ namespace BitCoinSharp
         // For unit testing. If not zero, use this instead of the current time.
         internal static ulong FakeClock;
         private uint _version;
-        private byte[] _prevBlockHash;
-        private byte[] _merkleRoot;
+        private Sha256Hash _prevBlockHash;
+        private Sha256Hash _merkleRoot;
         private uint _time;
         private uint _difficultyTarget; // "nBits"
 
@@ -72,7 +71,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Stores the hash of the block. If null, getHash() will recalculate it.
         /// </summary>
-        [NonSerialized] private byte[] _hash;
+        [NonSerialized] private Sha256Hash _hash;
 
         /// <summary>
         /// Special case constructor, used for the genesis node and unit tests.
@@ -84,7 +83,7 @@ namespace BitCoinSharp
             _version = 1;
             _difficultyTarget = 0x1d07fff8;
             _time = (uint) UnixTime.ToUnixTime(DateTime.UtcNow);
-            _prevBlockHash = new byte[32]; // All zeros.
+            _prevBlockHash = Sha256Hash.ZeroHash;
         }
 
         /// <summary>
@@ -106,7 +105,7 @@ namespace BitCoinSharp
             _difficultyTarget = ReadUint32();
             _nonce = ReadUint32();
 
-            _hash = Utils.ReverseBytes(Utils.DoubleDigest(Bytes, 0, Cursor));
+            _hash = new Sha256Hash(Utils.ReverseBytes(Utils.DoubleDigest(Bytes, 0, Cursor)));
 
             if (Cursor == Bytes.Length)
             {
@@ -128,8 +127,8 @@ namespace BitCoinSharp
         private void WriteHeader(Stream stream)
         {
             Utils.Uint32ToByteStreamLe(_version, stream);
-            stream.Write(Utils.ReverseBytes(_prevBlockHash));
-            stream.Write(Utils.ReverseBytes(MerkleRoot));
+            stream.Write(Utils.ReverseBytes(_prevBlockHash.Bytes));
+            stream.Write(Utils.ReverseBytes(MerkleRoot.Bytes));
             Utils.Uint32ToByteStreamLe(_time, stream);
             Utils.Uint32ToByteStreamLe(_difficultyTarget, stream);
             Utils.Uint32ToByteStreamLe(_nonce, stream);
@@ -151,12 +150,12 @@ namespace BitCoinSharp
         /// <summary>
         /// Calculates the block hash by serializing the block and hashing the resulting bytes.
         /// </summary>
-        private byte[] CalculateHash()
+        private Sha256Hash CalculateHash()
         {
             using (var bos = new MemoryStream())
             {
                 WriteHeader(bos);
-                return Utils.ReverseBytes(Utils.DoubleDigest(bos.ToArray()));
+                return new Sha256Hash(Utils.ReverseBytes(Utils.DoubleDigest(bos.ToArray())));
             }
         }
 
@@ -167,13 +166,13 @@ namespace BitCoinSharp
         /// </summary>
         public string HashAsString
         {
-            get { return Utils.BytesToHexString(Hash); }
+            get { return Hash.ToString(); }
         }
 
         /// <summary>
         /// Returns the hash of the block (which for a valid, solved block should be below the target). Big endian.
         /// </summary>
-        public byte[] Hash
+        public Sha256Hash Hash
         {
             get { return _hash ?? (_hash = CalculateHash()); }
         }
@@ -214,8 +213,8 @@ namespace BitCoinSharp
         {
             var s = new StringBuilder();
             s.AppendFormat("v{0} block:", _version).AppendLine();
-            s.AppendFormat("   previous block: {0}", Utils.BytesToHexString(_prevBlockHash)).AppendLine();
-            s.AppendFormat("   merkle root: {0}", Utils.BytesToHexString(MerkleRoot)).AppendLine();
+            s.AppendFormat("   previous block: {0}", _prevBlockHash).AppendLine();
+            s.AppendFormat("   merkle root: {0}", MerkleRoot).AppendLine();
             s.AppendFormat("   time: [{0}] {1}", _time, new DateTime(_time*1000)).AppendLine();
             s.AppendFormat("   difficulty target (nBits): {0}", _difficultyTarget).AppendLine();
             s.AppendFormat("   nonce: {0}", _nonce).AppendLine();
@@ -279,7 +278,7 @@ namespace BitCoinSharp
             // field is of the right value. This requires us to have the preceding blocks.
             var target = GetDifficultyTargetAsInteger();
 
-            var h = new BigInteger(1, Hash);
+            var h = Hash.ToBigInteger();
             if (h.CompareTo(target) > 0)
             {
                 // Proof of work check failed!
@@ -301,24 +300,21 @@ namespace BitCoinSharp
         }
 
         /// <exception cref="BitCoinSharp.VerificationException" />
-        private void CheckMerkleHash()
+        private void CheckMerkleRoot()
         {
-            var tree = BuildMerkleTree();
-            var calculatedRoot = tree[tree.Count - 1];
-            if (!calculatedRoot.SequenceEqual(_merkleRoot))
+            var calculatedRoot = CalculateMerkleRoot();
+            if (!calculatedRoot.Equals(_merkleRoot))
             {
-                _log.Error("Merkle tree did not verify: ");
-                foreach (var b in tree) _log.Error(Utils.BytesToHexString(b));
-
+                _log.Error("Merkle tree did not verify");
                 throw new VerificationException("Merkle hashes do not match: " +
-                                                Utils.BytesToHexString(calculatedRoot) + " vs " + Utils.BytesToHexString(_merkleRoot));
+                                                calculatedRoot + " vs " + _merkleRoot);
             }
         }
 
-        private byte[] CalculateMerkleRoot()
+        private Sha256Hash CalculateMerkleRoot()
         {
             var tree = BuildMerkleTree();
-            return tree[tree.Count - 1];
+            return new Sha256Hash(tree[tree.Count - 1]);
         }
 
         private IList<byte[]> BuildMerkleTree()
@@ -358,7 +354,7 @@ namespace BitCoinSharp
             // Start by adding all the hashes of the transactions as leaves of the tree.
             foreach (var t in Transactions)
             {
-                tree.Add(t.Hash.Hash);
+                tree.Add(t.Hash.Bytes);
             }
             var levelOffset = 0; // Offset in the list where the currently processed level starts.
             // Step through each level, stopping when we reach the root (levelSize == 1).
@@ -418,7 +414,7 @@ namespace BitCoinSharp
             {
                 Debug.Assert(Transactions.Count > 0);
                 CheckTransactions();
-                CheckMerkleHash();
+                CheckMerkleRoot();
             }
         }
 
@@ -426,19 +422,18 @@ namespace BitCoinSharp
         {
             if (!(o is Block)) return false;
             var other = (Block) o;
-            return Hash.SequenceEqual(other.Hash);
+            return Hash.Equals(other.Hash);
         }
 
         public override int GetHashCode()
         {
-            var hash = Hash;
-            return hash != null ? hash.Aggregate(1, (current, element) => 31*current + element) : 0;
+            return Hash.GetHashCode();
         }
 
         /// <summary>
         /// Returns the merkle root in big endian form, calculating it from transactions if necessary.
         /// </summary>
-        public byte[] MerkleRoot
+        public Sha256Hash MerkleRoot
         {
             get { return _merkleRoot ?? (_merkleRoot = CalculateMerkleRoot()); }
             internal set // Exists only for unit testing.
@@ -474,7 +469,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Returns the hash of the previous block in the chain, as defined by the block header.
         /// </summary>
-        public byte[] PrevBlockHash
+        public Sha256Hash PrevBlockHash
         {
             get { return _prevBlockHash; }
             internal set

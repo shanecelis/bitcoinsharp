@@ -32,7 +32,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Hash of the transaction to which we refer.
         /// </summary>
-        internal byte[] Hash { get; private set; }
+        internal Sha256Hash Hash { get; private set; }
 
         /// <summary>
         /// Which output of that transaction we are talking about.
@@ -49,13 +49,13 @@ namespace BitCoinSharp
             Index = index;
             if (fromTx != null)
             {
-                Hash = fromTx.Hash.Hash;
+                Hash = fromTx.Hash;
                 FromTx = fromTx;
             }
             else
             {
                 // This happens when constructing the genesis block.
-                Hash = new byte[32]; // All zeros.
+                Hash = Sha256Hash.ZeroHash;
             }
         }
 
@@ -79,8 +79,7 @@ namespace BitCoinSharp
         /// <exception cref="System.IO.IOException" />
         public override void BitcoinSerializeToStream(Stream stream)
         {
-            Debug.Assert(Hash.Length == 32);
-            stream.Write(Utils.ReverseBytes(Hash));
+            stream.Write(Utils.ReverseBytes(Hash.Bytes));
             Utils.Uint32ToByteStreamLe((uint) Index, stream);
         }
 

@@ -18,7 +18,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using BitCoinSharp.IO;
 
 namespace BitCoinSharp
@@ -109,7 +108,7 @@ namespace BitCoinSharp
         /// </summary>
         public bool IsCoinBase
         {
-            get { return Outpoint.Hash.All(t => t == 0); }
+            get { return Outpoint.Hash.Equals(Sha256Hash.ZeroHash); }
         }
 
         /// <summary>
@@ -172,9 +171,8 @@ namespace BitCoinSharp
         /// <returns>The TransactionOutput or null if the transactions map doesn't contain the referenced tx.</returns>
         internal TransactionOutput GetConnectedOutput(IDictionary<Sha256Hash, Transaction> transactions)
         {
-            var h = new Sha256Hash(Outpoint.Hash);
             Transaction tx;
-            if (!transactions.TryGetValue(h, out tx))
+            if (!transactions.TryGetValue(Outpoint.Hash, out tx))
                 return null;
             var @out = tx.Outputs[Outpoint.Index];
             return @out;
@@ -189,9 +187,8 @@ namespace BitCoinSharp
         /// <returns>True if connection took place, false if the referenced transaction was not in the list.</returns>
         internal ConnectionResult Connect(IDictionary<Sha256Hash, Transaction> transactions, bool disconnect)
         {
-            var h = new Sha256Hash(Outpoint.Hash);
             Transaction tx;
-            if (!transactions.TryGetValue(h, out tx))
+            if (!transactions.TryGetValue(Outpoint.Hash, out tx))
                 return ConnectionResult.NoSuchTx;
             var @out = tx.Outputs[Outpoint.Index];
             if (!@out.IsAvailableForSpending)

@@ -25,10 +25,10 @@ namespace BitCoinSharp
     [Serializable]
     public class GetBlocksMessage : Message
     {
-        private readonly IList<byte[]> _locator;
-        private readonly byte[] _stopHash;
+        private readonly IList<Sha256Hash> _locator;
+        private readonly Sha256Hash _stopHash;
 
-        public GetBlocksMessage(NetworkParameters @params, IList<byte[]> locator, byte[] stopHash)
+        public GetBlocksMessage(NetworkParameters @params, IList<Sha256Hash> locator, Sha256Hash stopHash)
             : base(@params)
         {
             _locator = locator;
@@ -45,7 +45,7 @@ namespace BitCoinSharp
             b.Append("getblocks: ");
             foreach (var hash in _locator)
             {
-                b.Append(Utils.BytesToHexString(hash));
+                b.Append(hash.ToString());
                 b.Append(" ");
             }
             return b.ToString();
@@ -64,10 +64,10 @@ namespace BitCoinSharp
                 foreach (var hash in _locator)
                 {
                     // Have to reverse as wire format is little endian.
-                    buf.Write(Utils.ReverseBytes(hash));
+                    buf.Write(Utils.ReverseBytes(hash.Bytes));
                 }
                 // Next, a block ID to stop at.
-                buf.Write(_stopHash);
+                buf.Write(_stopHash.Bytes);
                 return buf.ToArray();
             }
         }

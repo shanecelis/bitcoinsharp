@@ -81,8 +81,8 @@ namespace BitCoinSharp.Store
                 // Set up the genesis block. When we start out fresh, it is by definition the top of the chain.
                 var genesis = @params.GenesisBlock.CloneAsHeader();
                 var storedGenesis = new StoredBlock(genesis, genesis.GetWork(), 0);
-                _chainHead = new Sha256Hash(storedGenesis.Header.Hash);
-                _stream.Write(_chainHead.Hash);
+                _chainHead = storedGenesis.Header.Hash;
+                _stream.Write(_chainHead.Bytes);
                 Put(storedGenesis);
             }
             catch (IOException e)
@@ -141,8 +141,7 @@ namespace BitCoinSharp.Store
                             }
                             else
                             {
-                                throw new BlockStoreException("Could not connect " + Utils.BytesToHexString(b.Hash) + " to "
-                                                              + Utils.BytesToHexString(b.PrevBlockHash));
+                                throw new BlockStoreException("Could not connect " + b.Hash + " to " + b.PrevBlockHash);
                             }
                         }
                         else
@@ -153,7 +152,7 @@ namespace BitCoinSharp.Store
                             s = prev.Build(b);
                         }
                         // Save in memory.
-                        _blockMap[new Sha256Hash(b.Hash)] = s;
+                        _blockMap[b.Hash] = s;
                     }
                 }
                 catch (ProtocolException e)
@@ -178,7 +177,7 @@ namespace BitCoinSharp.Store
             {
                 try
                 {
-                    var hash = new Sha256Hash(block.Header.Hash);
+                    var hash = block.Header.Hash;
                     Debug.Assert(!_blockMap.ContainsKey(hash), "Attempt to insert duplicate");
                     // Append to the end of the file. The other fields in StoredBlock will be recalculated when it's reloaded.
                     var bytes = block.Header.BitcoinSerialize();
@@ -194,12 +193,12 @@ namespace BitCoinSharp.Store
         }
 
         /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
-        public StoredBlock Get(byte[] hash)
+        public StoredBlock Get(Sha256Hash hash)
         {
             lock (this)
             {
                 StoredBlock block;
-                _blockMap.TryGetValue(new Sha256Hash(hash), out block);
+                _blockMap.TryGetValue(hash, out block);
                 return block;
             }
         }
@@ -222,11 +221,11 @@ namespace BitCoinSharp.Store
             {
                 try
                 {
-                    var hash = chainHead.Header.Hash;
-                    _chainHead = new Sha256Hash(hash);
+                    _chainHead = chainHead.Header.Hash;
                     // Write out new hash to the first 32 bytes of the file past one (first byte is version number).
                     _stream.Seek(1, SeekOrigin.Begin);
-                    _stream.Write(hash, 0, hash.Length);
+                    var bytes = _chainHead.Bytes;
+                    _stream.Write(bytes, 0, bytes.Length);
                 }
                 catch (IOException e)
                 {

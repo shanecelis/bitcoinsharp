@@ -43,7 +43,7 @@ namespace BitCoinSharp.Store
         /// parameter. If no such block is found, returns null.
         /// </summary>
         /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
-        StoredBlock Get(byte[] hash);
+        StoredBlock Get(Sha256Hash hash);
 
         /// <summary>
         /// Returns the <see cref="StoredBlock">StoredBlock</see> that represents the top of the chain of greatest total work.

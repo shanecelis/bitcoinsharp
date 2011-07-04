@@ -141,7 +141,7 @@ namespace BitCoinSharp
             return u;
         }
 
-        internal byte[] ReadHash()
+        internal Sha256Hash ReadHash()
         {
             var hash = new byte[32];
             Array.Copy(Bytes, Cursor, hash, 0, 32);
@@ -149,7 +149,7 @@ namespace BitCoinSharp
             // Not the most efficient way to do this but the clearest.
             hash = Utils.ReverseBytes(hash);
             Cursor += 32;
-            return hash;
+            return new Sha256Hash(hash);
         }
 
         internal ulong ReadUint64()

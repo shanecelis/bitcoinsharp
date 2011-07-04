@@ -145,7 +145,7 @@ namespace BitCoinSharp.Test
             var params2 = NetworkParameters.TestNet();
             var bad = new Block(params2);
             // Merkle root can be anything here, doesn't matter.
-            bad.MerkleRoot = Hex.Decode("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+            bad.MerkleRoot = new Sha256Hash(Hex.Decode("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
             // Nonce was just some number that made the hash < difficulty limit set below, it can be anything.
             bad.Nonce = 140548933;
             bad.Time = 1279242649;
@@ -186,10 +186,10 @@ namespace BitCoinSharp.Test
         private static Block GetBlock2()
         {
             var b2 = new Block(_testNet);
-            b2.MerkleRoot = Hex.Decode("addc858a17e21e68350f968ccd384d6439b64aafa6c193c8b9dd66320470838b");
+            b2.MerkleRoot = new Sha256Hash(Hex.Decode("addc858a17e21e68350f968ccd384d6439b64aafa6c193c8b9dd66320470838b"));
             b2.Nonce = 2642058077;
             b2.Time = 1296734343;
-            b2.PrevBlockHash = Hex.Decode("000000033cc282bc1fa9dcae7a533263fd7fe66490f550d80076433340831604");
+            b2.PrevBlockHash = new Sha256Hash(Hex.Decode("000000033cc282bc1fa9dcae7a533263fd7fe66490f550d80076433340831604"));
             Assert.AreEqual("000000037b21cac5d30fc6fda2581cf7b2612908aed2abbcc429c45b0557a15f", b2.HashAsString);
             b2.Verify();
             return b2;
@@ -198,10 +198,10 @@ namespace BitCoinSharp.Test
         private static Block GetBlock1()
         {
             var b1 = new Block(_testNet);
-            b1.MerkleRoot = Hex.Decode("0e8e58ecdacaa7b3c6304a35ae4ffff964816d2b80b62b58558866ce4e648c10");
+            b1.MerkleRoot = new Sha256Hash(Hex.Decode("0e8e58ecdacaa7b3c6304a35ae4ffff964816d2b80b62b58558866ce4e648c10"));
             b1.Nonce = 236038445;
             b1.Time = 1296734340;
-            b1.PrevBlockHash = Hex.Decode("00000007199508e34a9ff81e6ec0c477a4cccff2a4767a8eee39c11db367b008");
+            b1.PrevBlockHash = new Sha256Hash(Hex.Decode("00000007199508e34a9ff81e6ec0c477a4cccff2a4767a8eee39c11db367b008"));
             Assert.AreEqual("000000033cc282bc1fa9dcae7a533263fd7fe66490f550d80076433340831604", b1.HashAsString);
             b1.Verify();
             return b1;

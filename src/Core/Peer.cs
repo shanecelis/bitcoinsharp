@@ -137,7 +137,7 @@ namespace BitCoinSharp
                     for (var i = 0; i < _pendingGetBlockFutures.Count; i++)
                     {
                         var f = _pendingGetBlockFutures[i];
-                        if (f.Item.Hash.SequenceEqual(m.Hash))
+                        if (f.Item.Hash.Equals(m.Hash))
                         {
                             // Yes, it was. So pass it through the future.
                             f.SetResult(m);
@@ -198,7 +198,7 @@ namespace BitCoinSharp
             var topHash = (topBlock != null ? topBlock.Hash : null);
             var items = inv.Items;
             if (items.Count == 1 && items[0].Type == InventoryItem.ItemType.Block && topHash != null &&
-                items[0].Hash.SequenceEqual(topHash))
+                items[0].Hash.Equals(topHash))
             {
                 // An inv with a single hash containing our most recent unconnected block is a special inv,
                 // it's kind of like a tickle from the peer telling us that it's time to download more blocks to catch up to
@@ -231,7 +231,7 @@ namespace BitCoinSharp
         /// </summary>
         /// <param name="blockHash">Hash of the block you were requesting.</param>
         /// <exception cref="System.IO.IOException" />
-        public GetDataFuture<Block> GetBlock(byte[] blockHash)
+        public GetDataFuture<Block> GetBlock(Sha256Hash blockHash)
         {
             var getdata = new InventoryMessage(_params);
             var inventoryItem = new InventoryItem(InventoryItem.ItemType.Block, blockHash);
@@ -326,7 +326,7 @@ namespace BitCoinSharp
         }
 
         /// <exception cref="System.IO.IOException" />
-        private void BlockChainDownload(byte[] toHash)
+        private void BlockChainDownload(Sha256Hash toHash)
         {
             // This may run in ANY thread.
 
@@ -355,10 +355,10 @@ namespace BitCoinSharp
             //
             // So this is a complicated process but it has the advantage that we can download a chain of enormous length
             // in a relatively stateless manner and with constant/bounded memory usage.
-            _log.InfoFormat("blockChainDownload({0})", Utils.BytesToHexString(toHash));
+            _log.InfoFormat("blockChainDownload({0})", toHash);
 
             // TODO: Block locators should be abstracted out rather than special cased here.
-            var blockLocator = new LinkedList<byte[]>();
+            var blockLocator = new LinkedList<Sha256Hash>();
             // We don't do the exponential thinning here, so if we get onto a fork of the chain we will end up
             // re-downloading the whole thing again.
             blockLocator.AddLast(_params.GenesisBlock.Hash);
@@ -392,7 +392,7 @@ namespace BitCoinSharp
             if (blocksToGet > 0)
             {
                 // When we just want as many blocks as possible, we can set the target hash to zero.
-                BlockChainDownload(new byte[32]);
+                BlockChainDownload(Sha256Hash.ZeroHash);
             }
             return _chainCompletionLatch;
         }

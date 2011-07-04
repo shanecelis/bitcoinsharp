@@ -26,9 +26,9 @@ namespace BitCoinSharp
         }
 
         public ItemType Type { get; private set; }
-        public byte[] Hash { get; private set; }
+        public Sha256Hash Hash { get; private set; }
 
-        public InventoryItem(ItemType type, byte[] hash)
+        public InventoryItem(ItemType type, Sha256Hash hash)
         {
             Type = type;
             Hash = hash;
@@ -36,7 +36,7 @@ namespace BitCoinSharp
 
         public override string ToString()
         {
-            return Type + ": " + Utils.BytesToHexString(Hash);
+            return Type + ": " + Hash;
         }
     }
 }

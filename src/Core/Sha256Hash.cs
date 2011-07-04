@@ -17,8 +17,8 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-
-// TODO: Switch all code/interfaces to using this class.
+using Org.BouncyCastle.Math;
+using Org.BouncyCastle.Utilities.Encoders;
 
 namespace BitCoinSharp
 {
@@ -29,12 +29,26 @@ namespace BitCoinSharp
     [Serializable]
     public class Sha256Hash
     {
-        public byte[] Hash { get; private set; }
+        private readonly byte[] _bytes;
 
-        public Sha256Hash(byte[] hash)
+        public static Sha256Hash ZeroHash = new Sha256Hash(new byte[32]);
+
+        /// <summary>
+        /// Creates a Sha256Hash by wrapping the given byte array. It must be 32 bytes long.
+        /// </summary>
+        public Sha256Hash(byte[] bytes)
         {
-            Debug.Assert(hash.Length == 32);
-            Hash = hash;
+            Debug.Assert(bytes.Length == 32);
+            _bytes = bytes;
+        }
+
+        /// <summary>
+        /// Creates a Sha256Hash by decoding the given hex string. It must be 64 characters long.
+        /// </summary>
+        public Sha256Hash(string @string)
+        {
+            Debug.Assert(@string.Length == 64);
+            _bytes = Hex.Decode(@string);
         }
 
         /// <summary>
@@ -43,22 +57,35 @@ namespace BitCoinSharp
         public override bool Equals(object other)
         {
             if (!(other is Sha256Hash)) return false;
-            return Hash.SequenceEqual(((Sha256Hash) other).Hash);
+            return _bytes.SequenceEqual(((Sha256Hash) other)._bytes);
         }
 
         /// <summary>
         /// Hash code of the byte array as calculated by <see cref="object.GetHashCode()">object.GetHashCode()</see>. Note the difference between a SHA256
-        /// secure hash and the type of quick/dirty hash used by the Java hashCode method which is designed for use in
-        /// hash tables.
+        /// secure bytes and the type of quick/dirty bytes used by the Java hashCode method which is designed for use in
+        /// bytes tables.
         /// </summary>
         public override int GetHashCode()
         {
-            return Hash != null ? Hash.Aggregate(1, (current, element) => 31*current + element) : 0;
+            return _bytes != null ? _bytes.Aggregate(1, (current, element) => 31*current + element) : 0;
         }
 
         public override string ToString()
         {
-            return Utils.BytesToHexString(Hash);
+            return Utils.BytesToHexString(_bytes);
+        }
+
+        /// <summary>
+        /// Returns the bytes interpreted as a positive integer.
+        /// </summary>
+        public BigInteger ToBigInteger()
+        {
+            return new BigInteger(1, _bytes);
+        }
+
+        public byte[] Bytes
+        {
+            get { return _bytes; }
         }
     }
 }

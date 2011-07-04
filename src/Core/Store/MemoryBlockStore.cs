@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using BitCoinSharp.IO;
 
 namespace BitCoinSharp.Store
 {
@@ -27,18 +23,12 @@ namespace BitCoinSharp.Store
     /// </summary>
     public class MemoryBlockStore : IBlockStore
     {
-        // We use a ByteBuffer to hold hashes here because the Java array equals()/hashcode() methods do not operate on
-        // the contents of the array but just inherit the default Object behavior. ByteBuffer provides the functionality
-        // needed to act as a key in a map.
-        //
-        // The StoredBlocks are also stored as serialized objects to ensure we don't have assumptions that would make
-        // things harder for disk based implementations.
-        private IDictionary<ByteBuffer, byte[]> _blockMap;
+        private readonly IDictionary<Sha256Hash, StoredBlock> _blockMap;
         private StoredBlock _chainHead;
 
         public MemoryBlockStore(NetworkParameters @params)
         {
-            _blockMap = new Dictionary<ByteBuffer, byte[]>();
+            _blockMap = new Dictionary<Sha256Hash, StoredBlock>();
             // Insert the genesis block.
             var genesisHeader = @params.GenesisBlock.CloneAsHeader();
             var storedGenesis = new StoredBlock(genesisHeader, genesisHeader.GetWork(), 0);
@@ -52,43 +42,18 @@ namespace BitCoinSharp.Store
             lock (this)
             {
                 var hash = block.Header.Hash;
-                using (var bos = new MemoryStream())
-                {
-                    var oos = new BinaryFormatter();
-                    oos.Serialize(bos, block);
-                    _blockMap[ByteBuffer.Wrap(hash)] = bos.ToArray();
-                }
+                _blockMap[hash] = block;
             }
         }
 
         /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
-        public StoredBlock Get(byte[] hash)
+        public StoredBlock Get(Sha256Hash hash)
         {
             lock (this)
             {
-                try
-                {
-                    byte[] serializedBlock;
-                    using (var key = ByteBuffer.Wrap(hash))
-                    {
-                        if (!_blockMap.TryGetValue(key, out serializedBlock))
-                            return null;
-                    }
-                    using (var stream = new MemoryStream(serializedBlock))
-                    {
-                        var ois = new BinaryFormatter();
-                        var storedBlock = (StoredBlock) ois.Deserialize(stream);
-                        return storedBlock;
-                    }
-                }
-                catch (IOException e)
-                {
-                    throw new BlockStoreException(e);
-                }
-                catch (TypeLoadException e)
-                {
-                    throw new BlockStoreException(e);
-                }
+                StoredBlock block;
+                _blockMap.TryGetValue(hash, out block);
+                return block;
             }
         }
 
@@ -107,14 +72,6 @@ namespace BitCoinSharp.Store
 
         public void Dispose()
         {
-            if (_blockMap != null)
-            {
-                foreach (var key in _blockMap.Keys)
-                {
-                    key.Dispose();
-                }
-                _blockMap = null;
-            }
         }
 
         #endregion
