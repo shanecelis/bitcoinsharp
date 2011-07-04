@@ -15,9 +15,10 @@
  */
 
 using System.Linq;
+using BitCoinSharp.Discovery;
 using NUnit.Framework;
 
-namespace BitCoinSharp.Test
+namespace BitCoinSharp.Test.Discovery
 {
     [TestFixture]
     public class IrcDiscoveryTest

@@ -175,7 +175,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Returns a testnet params modified to allow any difficulty target.
         /// </summary>
-        internal static NetworkParameters UnitTests()
+        public static NetworkParameters UnitTests()
         {
             var n = new NetworkParameters();
             n = CreateTestNet(n);

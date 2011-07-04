@@ -16,6 +16,7 @@
 
 using System;
 using BitCoinSharp.Common;
+using BitCoinSharp.Store;
 using NUnit.Framework;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Utilities.Encoders;

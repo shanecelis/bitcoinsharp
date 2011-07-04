@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using BitCoinSharp.Store;
 using log4net;
 using Org.BouncyCastle.Math;
 
@@ -106,7 +107,7 @@ namespace BitCoinSharp
         private int _statsLastTime = Environment.TickCount;
         private long _statsBlocksAdded;
 
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         /// <exception cref="BitCoinSharp.VerificationException" />
         /// <exception cref="BitCoinSharp.ScriptException" />
         private bool Add(Block block, bool tryConnecting)
@@ -170,7 +171,7 @@ namespace BitCoinSharp
             }
         }
 
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         /// <exception cref="BitCoinSharp.VerificationException" />
         private void ConnectBlock(StoredBlock newStoredBlock, StoredBlock storedPrev, IEnumerable<Transaction> newTransactions)
         {
@@ -216,7 +217,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Called as part of connecting a block when the new block results in a different chain having higher total work.
         /// </summary>
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         /// <exception cref="BitCoinSharp.VerificationException" />
         private void HandleNewBestChain(StoredBlock newChainHead)
         {
@@ -243,7 +244,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Returns the set of contiguous blocks between 'higher' and 'lower'. Higher is included, lower is not.
         /// </summary>
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         private IList<StoredBlock> GetPartialChain(StoredBlock higher, StoredBlock lower)
         {
             Debug.Assert(higher.Height > lower.Height);
@@ -263,7 +264,7 @@ namespace BitCoinSharp
         /// Locates the point in the chain at which newStoredBlock and chainHead diverge. Returns null if no split point was
         /// found (ie they are part of the same chain).
         /// </summary>
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         private StoredBlock FindSplit(StoredBlock newChainHead, StoredBlock chainHead)
         {
             var currentChainCursor = chainHead;
@@ -320,7 +321,7 @@ namespace BitCoinSharp
         /// </summary>
         /// <exception cref="BitCoinSharp.VerificationException" />
         /// <exception cref="BitCoinSharp.ScriptException" />
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         private void TryConnectingUnconnected()
         {
             // For each block in our unconnected list, try and fit it onto the head of the chain. If we succeed remove it
@@ -354,7 +355,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Throws an exception if the blocks difficulty is not correct.
         /// </summary>
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         /// <exception cref="BitCoinSharp.VerificationException" />
         private void CheckDifficultyTransitions(StoredBlock storedPrev, StoredBlock storedNext)
         {

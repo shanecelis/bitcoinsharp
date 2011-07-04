@@ -21,7 +21,7 @@ using System.Net;
 using System.Net.Sockets;
 using log4net;
 
-namespace BitCoinSharp
+namespace BitCoinSharp.Discovery
 {
     /// <summary>
     /// IrcDiscovery provides a way to find network peers by joining a pre-agreed rendevouz point on the LFnet IRC network.
@@ -71,7 +71,7 @@ namespace BitCoinSharp
         /// Returns a list of peers that were found in the IRC channel. Note that just because a peer appears in the list
         /// does not mean it is accepting connections.
         /// </summary>
-        /// <exception cref="BitCoinSharp.PeerDiscoveryException" />
+        /// <exception cref="BitCoinSharp.Discovery.PeerDiscoveryException" />
         public IEnumerable<IPEndPoint> GetPeers()
         {
             var addresses = new List<IPEndPoint>();

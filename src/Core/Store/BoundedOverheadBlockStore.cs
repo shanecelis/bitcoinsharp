@@ -22,7 +22,7 @@ using BitCoinSharp.IO;
 using log4net;
 using Org.BouncyCastle.Math;
 
-namespace BitCoinSharp
+namespace BitCoinSharp.Store
 {
     /// <summary>
     /// Stores the block chain to disk.
@@ -146,7 +146,7 @@ namespace BitCoinSharp
             }
         }
 
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         public BoundedOverheadBlockStore(NetworkParameters @params, FileInfo file)
         {
             _params = @params;
@@ -162,7 +162,7 @@ namespace BitCoinSharp
             }
         }
 
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         private void CreateNewStore(NetworkParameters @params, FileInfo file)
         {
             // Create a new block store if the file wasn't found or anything went wrong whilst reading.
@@ -199,7 +199,7 @@ namespace BitCoinSharp
         }
 
         /// <exception cref="System.IO.IOException" />
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         private void Load(FileInfo file)
         {
             _log.InfoFormat("Reading block store from {0}", file);
@@ -230,7 +230,7 @@ namespace BitCoinSharp
         // TODO: This is ugly, fix!
         private readonly Record _dummyRecord = new Record();
 
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         public void Put(StoredBlock block)
         {
             lock (this)
@@ -253,7 +253,7 @@ namespace BitCoinSharp
             }
         }
 
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         public StoredBlock Get(byte[] hashBytes)
         {
             lock (this)
@@ -306,7 +306,7 @@ namespace BitCoinSharp
 
         private ByteBuffer _buf = ByteBuffer.Allocate(Record.Size);
 
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         /// <exception cref="System.IO.IOException" />
         /// <exception cref="BitCoinSharp.ProtocolException" />
         private Record GetRecord(Sha256Hash hash)
@@ -343,7 +343,7 @@ namespace BitCoinSharp
             return null;
         }
 
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         public StoredBlock GetChainHead()
         {
             lock (this)
@@ -352,7 +352,7 @@ namespace BitCoinSharp
             }
         }
 
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         public void SetChainHead(StoredBlock chainHead)
         {
             lock (this)

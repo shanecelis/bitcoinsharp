@@ -16,7 +16,7 @@
 
 using System;
 
-namespace BitCoinSharp
+namespace BitCoinSharp.Store
 {
     /// <summary>
     /// An implementor of BlockStore saves StoredBlock objects to disk. Different implementations store them in
@@ -35,26 +35,26 @@ namespace BitCoinSharp
         /// StoredBlock directly. Can throw if there is a problem with the underlying storage layer such as running out of
         /// disk space.
         /// </summary>
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         void Put(StoredBlock block);
 
         /// <summary>
         /// Returns the StoredBlock given a hash. The returned values block.getHash() method will be equal to the
         /// parameter. If no such block is found, returns null.
         /// </summary>
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         StoredBlock Get(byte[] hash);
 
         /// <summary>
         /// Returns the <see cref="StoredBlock">StoredBlock</see> that represents the top of the chain of greatest total work.
         /// </summary>
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         StoredBlock GetChainHead();
 
         /// <summary>
         /// Sets the <see cref="StoredBlock">StoredBlock</see> that represents the top of the chain of greatest total work.
         /// </summary>
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         void SetChainHead(StoredBlock chainHead);
     }
 }

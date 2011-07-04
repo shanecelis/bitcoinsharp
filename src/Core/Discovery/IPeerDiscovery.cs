@@ -17,7 +17,7 @@
 using System.Collections.Generic;
 using System.Net;
 
-namespace BitCoinSharp
+namespace BitCoinSharp.Discovery
 {
     // TODO: Flesh out this interface a lot more.
 
@@ -30,7 +30,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Returns an array of addresses. This method may block.
         /// </summary>
-        /// <exception cref="BitCoinSharp.PeerDiscoveryException" />
+        /// <exception cref="BitCoinSharp.Discovery.PeerDiscoveryException" />
         IEnumerable<IPEndPoint> GetPeers();
     }
 }

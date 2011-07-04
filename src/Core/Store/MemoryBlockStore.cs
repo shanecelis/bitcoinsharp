@@ -20,7 +20,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using BitCoinSharp.IO;
 
-namespace BitCoinSharp
+namespace BitCoinSharp.Store
 {
     /// <summary>
     /// Keeps <see cref="StoredBlock">StoredBlock</see>s in memory. Used primarily for unit testing.
@@ -46,7 +46,7 @@ namespace BitCoinSharp
             SetChainHead(storedGenesis);
         }
 
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         public void Put(StoredBlock block)
         {
             lock (this)
@@ -61,7 +61,7 @@ namespace BitCoinSharp
             }
         }
 
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         public StoredBlock Get(byte[] hash)
         {
             lock (this)
@@ -97,7 +97,7 @@ namespace BitCoinSharp
             return _chainHead;
         }
 
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         public void SetChainHead(StoredBlock chainHead)
         {
             _chainHead = chainHead;

@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Net;
 using log4net;
 
-namespace BitCoinSharp
+namespace BitCoinSharp.Discovery
 {
     /// <summary>
     /// Supports peer discovery through DNS.
@@ -58,7 +58,7 @@ namespace BitCoinSharp
             _netParams = netParams;
         }
 
-        /// <exception cref="BitCoinSharp.PeerDiscoveryException" />
+        /// <exception cref="BitCoinSharp.Discovery.PeerDiscoveryException" />
         public IEnumerable<IPEndPoint> GetPeers()
         {
             ICollection<IPEndPoint> addresses = new HashSet<IPEndPoint>();

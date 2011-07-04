@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using BitCoinSharp.Store;
 using NUnit.Framework;
 
 namespace BitCoinSharp.Test

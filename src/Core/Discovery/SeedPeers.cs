@@ -17,7 +17,7 @@
 using System.Collections.Generic;
 using System.Net;
 
-namespace BitCoinSharp
+namespace BitCoinSharp.Discovery
 {
     /// <summary>
     /// SeedPeers stores a pre-determined list of Bitcoin node addresses. These nodes are selected based on being
@@ -55,7 +55,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Returns an array containing all the Bitcoin nodes within the list.
         /// </summary>
-        /// <exception cref="BitCoinSharp.PeerDiscoveryException" />
+        /// <exception cref="BitCoinSharp.Discovery.PeerDiscoveryException" />
         public IEnumerable<IPEndPoint> GetPeers()
         {
             return AllPeers();

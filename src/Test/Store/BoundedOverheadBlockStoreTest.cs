@@ -16,12 +16,13 @@
 
 using System;
 using System.IO;
+using BitCoinSharp.Store;
 using NUnit.Framework;
 
-namespace BitCoinSharp.Test
+namespace BitCoinSharp.Test.Store
 {
     [TestFixture]
-    public class DiskBlockStoreTest
+    public class BoundedOverheadBlockStoreTest
     {
         [Test]
         public void TestStorage()
@@ -33,18 +34,19 @@ namespace BitCoinSharp.Test
                 var @params = NetworkParameters.UnitTests();
                 var to = new EcKey().ToAddress(@params);
                 StoredBlock b1;
-                using (var store = new DiskBlockStore(@params, temp))
+                using (var store = new BoundedOverheadBlockStore(@params, temp))
                 {
                     // Check the first block in a new store is the genesis block.
                     var genesis = store.GetChainHead();
                     Assert.AreEqual(@params.GenesisBlock, genesis.Header);
+
                     // Build a new block.
                     b1 = genesis.Build(genesis.Header.CreateNextBlock(to).CloneAsHeader());
                     store.Put(b1);
                     store.SetChainHead(b1);
                 }
                 // Check we can get it back out again if we rebuild the store object.
-                using (var store = new DiskBlockStore(@params, temp))
+                using (var store = new BoundedOverheadBlockStore(@params, temp))
                 {
                     var b2 = store.Get(b1.Header.Hash);
                     Assert.AreEqual(b1, b2);

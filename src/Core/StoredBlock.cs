@@ -15,6 +15,7 @@
  */
 
 using System;
+using BitCoinSharp.Store;
 using Org.BouncyCastle.Math;
 
 namespace BitCoinSharp
@@ -108,7 +109,7 @@ namespace BitCoinSharp
         /// <tt>store.get(this.getHeader().getPrevBlockHash())</tt>.
         /// </summary>
         /// <returns>The previous block in the chain or null if it was not found in the store.</returns>
-        /// <exception cref="BitCoinSharp.BlockStoreException" />
+        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         public StoredBlock GetPrev(IBlockStore store)
         {
             return store.Get(Header.PrevBlockHash);

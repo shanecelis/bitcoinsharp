@@ -17,6 +17,7 @@
 using System;
 using System.Net;
 using System.Threading;
+using BitCoinSharp.Store;
 
 namespace BitCoinSharp.Examples
 {

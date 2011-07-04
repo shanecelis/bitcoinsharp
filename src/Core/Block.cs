@@ -565,7 +565,8 @@ namespace BitCoinSharp
             return b;
         }
 
-        internal Block CreateNextBlock(Address to)
+        // Visible for testing.
+        public Block CreateNextBlock(Address to)
         {
             return CreateNextBlock(to, (uint) UnixTime.ToUnixTime(DateTime.UtcNow));
         }
