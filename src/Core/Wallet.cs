@@ -970,7 +970,7 @@ namespace BitCoinSharp
                 //    dead instead of pending.
                 //
                 // This only occurs when we are double spending our own coins.
-                foreach (var tx in _dead.Values)
+                foreach (var tx in _dead.Values.ToList())
                 {
                     ReprocessTxAfterReorg(pool, tx);
                 }
