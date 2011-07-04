@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-using System.Linq;
 using BitCoinSharp.Discovery;
 using NUnit.Framework;
 
@@ -37,12 +36,11 @@ namespace BitCoinSharp.Test.Discovery
             Assert.AreEqual(2, addresses.Count, "Too many addresses.");
 
             var ips = new[] {"69.4.98.82:8333", "74.92.222.129:8333"};
-            var decoded = addresses.ToArray();
 
-            for (var i = 0; i < decoded.Length; i++)
+            for (var i = 0; i < addresses.Count; i++)
             {
-                var formattedIp = decoded[0].Address + ":" + decoded[i].Port;
-                Assert.AreEqual(ips[0], formattedIp, "IPs decoded improperly");
+                var formattedIp = addresses[i].Address + ":" + addresses[i].Port;
+                Assert.AreEqual(ips[i], formattedIp, "IPs decoded improperly");
             }
         }
     }
