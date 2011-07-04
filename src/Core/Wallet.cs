@@ -1027,6 +1027,7 @@ namespace BitCoinSharp
                     var doubleSpent = input.GetConnectedOutput(pool);
                     var replacement = doubleSpent.SpentBy.ParentTransaction;
                     _dead[tx.Hash] = tx;
+                    Pending.Remove(tx.Hash);
                     // Inform the event listeners of the newly dead tx.
                     if (DeadTransaction != null)
                     {
@@ -1050,6 +1051,7 @@ namespace BitCoinSharp
                 // All inputs are either valid for spending or don't come from us. Miners are trying to re-include it.
                 _log.Info("   ->pending");
                 Pending[tx.Hash] = tx;
+                _dead.Remove(tx.Hash);
             }
         }
 
