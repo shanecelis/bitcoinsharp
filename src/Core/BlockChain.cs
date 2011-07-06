@@ -65,7 +65,7 @@ namespace BitCoinSharp
         private StoredBlock _chainHead;
 
         private readonly NetworkParameters _params;
-        private readonly Wallet _wallet;
+        private readonly IList<Wallet> _wallets;
 
         // Holds blocks that we have received but can't plug into the chain yet, eg because they were created whilst we
         // were downloading the block chain.
@@ -80,12 +80,34 @@ namespace BitCoinSharp
         /// <see cref="BoundedOverheadBlockStore">BoundedOverheadBlockStore</see> if you'd like to ensure fast start-up the next time you run the program.
         /// </remarks>
         public BlockChain(NetworkParameters @params, Wallet wallet, IBlockStore blockStore)
+            : this(@params, new List<Wallet>(), blockStore)
+        {
+            AddWallet(wallet);
+        }
+
+        /// <summary>
+        /// Constructs a BlockChain connected to the given list of wallets and a store.
+        /// </summary>
+        public BlockChain(NetworkParameters @params, IList<Wallet> wallets, IBlockStore blockStore)
         {
             _blockStore = blockStore;
             _chainHead = blockStore.GetChainHead();
             _log.InfoFormat("chain head is:{0}{1}", Environment.NewLine, _chainHead.Header);
             _params = @params;
-            _wallet = wallet;
+            _wallets = new List<Wallet>(wallets);
+        }
+
+        /// <summary>
+        /// Add a wallet to the BlockChain. Note that the wallet will be unaffected by any blocks received while it
+        /// was not part of this BlockChain. This method is useful if the wallet has just been created, and its keys
+        /// have never been in use, or if the wallet has been loaded along with the BlockChain
+        /// </summary>
+        public void AddWallet(Wallet wallet)
+        {
+            lock (this)
+            {
+                _wallets.Add(wallet);
+            }
         }
 
         /// <summary>
@@ -236,7 +258,10 @@ namespace BitCoinSharp
             // Now inform the wallet. This is necessary so the set of currently active transactions (that we can spend)
             // can be updated to take into account the re-organize. We might also have received new coins we didn't have
             // before and our previous spends might have been undone.
-            _wallet.Reorganize(oldBlocks, newBlocks);
+            foreach (var wallet in _wallets)
+            {
+                wallet.Reorganize(oldBlocks, newBlocks);
+            }
             // Update the pointer to the best known block.
             ChainHead = newChainHead;
         }
@@ -422,34 +447,37 @@ namespace BitCoinSharp
         /// <exception cref="BitCoinSharp.VerificationException" />
         private void ScanTransaction(StoredBlock block, Transaction tx, NewBlockType blockType)
         {
-            var shouldReceive = false;
-            foreach (var output in tx.Outputs)
+            foreach (var wallet in _wallets)
             {
-                // TODO: Handle more types of outputs, not just regular to address outputs.
-                if (output.ScriptPubKey.IsSentToIp) return;
-                // This is not thread safe as a key could be removed between the call to isMine and receive.
-                if (output.IsMine(_wallet))
+                var shouldReceive = false;
+                foreach (var output in tx.Outputs)
                 {
-                    shouldReceive = true;
-                }
-            }
-
-            // Coinbase transactions don't have anything useful in their inputs (as they create coins out of thin air).
-            if (!tx.IsCoinBase)
-            {
-                foreach (var i in tx.Inputs)
-                {
-                    var pubkey = i.ScriptSig.PubKey;
-                    // This is not thread safe as a key could be removed between the call to isPubKeyMine and receive.
-                    if (_wallet.IsPubKeyMine(pubkey))
+                    // TODO: Handle more types of outputs, not just regular to address outputs.
+                    if (output.ScriptPubKey.IsSentToIp) return;
+                    // This is not thread safe as a key could be removed between the call to isMine and receive.
+                    if (output.IsMine(wallet))
                     {
                         shouldReceive = true;
                     }
                 }
-            }
 
-            if (shouldReceive)
-                _wallet.Receive(tx, block, blockType);
+                // Coinbase transactions don't have anything useful in their inputs (as they create coins out of thin air).
+                if (!tx.IsCoinBase)
+                {
+                    foreach (var i in tx.Inputs)
+                    {
+                        var pubkey = i.ScriptSig.PubKey;
+                        // This is not thread safe as a key could be removed between the call to isPubKeyMine and receive.
+                        if (wallet.IsPubKeyMine(pubkey))
+                        {
+                            shouldReceive = true;
+                        }
+                    }
+                }
+
+                if (shouldReceive)
+                    wallet.Receive(tx, block, blockType);
+            }
         }
 
         /// <summary>

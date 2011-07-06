@@ -379,7 +379,10 @@ namespace BitCoinSharp
                     //   A  -> spent by B [pending]
                     //     \-> spent by C [chain]
                     var doubleSpent = input.Outpoint.FromTx; // == A
-                    var connected = doubleSpent.Outputs[input.Outpoint.Index].SpentBy.ParentTransaction;
+                    var index = input.Outpoint.Index;
+                    var output = doubleSpent.Outputs[index];
+                    var spentBy = output.SpentBy;
+                    var connected = spentBy.ParentTransaction;
                     if (Pending.Remove(connected.Hash))
                     {
                         _log.InfoFormat("Saw double spend from chain override pending tx {0}", connected.HashAsString);
