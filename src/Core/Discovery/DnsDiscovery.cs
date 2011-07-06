@@ -36,7 +36,14 @@ namespace BitCoinSharp.Discovery
 
         private readonly string[] _hostNames;
         private readonly NetworkParameters _netParams;
-        private static readonly string[] _defaultHosts = new[] {"bitseed.xf2.org", "bitseed.bitcoin.org.uk"};
+
+        public static readonly string[] DefaultHosts =
+            new[]
+            {
+                "dnsseed.bluematt.me", // Auto generated
+                "bitseed.xf2.org", // Static
+                "bitseed.bitcoin.org.uk" // Static
+            };
 
         /// <summary>
         /// Supports finding peers through DNS A records. Community run DNS entry points will be used.
@@ -110,7 +117,7 @@ namespace BitCoinSharp.Discovery
         /// </summary>
         public static string[] DefaultHostNames
         {
-            get { return _defaultHosts; }
+            get { return DefaultHosts; }
         }
     }
 }

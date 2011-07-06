@@ -81,7 +81,7 @@ namespace BitCoinSharp.Test
         }
 
         [Test]
-        public void TestBasicSpending()
+        public void BasicSpending()
         {
             // We'll set up a wallet that receives a coin, then sends a coin of lesser value and keeps the change.
             var v1 = Utils.ToNanoCoins(1, 0);
@@ -102,7 +102,7 @@ namespace BitCoinSharp.Test
         }
 
         [Test]
-        public void TestSideChain()
+        public void SideChain()
         {
             // The wallet receives a coin on the main chain, then on a side chain. Only main chain counts towards balance.
             var v1 = Utils.ToNanoCoins(1, 0);
@@ -119,7 +119,7 @@ namespace BitCoinSharp.Test
         }
 
         [Test]
-        public void TestListener()
+        public void Listener()
         {
             var fakeTx = CreateFakeTx(Utils.ToNanoCoins(1, 0), _myAddress);
             var didRun = false;
@@ -137,7 +137,7 @@ namespace BitCoinSharp.Test
         }
 
         [Test]
-        public void TestBalance()
+        public void Balance()
         {
             // Receive 5 coins then half a coin.
             var v1 = Utils.ToNanoCoins(5, 0);
@@ -176,7 +176,7 @@ namespace BitCoinSharp.Test
         // with the same key twice gives two different outputs. So we cannot prove bit-for-bit compatibility in this test
         // suite.
         [Test]
-        public void TestBlockChainCatchup()
+        public void BlockChainCatchup()
         {
             var tx1 = CreateFakeTx(Utils.ToNanoCoins(1, 0), _myAddress);
             var b1 = CreateFakeBlock(tx1).StoredBlock;
@@ -199,7 +199,7 @@ namespace BitCoinSharp.Test
         }
 
         [Test]
-        public void TestBalances()
+        public void Balances()
         {
             var nanos = Utils.ToNanoCoins(1, 0);
             var tx1 = CreateFakeTx(nanos, _myAddress);
@@ -213,7 +213,7 @@ namespace BitCoinSharp.Test
         }
 
         [Test]
-        public void TestFinneyAttack()
+        public void FinneyAttack()
         {
             // A Finney attack is where a miner includes a transaction spending coins to themselves but does not
             // broadcast it. When they find a solved block, they hold it back temporarily whilst they buy something with

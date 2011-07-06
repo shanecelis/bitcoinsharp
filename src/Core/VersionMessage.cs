@@ -85,7 +85,7 @@ namespace BitCoinSharp
             // is kind of tricky anyway, so we just put nonsense here for now.
             MyAddr = new PeerAddress(IPAddress.Loopback, @params.Port, 0);
             TheirAddr = new PeerAddress(IPAddress.Loopback, @params.Port, 0);
-            SubVer = "BitCoinSharp 0.1";
+            SubVer = "BitCoinSharp 0.3-SNAPSHOT";
             BestHeight = newBestHeight;
         }
 
