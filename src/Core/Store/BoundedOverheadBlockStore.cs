@@ -240,7 +240,7 @@ namespace BitCoinSharp.Store
                     // Append to the end of the file.
                     _dummyRecord.Write(_channel, block);
                     _blockCache[hash] = block;
-                    while (_blockCache.Count > 100)
+                    while (_blockCache.Count > 2050)
                     {
                         _blockCache.RemoveAt(0);
                     }
@@ -275,7 +275,7 @@ namespace BitCoinSharp.Store
                     if (fromDisk == null)
                     {
                         _notFoundCache[hash] = _notFoundMarker;
-                        while (_notFoundCache.Count > 100)
+                        while (_notFoundCache.Count > 2050)
                         {
                             _notFoundCache.RemoveAt(0);
                         }
@@ -284,7 +284,7 @@ namespace BitCoinSharp.Store
                     {
                         block = fromDisk.ToStoredBlock(_params);
                         _blockCache[hash] = block;
-                        while (_blockCache.Count > 100)
+                        while (_blockCache.Count > 2050)
                         {
                             _blockCache.RemoveAt(0);
                         }
