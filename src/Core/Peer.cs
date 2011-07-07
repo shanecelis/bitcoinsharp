@@ -233,7 +233,7 @@ namespace BitCoinSharp
         /// <exception cref="System.IO.IOException" />
         public GetDataFuture<Block> GetBlock(Sha256Hash blockHash)
         {
-            var getdata = new InventoryMessage(_params);
+            var getdata = new GetDataMessage(_params);
             var inventoryItem = new InventoryItem(InventoryItem.ItemType.Block, blockHash);
             getdata.AddItem(inventoryItem);
             var future = new GetDataFuture<Block>(this, inventoryItem);

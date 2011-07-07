@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DumpWallet.cs" />
+    <Compile Include="FetchBlock.cs" />
     <Compile Include="PingService.cs" />
     <Compile Include="PrintPeers.cs" />
     <Compile Include="PrivateKeys.cs" />

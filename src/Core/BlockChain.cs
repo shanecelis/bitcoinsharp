@@ -82,13 +82,23 @@ namespace BitCoinSharp
         public BlockChain(NetworkParameters @params, Wallet wallet, IBlockStore blockStore)
             : this(@params, new List<Wallet>(), blockStore)
         {
-            AddWallet(wallet);
+            if (wallet != null)
+                AddWallet(wallet);
+        }
+
+        /// <summary>
+        /// Constructs a BlockChain that has no wallet at all. This is helpful when you don't actually care about sending
+        /// and receiving coins but rather, just want to explore the network data structures.
+        /// </summary>
+        public BlockChain(NetworkParameters @params, IBlockStore blockStore)
+            : this(@params, new List<Wallet>(), blockStore)
+        {
         }
 
         /// <summary>
         /// Constructs a BlockChain connected to the given list of wallets and a store.
         /// </summary>
-        public BlockChain(NetworkParameters @params, IList<Wallet> wallets, IBlockStore blockStore)
+        public BlockChain(NetworkParameters @params, IEnumerable<Wallet> wallets, IBlockStore blockStore)
         {
             _blockStore = blockStore;
             _chainHead = blockStore.GetChainHead();

@@ -17,6 +17,7 @@ namespace BitCoinSharp.Examples
             var examples = new Dictionary<string, Action<string[]>>(StringComparer.InvariantCultureIgnoreCase)
                            {
                                {"DumpWallet", DumpWallet.Run},
+                               {"FetchBlock", FetchBlock.Run},
                                {"PingService", PingService.Run},
                                {"PrintPeers", PrintPeers.Run},
                                {"PrivateKeys", PrivateKeys.Run},
