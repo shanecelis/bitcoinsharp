@@ -17,8 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Text;
 using BitCoinSharp.IO;
 using log4net;
@@ -46,7 +44,6 @@ namespace BitCoinSharp
         private bool _usesChecksumming;
 
         private static readonly IDictionary<Type, string> _names = new Dictionary<Type, string>();
-        private static readonly IDictionary<string, Func<NetworkParameters, byte[], Message>> _messageConstructors = new Dictionary<string, Func<NetworkParameters, byte[], Message>>();
 
         static BitcoinSerializer()
         {
@@ -59,16 +56,6 @@ namespace BitCoinSharp
             _names.Add(typeof (Ping), "ping");
             _names.Add(typeof (VersionAck), "verack");
             _names.Add(typeof (GetBlocksMessage), "getblocks");
-
-            // some Message subclasses can only be sent for now, ignore missing constructors
-            foreach (var c in _names.Keys)
-            {
-                var ct = MakeConstructor(c);
-                if (ct != null)
-                {
-                    _messageConstructors.Add(_names[c], ct);
-                }
-            }
         }
 
         /// <summary>
@@ -123,7 +110,8 @@ namespace BitCoinSharp
             @out.Write(header);
             @out.Write(payload);
 
-            _log.DebugFormat("Sending {0} message: {1}", name, Utils.BytesToHexString(header) + Utils.BytesToHexString(payload));
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Sending {0} message: {1}", name, Utils.BytesToHexString(header) + Utils.BytesToHexString(payload));
         }
 
         /// <summary>
@@ -226,12 +214,7 @@ namespace BitCoinSharp
 
             try
             {
-                Func<NetworkParameters, byte[], Message> c;
-                if (!_messageConstructors.TryGetValue(command, out c))
-                {
-                    throw new ProtocolException("No support for deserializing message with name " + command);
-                }
-                return c.Invoke(_params, payloadBytes);
+                return MakeMessage(command, payloadBytes);
             }
             catch (Exception e)
             {
@@ -239,20 +222,43 @@ namespace BitCoinSharp
             }
         }
 
-        private static Func<NetworkParameters, byte[], Message> MakeConstructor(Type c)
+        /// <exception cref="BitCoinSharp.ProtocolException" />
+        private Message MakeMessage(string command, byte[] payloadBytes)
         {
-            var parameters = new[]
-                             {
-                                 Expression.Parameter(typeof (NetworkParameters), "params"),
-                                 Expression.Parameter(typeof (byte[]), "payload")
-                             };
-            var ctor = c.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, new[] {typeof (NetworkParameters), typeof (byte[])}, null);
-            if (ctor == null)
+            // We use an if ladder rather than reflection because reflection can be slow on some platforms.
+            if (command.Equals("version"))
             {
-                return null;
+                return new VersionMessage(_params, payloadBytes);
             }
-            var lambda = Expression.Lambda<Func<NetworkParameters, byte[], Message>>(Expression.New(ctor, parameters), parameters);
-            return lambda.Compile();
+            if (command.Equals("inv"))
+            {
+                return new InventoryMessage(_params, payloadBytes);
+            }
+            if (command.Equals("block"))
+            {
+                return new Block(_params, payloadBytes);
+            }
+            if (command.Equals("getdata"))
+            {
+                return new GetDataMessage(_params, payloadBytes);
+            }
+            if (command.Equals("tx"))
+            {
+                return new Transaction(_params, payloadBytes);
+            }
+            if (command.Equals("addr"))
+            {
+                return new AddressMessage(_params, payloadBytes);
+            }
+            if (command.Equals("ping"))
+            {
+                return new Ping();
+            }
+            if (command.Equals("verack"))
+            {
+                return new VersionAck(_params, payloadBytes);
+            }
+            throw new ProtocolException("No support for deserializing message with name " + command);
         }
 
         /// <exception cref="System.IO.IOException" />

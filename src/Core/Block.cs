@@ -211,7 +211,7 @@ namespace BitCoinSharp
             block._time = _time;
             block._difficultyTarget = _difficultyTarget;
             block.Transactions = null;
-            block._hash = null;
+            block._hash = Hash.Clone();
             return block;
         }
 
