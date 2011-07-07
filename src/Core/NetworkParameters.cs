@@ -137,7 +137,7 @@ namespace BitCoinSharp
             n.GenesisBlock.DifficultyTarget = 0x1d07fff8;
             n.GenesisBlock.Nonce = 384568319;
             var genesisHash = n.GenesisBlock.HashAsString;
-            Debug.Assert(genesisHash.Equals("00000007199508e34a9ff81e6ec0c477a4cccff2a4767a8eee39c11db367b008"));
+            Debug.Assert(genesisHash.Equals("00000007199508e34a9ff81e6ec0c477a4cccff2a4767a8eee39c11db367b008"), genesisHash);
             return n;
         }
 

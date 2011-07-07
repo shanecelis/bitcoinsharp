@@ -55,12 +55,13 @@ namespace BitCoinSharp
 
         // For unit testing. If not zero, use this instead of the current time.
         internal static ulong FakeClock;
+
+        // Fields defined as part of the protocol format.
         private uint _version;
         private Sha256Hash _prevBlockHash;
         private Sha256Hash _merkleRoot;
         private uint _time;
         private uint _difficultyTarget; // "nBits"
-
         private uint _nonce;
 
         /// <summary>
@@ -74,7 +75,7 @@ namespace BitCoinSharp
         [NonSerialized] private Sha256Hash _hash;
 
         /// <summary>
-        /// Special case constructor, used for the genesis node and unit tests.
+        /// Special case constructor, used for the genesis node, cloneAsHeader and unit tests.
         /// </summary>
         internal Block(NetworkParameters @params)
             : base(@params)
@@ -202,7 +203,16 @@ namespace BitCoinSharp
         /// </summary>
         public Block CloneAsHeader()
         {
-            return new Block(Params, BitcoinSerialize()) {Transactions = null};
+            var block = new Block(Params);
+            block._nonce = _nonce;
+            block._prevBlockHash = _prevBlockHash.Clone();
+            block._merkleRoot = MerkleRoot.Clone();
+            block._version = _version;
+            block._time = _time;
+            block._difficultyTarget = _difficultyTarget;
+            block.Transactions = null;
+            block._hash = null;
+            return block;
         }
 
         /// <summary>
