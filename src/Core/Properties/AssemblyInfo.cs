@@ -37,5 +37,5 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 
 [assembly: AssemblyVersion("0.2.135.36")]
-[assembly: AssemblyFileVersion("0.2.135.36")]
+[assembly: AssemblyFileVersion("0.2.135.37")]
 [assembly: InternalsVisibleTo("BitCoinSharp.Test")]

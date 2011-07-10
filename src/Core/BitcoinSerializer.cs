@@ -159,8 +159,16 @@ namespace BitCoinSharp
             {
             }
             var commandBytes = new byte[cursor - mark];
-            Array.Copy(header, mark, commandBytes, 0, cursor - mark);
-            var command = Encoding.UTF8.GetString(commandBytes);
+            Array.Copy(header, mark, commandBytes, 0, commandBytes.Length);
+            for (var i = 0; i < commandBytes.Length; i++)
+            {
+                // Emulate ASCII by replacing extended characters with question marks.
+                if (commandBytes[i] >= 0x80)
+                {
+                    commandBytes[i] = 0x3F;
+                }
+            }
+            var command = Encoding.UTF8.GetString(commandBytes, 0, commandBytes.Length);
             cursor = mark + _commandLen;
 
             var size = Utils.ReadUint32(header, cursor);
