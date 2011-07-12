@@ -40,12 +40,12 @@ namespace BitCoinSharp.Discovery
         /// </summary>
         /// <returns>The address/port of the next node.</returns>
         /// <exception cref="PeerDiscoveryException" />
-        public IPEndPoint GetPeer()
+        public EndPoint GetPeer()
         {
             return NextPeer();
         }
 
-        private IPEndPoint NextPeer()
+        private EndPoint NextPeer()
         {
             if (_pnseedIndex >= SeedAddrs.Length) return null;
             return new IPEndPoint(ConvertAddress(SeedAddrs[_pnseedIndex++]),
@@ -56,12 +56,12 @@ namespace BitCoinSharp.Discovery
         /// Returns an array containing all the Bitcoin nodes within the list.
         /// </summary>
         /// <exception cref="BitCoinSharp.Discovery.PeerDiscoveryException" />
-        public IEnumerable<IPEndPoint> GetPeers()
+        public IEnumerable<EndPoint> GetPeers()
         {
             return AllPeers();
         }
 
-        private IEnumerable<IPEndPoint> AllPeers()
+        private IEnumerable<EndPoint> AllPeers()
         {
             var addresses = new IPEndPoint[SeedAddrs.Length];
             for (var i = 0; i < SeedAddrs.Length; ++i)

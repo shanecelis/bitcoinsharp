@@ -32,12 +32,11 @@ namespace BitCoinSharp.Examples
             Console.WriteLine("Took {0:0.00} seconds", (now - start)/1000.0);
         }
 
-        private static void PrintAddresses(IEnumerable<IPEndPoint> addresses)
+        private static void PrintAddresses(IEnumerable<EndPoint> addresses)
         {
             foreach (var address in addresses)
             {
-                var hostAddress = address.Address;
-                Console.WriteLine("{0}:{1}", hostAddress, address.Port);
+                Console.WriteLine(address);
             }
         }
 

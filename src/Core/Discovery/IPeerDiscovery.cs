@@ -31,6 +31,6 @@ namespace BitCoinSharp.Discovery
         /// Returns an array of addresses. This method may block.
         /// </summary>
         /// <exception cref="BitCoinSharp.Discovery.PeerDiscoveryException" />
-        IEnumerable<IPEndPoint> GetPeers();
+        IEnumerable<EndPoint> GetPeers();
     }
 }

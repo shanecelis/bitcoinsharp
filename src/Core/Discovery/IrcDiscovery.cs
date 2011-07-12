@@ -72,9 +72,9 @@ namespace BitCoinSharp.Discovery
         /// does not mean it is accepting connections.
         /// </summary>
         /// <exception cref="BitCoinSharp.Discovery.PeerDiscoveryException" />
-        public IEnumerable<IPEndPoint> GetPeers()
+        public IEnumerable<EndPoint> GetPeers()
         {
-            var addresses = new List<IPEndPoint>();
+            var addresses = new List<EndPoint>();
             using (var connection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
                 try
@@ -156,9 +156,9 @@ namespace BitCoinSharp.Discovery
         }
 
         // Visible for testing.
-        internal static IList<IPEndPoint> ParseUserList(IEnumerable<string> userNames)
+        internal static IList<EndPoint> ParseUserList(IEnumerable<string> userNames)
         {
-            var addresses = new List<IPEndPoint>();
+            var addresses = new List<EndPoint>();
             foreach (var user in userNames)
             {
                 // All BitCoin peers start their nicknames with a 'u' character.

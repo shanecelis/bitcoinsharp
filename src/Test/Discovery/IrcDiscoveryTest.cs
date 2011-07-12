@@ -39,8 +39,7 @@ namespace BitCoinSharp.Test.Discovery
 
             for (var i = 0; i < addresses.Count; i++)
             {
-                var formattedIp = addresses[i].Address + ":" + addresses[i].Port;
-                Assert.AreEqual(ips[i], formattedIp, "IPs decoded improperly");
+                Assert.AreEqual(ips[i], addresses[i].ToString(), "IPs decoded improperly");
             }
         }
     }

@@ -66,9 +66,9 @@ namespace BitCoinSharp.Discovery
         }
 
         /// <exception cref="BitCoinSharp.Discovery.PeerDiscoveryException" />
-        public IEnumerable<IPEndPoint> GetPeers()
+        public IEnumerable<EndPoint> GetPeers()
         {
-            ICollection<IPEndPoint> addresses = new HashSet<IPEndPoint>();
+            ICollection<EndPoint> addresses = new HashSet<EndPoint>();
 
             /*
              * Keep track of how many lookups failed vs. succeeded.
