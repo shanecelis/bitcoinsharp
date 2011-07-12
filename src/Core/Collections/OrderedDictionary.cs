@@ -3,7 +3,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Threading;
 
 namespace BitCoinSharp.Collections
@@ -13,7 +12,7 @@ namespace BitCoinSharp.Collections
     /// </summary>
     /// <typeparam name="TKey">The type of the keys in the dictionary</typeparam>
     /// <typeparam name="TValue">The type of the values in the dictionary</typeparam>
-    internal class OrderedDictionary<TKey, TValue> : IOrderedDictionary, IDictionary<TKey, TValue>
+    internal class OrderedDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary
     {
         private const int _defaultInitialCapacity = 0;
 
@@ -132,11 +131,6 @@ namespace BitCoinSharp.Collections
             get { return _list ?? (_list = new List<KeyValuePair<TKey, TValue>>(_initialCapacity)); }
         }
 
-        IDictionaryEnumerator IOrderedDictionary.GetEnumerator()
-        {
-            return Dictionary.GetEnumerator();
-        }
-
         IDictionaryEnumerator IDictionary.GetEnumerator()
         {
             return Dictionary.GetEnumerator();
@@ -170,28 +164,6 @@ namespace BitCoinSharp.Collections
 
             Dictionary.Add(key, value);
             List.Insert(index, new KeyValuePair<TKey, TValue>(key, value));
-        }
-
-        /// <summary>
-        /// Inserts a new entry into the <see cref="OrderedDictionary{TKey,TValue}">OrderedDictionary&lt;TKey,TValue&gt;</see> collection with the specified key and value at the specified index.
-        /// </summary>
-        /// <param name="index">The zero-based index at which the element should be inserted.</param>
-        /// <param name="key">The key of the entry to add.</param>
-        /// <param name="value">The value of the entry to add. The value can be <null/> if the type of the values in the dictionary is a reference type.</param>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is less than 0.<br/>
-        /// -or-<br/>
-        /// <paramref name="index"/> is greater than <see cref="Count"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="key"/> is <null/>.<br/>
-        /// -or-<br/>
-        /// <paramref name="value"/> is <null/>, and the value type of the <see cref="OrderedDictionary{TKey,TValue}">OrderedDictionary&lt;TKey,TValue&gt;</see> is a value type.</exception>
-        /// <exception cref="ArgumentException">The key type of the <see cref="OrderedDictionary{TKey,TValue}">OrderedDictionary&lt;TKey,TValue&gt;</see> is not in the inheritance hierarchy of <paramref name="key"/>.<br/>
-        /// -or-<br/>
-        /// The value type of the <see cref="OrderedDictionary{TKey,TValue}">OrderedDictionary&lt;TKey,TValue&gt;</see> is not in the inheritance hierarchy of <paramref name="value"/>.<br/>
-        /// -or-<br/>
-        /// An element with the same key already exists in the <see cref="OrderedDictionary{TKey,TValue}">OrderedDictionary&lt;TKey,TValue&gt;</see>.</exception>
-        void IOrderedDictionary.Insert(int index, object key, object value)
-        {
-            Insert(index, ConvertToKeyType(key), ConvertToValueType(value));
         }
 
         /// <summary>
@@ -234,23 +206,6 @@ namespace BitCoinSharp.Collections
                 List[index] = new KeyValuePair<TKey, TValue>(key, value);
                 Dictionary[key] = value;
             }
-        }
-
-        /// <summary>
-        /// Gets or sets the value at the specified index.
-        /// </summary>
-        /// <param name="index">The zero-based index of the value to get or set.</param>
-        /// <value>The value of the item at the specified index.</value>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is less than 0.<br/>
-        /// -or-<br/>
-        /// index is equal to or greater than <see cref="Count"/>.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="value"/> is a null reference, and the value type of the <see cref="OrderedDictionary{TKey,TValue}">OrderedDictionary&lt;TKey,TValue&gt;</see> is a value type.</exception>
-        /// <exception cref="ArgumentException">The value type of the <see cref="OrderedDictionary{TKey,TValue}">OrderedDictionary&lt;TKey,TValue&gt;</see> is not in the inheritance hierarchy of <paramref name="value"/>.</exception>
-        object IOrderedDictionary.this[int index]
-        {
-            get { return this[index]; }
-
-            set { this[index] = ConvertToValueType(value); }
         }
 
         /// <summary>

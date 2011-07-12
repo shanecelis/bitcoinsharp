@@ -27,7 +27,7 @@ namespace BitCoinSharp.Test
         [Test]
         public void TestEncode()
         {
-            var testbytes = Encoding.Default.GetBytes("Hello World");
+            var testbytes = Encoding.UTF8.GetBytes("Hello World");
             Assert.AreEqual("JxF12TrwUP45BMd", Base58.Encode(testbytes));
 
             var bi = BigInteger.ValueOf(3471844090);
@@ -37,9 +37,9 @@ namespace BitCoinSharp.Test
         [Test]
         public void TestDecode()
         {
-            var testbytes = Encoding.Default.GetBytes("Hello World");
+            var testbytes = Encoding.UTF8.GetBytes("Hello World");
             var actualbytes = Base58.Decode("JxF12TrwUP45BMd");
-            Assert.IsTrue(testbytes.SequenceEqual(actualbytes), Encoding.Default.GetString(actualbytes));
+            Assert.IsTrue(testbytes.SequenceEqual(actualbytes), Encoding.UTF8.GetString(actualbytes, 0, actualbytes.Length));
 
             try
             {

@@ -21,6 +21,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using BitCoinSharp.IO;
+using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Math;
 
 namespace BitCoinSharp
@@ -205,10 +206,12 @@ namespace BitCoinSharp
         /// </summary>
         public static byte[] Sha256Hash160(byte[] input)
         {
-            var shaAlgorithm = new SHA256Managed();
-            var ripemdAlgorithm = new RIPEMD160Managed();
-            var sha256 = shaAlgorithm.ComputeHash(input);
-            return ripemdAlgorithm.ComputeHash(sha256, 0, sha256.Length);
+            var sha256 = new SHA256Managed().ComputeHash(input);
+            var digest = new RipeMD160Digest();
+            digest.BlockUpdate(sha256, 0, sha256.Length);
+            var @out = new byte[20];
+            digest.DoFinal(@out, 0);
+            return @out;
         }
 
         /// <summary>
@@ -243,7 +246,7 @@ namespace BitCoinSharp
         {
             var length = ReadUint32Be(mpi, 0);
             var buf = new byte[length];
-            Array.Copy(mpi, 4, buf, 0, length);
+            Array.Copy(mpi, 4, buf, 0, (int) length);
             return new BigInteger(1, buf);
         }
 
