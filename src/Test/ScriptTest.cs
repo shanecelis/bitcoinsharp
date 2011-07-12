@@ -57,7 +57,7 @@ namespace BitCoinSharp.Test
             var sig = new Script(_params, sigBytes, 0, sigBytes.Length);
             var allScript = Script.Join(sig, pubkey);
             allScript.Tracing = true;
-            Assert.True(allScript.Run(null));
+            Assert.IsTrue(allScript.Run(null));
             allScript.LogStack();
         }
 
@@ -67,7 +67,7 @@ namespace BitCoinSharp.Test
             var bytes = Hex.Decode("41043e96222332ea7848323c08116dddafbfa917b8e37f0bdf63841628267148588a09a43540942d58d49717ad3fabfe14978cf4f0a8b84d2435dad16e9aa4d7f935ac");
             var s = new Script(_params, bytes, 0, bytes.Length);
             s.Tracing = true;
-            Assert.True(s.IsSentToIp);
+            Assert.IsTrue(s.IsSentToIp);
         }
     }
 }

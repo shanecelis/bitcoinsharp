@@ -27,7 +27,7 @@ namespace BitCoinSharp.Test.Discovery
         public void GetPeerOne()
         {
             var seedPeers = new SeedPeers(NetworkParameters.ProdNet());
-            Assert.That(seedPeers.GetPeer(), Is.Not.Null);
+            Assert.IsNotNull(seedPeers.GetPeer());
         }
 
         [Test]
@@ -36,9 +36,9 @@ namespace BitCoinSharp.Test.Discovery
             var seedPeers = new SeedPeers(NetworkParameters.ProdNet());
             for (var i = 0; i < SeedPeers.SeedAddrs.Length; ++i)
             {
-                Assert.That(seedPeers.GetPeer(), Is.Not.Null, "Failed on index: " + i);
+                Assert.IsNotNull(seedPeers.GetPeer(), "Failed on index: " + i);
             }
-            Assert.That(seedPeers.GetPeer(), Is.EqualTo(null));
+            Assert.IsNull(seedPeers.GetPeer());
         }
 
         [Test]
@@ -46,7 +46,7 @@ namespace BitCoinSharp.Test.Discovery
         {
             var seedPeers = new SeedPeers(NetworkParameters.ProdNet());
             var addresses = seedPeers.GetPeers();
-            Assert.That(addresses.Count(), Is.EqualTo(SeedPeers.SeedAddrs.Length));
+            Assert.AreEqual(addresses.Count(), SeedPeers.SeedAddrs.Length);
         }
     }
 }

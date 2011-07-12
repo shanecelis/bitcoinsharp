@@ -32,11 +32,11 @@ namespace BitCoinSharp.Test
             var key = new EcKey(privkey);
             var message = new byte[32]; // All zeroes.
             var output = key.Sign(message);
-            Assert.True(key.Verify(message, output));
+            Assert.IsTrue(key.Verify(message, output));
 
             // Test interop with a signature from elsewhere.
             var sig = Hex.Decode("3046022100dffbc26774fc841bbe1c1362fd643609c6e42dcb274763476d87af2c0597e89e022100c59e3c13b96b316cae9fa0ab0260612c7a133a6fe2b3445b6bf80b3123bf274d");
-            Assert.True(key.Verify(message, sig));
+            Assert.IsTrue(key.Verify(message, sig));
         }
 
         [Test]
@@ -54,16 +54,16 @@ namespace BitCoinSharp.Test
             {
                 message = Utils.ReverseBytes(Hex.Decode("11da3761e86431e4a54c176789e41f1651b324d240d599a7067bee23d328ec2a"));
                 var output = key.Sign(message);
-                Assert.True(key.Verify(message, output));
+                Assert.IsTrue(key.Verify(message, output));
 
                 output = Hex.Decode("304502206faa2ebc614bf4a0b31f0ce4ed9012eb193302ec2bcaccc7ae8bb40577f47549022100c73a1a1acc209f3f860bf9b9f5e13e9433db6f8b7bd527a088a0e0cd0a4c83e9");
-                Assert.True(key.Verify(message, output));
+                Assert.IsTrue(key.Verify(message, output));
             }
 
             // Try to sign with one key and verify with the other.
             message = Utils.ReverseBytes(Hex.Decode("11da3761e86431e4a54c176789e41f1651b324d240d599a7067bee23d328ec2a"));
-            Assert.True(roundtripKey.Verify(message, decodedKey.Sign(message)));
-            Assert.True(decodedKey.Verify(message, roundtripKey.Sign(message)));
+            Assert.IsTrue(roundtripKey.Verify(message, decodedKey.Sign(message)));
+            Assert.IsTrue(decodedKey.Verify(message, roundtripKey.Sign(message)));
         }
     }
 }

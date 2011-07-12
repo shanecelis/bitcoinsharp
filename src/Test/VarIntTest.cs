@@ -27,7 +27,7 @@ namespace BitCoinSharp.Test
             var a = new VarInt(10);
             Assert.AreEqual(1, a.SizeInBytes);
             Assert.AreEqual(1, a.Encode().Length);
-            Assert.AreEqual(10, new VarInt(a.Encode(), 0).Value);
+            Assert.AreEqual(10UL, new VarInt(a.Encode(), 0).Value);
         }
 
         [Test]
@@ -36,7 +36,7 @@ namespace BitCoinSharp.Test
             var a = new VarInt(64000);
             Assert.AreEqual(3, a.SizeInBytes);
             Assert.AreEqual(3, a.Encode().Length);
-            Assert.AreEqual(64000, new VarInt(a.Encode(), 0).Value);
+            Assert.AreEqual(64000UL, new VarInt(a.Encode(), 0).Value);
         }
 
         [Test]

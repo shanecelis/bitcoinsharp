@@ -126,14 +126,14 @@ namespace BitCoinSharp.Test
             _wallet.CoinsReceived +=
                 (sender, e) =>
                 {
-                    Assert.True(e.PrevBalance.Equals(0));
-                    Assert.True(e.NewBalance.Equals(Utils.ToNanoCoins(1, 0)));
+                    Assert.IsTrue(e.PrevBalance.Equals(0));
+                    Assert.IsTrue(e.NewBalance.Equals(Utils.ToNanoCoins(1, 0)));
                     Assert.AreEqual(e.Tx, fakeTx);
                     Assert.AreEqual(sender, _wallet);
                     didRun = true;
                 };
             _wallet.Receive(fakeTx, null, BlockChain.NewBlockType.BestChain);
-            Assert.True(didRun);
+            Assert.IsTrue(didRun);
         }
 
         [Test]
@@ -159,7 +159,7 @@ namespace BitCoinSharp.Test
             // Available and estimated balances should not be the same. We don't check the exact available balance here
             // because it depends on the coin selection algorithm.
             Assert.AreEqual(Utils.ToNanoCoins(4, 50), _wallet.GetBalance(Wallet.BalanceType.Estimated));
-            Assert.False(_wallet.GetBalance(Wallet.BalanceType.Available).Equals(
+            Assert.IsFalse(_wallet.GetBalance(Wallet.BalanceType.Available).Equals(
                 _wallet.GetBalance(Wallet.BalanceType.Estimated)));
 
             // Now confirm the transaction by including it into a block.

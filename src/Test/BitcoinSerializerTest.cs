@@ -33,9 +33,9 @@ namespace BitCoinSharp.Test
                                                           "000000000000000000000000000000ffff0a000002208ddd9d202c3ab457130055810100")))
             {
                 var vm = (VersionMessage) bs.Deserialize(bais);
-                Assert.AreEqual(31900, vm.ClientVersion);
-                Assert.AreEqual(1292899814, vm.Time);
-                Assert.AreEqual(98645, vm.BestHeight);
+                Assert.AreEqual(31900U, vm.ClientVersion);
+                Assert.AreEqual(1292899814UL, vm.Time);
+                Assert.AreEqual(98645U, vm.BestHeight);
             }
         }
 

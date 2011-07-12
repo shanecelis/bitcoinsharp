@@ -67,7 +67,7 @@ namespace BitCoinSharp.Test
             // Check that we can plug a few blocks together.
             // Block 1 from the testnet.
             var b1 = GetBlock1();
-            Assert.True(_testNetChain.Add(b1));
+            Assert.IsTrue(_testNetChain.Add(b1));
             // Block 2 from the testnet.
             var b2 = GetBlock2();
 
@@ -84,7 +84,7 @@ namespace BitCoinSharp.Test
                 b2.Nonce = n;
             }
             // Now it works because we reset the nonce.
-            Assert.True(_testNetChain.Add(b2));
+            Assert.IsTrue(_testNetChain.Add(b2));
         }
 
         [Test]
@@ -94,12 +94,12 @@ namespace BitCoinSharp.Test
             var b2 = b1.CreateNextBlock(_coinbaseTo);
             var b3 = b2.CreateNextBlock(_coinbaseTo);
             // Connected.
-            Assert.True(_chain.Add(b1));
+            Assert.IsTrue(_chain.Add(b1));
             // Unconnected but stored. The head of the chain is still b1.
-            Assert.False(_chain.Add(b3));
+            Assert.IsFalse(_chain.Add(b3));
             Assert.AreEqual(_chain.ChainHead.Header, b1.CloneAsHeader());
             // Add in the middle block.
-            Assert.True(_chain.Add(b2));
+            Assert.IsTrue(_chain.Add(b2));
             Assert.AreEqual(_chain.ChainHead.Header, b3.CloneAsHeader());
         }
 
@@ -113,7 +113,7 @@ namespace BitCoinSharp.Test
             for (var i = 0; i < _unitTestParams.Interval - 1; i++)
             {
                 var newBlock = prev.CreateNextBlock(_coinbaseTo, (uint) Block.FakeClock);
-                Assert.True(_chain.Add(newBlock));
+                Assert.IsTrue(_chain.Add(newBlock));
                 prev = newBlock;
                 // The fake chain should seem to be "fast" for the purposes of difficulty calculations.
                 Block.FakeClock += 2;
@@ -132,16 +132,16 @@ namespace BitCoinSharp.Test
             var b = prev.CreateNextBlock(_coinbaseTo, (uint) Block.FakeClock);
             b.DifficultyTarget = 0x201FFFFF;
             b.Solve();
-            Assert.True(_chain.Add(b));
+            Assert.IsTrue(_chain.Add(b));
         }
 
         // Successfully traversed a difficulty transition period.
         [Test]
         public void TestBadDifficulty()
         {
-            Assert.True(_testNetChain.Add(GetBlock1()));
+            Assert.IsTrue(_testNetChain.Add(GetBlock1()));
             var b2 = GetBlock2();
-            Assert.True(_testNetChain.Add(b2));
+            Assert.IsTrue(_testNetChain.Add(b2));
             var params2 = NetworkParameters.TestNet();
             var bad = new Block(params2);
             // Merkle root can be anything here, doesn't matter.
@@ -163,7 +163,7 @@ namespace BitCoinSharp.Test
             }
             catch (VerificationException e)
             {
-                Assert.True(e.Message.IndexOf("Difficulty target is bad") >= 0, e.Message);
+                Assert.IsTrue(e.Message.IndexOf("Difficulty target is bad") >= 0, e.Message);
             }
 
             // Accept any level of difficulty now.
@@ -176,7 +176,7 @@ namespace BitCoinSharp.Test
             }
             catch (VerificationException e)
             {
-                Assert.True(e.Message.IndexOf("Unexpected change in difficulty") >= 0, e.Message);
+                Assert.IsTrue(e.Message.IndexOf("Unexpected change in difficulty") >= 0, e.Message);
             }
 
             // TODO: Test difficulty change is not out of range when a transition period becomes valid.

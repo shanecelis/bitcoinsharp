@@ -90,7 +90,7 @@ namespace BitCoinSharp.Test
             // Should find an acceptable nonce.
             block.Solve();
             block.Verify();
-            Assert.AreEqual(block.Nonce, 2);
+            Assert.AreEqual(block.Nonce, 2U);
         }
 
         [Test]
@@ -131,7 +131,7 @@ namespace BitCoinSharp.Test
             // NB: This tests the BITCOIN proprietary serialization protocol. A different test checks Java serialization
             // of transactions.
             var block = new Block(_params, _blockBytes);
-            Assert.True(_blockBytes.SequenceEqual(block.BitcoinSerialize()));
+            Assert.IsTrue(_blockBytes.SequenceEqual(block.BitcoinSerialize()));
         }
 
         [Test]

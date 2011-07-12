@@ -39,7 +39,7 @@ namespace BitCoinSharp.Test
         {
             var testbytes = Encoding.Default.GetBytes("Hello World");
             var actualbytes = Base58.Decode("JxF12TrwUP45BMd");
-            Assert.True(testbytes.SequenceEqual(actualbytes), Encoding.Default.GetString(actualbytes));
+            Assert.IsTrue(testbytes.SequenceEqual(actualbytes), Encoding.Default.GetString(actualbytes));
 
             try
             {

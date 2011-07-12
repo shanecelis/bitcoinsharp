@@ -60,9 +60,9 @@ namespace BitCoinSharp.Test
             // Start by building a couple of blocks on top of the genesis block.
             var b1 = _unitTestParams.GenesisBlock.CreateNextBlock(_coinbaseTo);
             var b2 = b1.CreateNextBlock(_coinbaseTo);
-            Assert.True(_chain.Add(b1));
-            Assert.True(_chain.Add(b2));
-            Assert.False(reorgHappened);
+            Assert.IsTrue(_chain.Add(b1));
+            Assert.IsTrue(_chain.Add(b2));
+            Assert.IsFalse(reorgHappened);
             // We got two blocks which generated 50 coins each, to us.
             Assert.AreEqual("100.00", Utils.BitcoinValueToFriendlyString(_wallet.GetBalance()));
             // We now have the following chain:
@@ -75,12 +75,12 @@ namespace BitCoinSharp.Test
             //
             // Nothing should happen at this point. We saw b2 first so it takes priority.
             var b3 = b1.CreateNextBlock(_someOtherGuy);
-            Assert.True(_chain.Add(b3));
-            Assert.False(reorgHappened); // No re-org took place.
+            Assert.IsTrue(_chain.Add(b3));
+            Assert.IsFalse(reorgHappened); // No re-org took place.
             Assert.AreEqual("100.00", Utils.BitcoinValueToFriendlyString(_wallet.GetBalance()));
             // Now we add another block to make the alternative chain longer.
-            Assert.True(_chain.Add(b3.CreateNextBlock(_someOtherGuy)));
-            Assert.True(reorgHappened); // Re-org took place.
+            Assert.IsTrue(_chain.Add(b3.CreateNextBlock(_someOtherGuy)));
+            Assert.IsTrue(reorgHappened); // Re-org took place.
             reorgHappened = false;
             //
             //     genesis -> b1 -> b2
@@ -91,13 +91,13 @@ namespace BitCoinSharp.Test
             // ... and back to the first chain.
             var b5 = b2.CreateNextBlock(_coinbaseTo);
             var b6 = b5.CreateNextBlock(_coinbaseTo);
-            Assert.True(_chain.Add(b5));
-            Assert.True(_chain.Add(b6));
+            Assert.IsTrue(_chain.Add(b5));
+            Assert.IsTrue(_chain.Add(b6));
             //
             //     genesis -> b1 -> b2 -> b5 -> b6
             //                  \-> b3 -> b4
             //
-            Assert.True(reorgHappened);
+            Assert.IsTrue(reorgHappened);
             Assert.AreEqual("200.00", Utils.BitcoinValueToFriendlyString(_wallet.GetBalance()));
         }
 
@@ -108,16 +108,16 @@ namespace BitCoinSharp.Test
             // after the re-org takes place.
             var b1 = _unitTestParams.GenesisBlock.CreateNextBlock(_someOtherGuy);
             var b2 = b1.CreateNextBlock(_someOtherGuy);
-            Assert.True(_chain.Add(b1));
-            Assert.True(_chain.Add(b2));
+            Assert.IsTrue(_chain.Add(b1));
+            Assert.IsTrue(_chain.Add(b2));
             //     genesis -> b1 -> b2
             //                  \-> b3 -> b4
-            Assert.AreEqual(0, _wallet.GetBalance());
+            Assert.AreEqual(0UL, _wallet.GetBalance());
             var b3 = b1.CreateNextBlock(_coinbaseTo);
             var b4 = b3.CreateNextBlock(_someOtherGuy);
-            Assert.True(_chain.Add(b3));
-            Assert.AreEqual(0, _wallet.GetBalance());
-            Assert.True(_chain.Add(b4));
+            Assert.IsTrue(_chain.Add(b3));
+            Assert.AreEqual(0UL, _wallet.GetBalance());
+            Assert.IsTrue(_chain.Add(b4));
             Assert.AreEqual("50.00", Utils.BitcoinValueToFriendlyString(_wallet.GetBalance()));
         }
 
@@ -132,7 +132,7 @@ namespace BitCoinSharp.Test
             var spend = _wallet.CreateSend(dest, Utils.ToNanoCoins(10, 0));
             _wallet.ConfirmSend(spend);
             // Waiting for confirmation ...
-            Assert.AreEqual(0, _wallet.GetBalance());
+            Assert.AreEqual(0UL, _wallet.GetBalance());
             var b2 = b1.CreateNextBlock(_someOtherGuy);
             b2.AddTransaction(spend);
             b2.Solve();
@@ -146,7 +146,7 @@ namespace BitCoinSharp.Test
             _chain.Add(b4);
             // b4 causes a re-org that should make our spend go inactive. Because the inputs are already spent our
             // available balance drops to zero again.
-            Assert.AreEqual(0, _wallet.GetBalance(Wallet.BalanceType.Available));
+            Assert.AreEqual(0UL, _wallet.GetBalance(Wallet.BalanceType.Available));
             // We estimate that it'll make it back into the block chain (we know we won't double spend).
             // assertEquals(Utils.toNanoCoins(40, 0), wallet.getBalance(Wallet.BalanceType.ESTIMATED));
         }
@@ -212,7 +212,7 @@ namespace BitCoinSharp.Test
             _chain.Add(b4); // New best chain.
 
             // Should have seen a double spend.
-            Assert.True(eventCalled);
+            Assert.IsTrue(eventCalled);
             Assert.AreEqual(Utils.ToNanoCoins(30, 0), _wallet.GetBalance());
         }
 
