@@ -109,9 +109,11 @@ namespace BitCoinSharp.Discovery
 
                         // Join the channel.
                         LogAndSend(writer, "JOIN " + _channel);
+                        // List users in channel.
+                        LogAndSend(writer, "NAMES " + _channel);
                         writer.Flush();
 
-                        // A list of the users should be returned when we join. Look for code 353 and parse until code 366.
+                        // A list of the users should be returned. Look for code 353 and parse until code 366.
                         while ((currLine = reader.ReadLine()) != null)
                         {
                             OnIrcReceive(currLine);
@@ -125,7 +127,7 @@ namespace BitCoinSharp.Discovery
                                 }
 
                                 var spacedList = currLine.Substring(currLine.IndexOf(":", subIndex));
-                                addresses.AddRange(ParseUserList(spacedList.Split(' ')));
+                                addresses.AddRange(ParseUserList(spacedList.Substring(1).Split(' ')));
                             }
                             else if (CheckLineStatus("366", currLine))
                             {
