@@ -31,7 +31,7 @@ namespace BitCoinSharp
     {
         private readonly byte[] _bytes;
 
-        public static Sha256Hash ZeroHash = new Sha256Hash(new byte[32]);
+        public static readonly Sha256Hash ZeroHash = new Sha256Hash(new byte[32]);
 
         /// <summary>
         /// Creates a Sha256Hash by wrapping the given byte array. It must be 32 bytes long.

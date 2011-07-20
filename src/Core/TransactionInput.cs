@@ -152,8 +152,7 @@ namespace BitCoinSharp
             {
                 return "TxIn: COINBASE";
             }
-            return "TxIn from " + Utils.BytesToHexString(ScriptSig.PubKey) + " script:" +
-                   ScriptSig;
+            return "TxIn from tx " + Outpoint + " (pubkey: " + Utils.BytesToHexString(ScriptSig.PubKey) + ") script:" + ScriptSig;
         }
 
         internal enum ConnectionResult

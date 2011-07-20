@@ -225,7 +225,7 @@ namespace BitCoinSharp
             {
                 // This block connects to the best known block, it is a normal continuation of the system.
                 ChainHead = newStoredBlock;
-                _log.DebugFormat("Chain is now {0} blocks high", _chainHead.Height);
+                _log.InfoFormat("Chain is now {0} blocks high", _chainHead.Height);
                 if (newTransactions != null)
                     SendTransactionsToWallet(newStoredBlock, NewBlockType.BestChain, newTransactions);
             }
@@ -486,11 +486,12 @@ namespace BitCoinSharp
                         foreach (var output in tx.Outputs)
                         {
                             // TODO: Handle more types of outputs, not just regular to address outputs.
-                            if (output.ScriptPubKey.IsSentToIp) return;
+                            if (output.ScriptPubKey.IsSentToIp) continue;
                             // This is not thread safe as a key could be removed between the call to isMine and receive.
                             if (output.IsMine(wallet))
                             {
                                 shouldReceive = true;
+                                break;
                             }
                         }
 

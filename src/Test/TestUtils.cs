@@ -45,6 +45,7 @@ namespace BitCoinSharp.Test
         public static BlockPair CreateFakeBlock(NetworkParameters @params, IBlockStore blockStore, params Transaction[] transactions)
         {
             var b = blockStore.GetChainHead().Header.CreateNextBlock(new EcKey().ToAddress(@params));
+            // Coinbase tx was already added.
             foreach (var tx in transactions)
                 b.AddTransaction(tx);
             b.Solve();

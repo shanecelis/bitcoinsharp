@@ -72,11 +72,12 @@ namespace BitCoinSharp
         /// <summary>
         /// Used only in creation of the genesis blocks and in unit tests.
         /// </summary>
-        internal TransactionOutput(NetworkParameters @params, byte[] scriptBytes)
+        internal TransactionOutput(NetworkParameters @params, Transaction parent, byte[] scriptBytes)
             : base(@params)
         {
             _scriptBytes = scriptBytes;
             _value = Utils.ToNanoCoins(50, 0);
+            ParentTransaction = parent;
             _availableForSpending = true;
         }
 

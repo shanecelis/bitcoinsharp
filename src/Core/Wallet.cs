@@ -899,7 +899,7 @@ namespace BitCoinSharp
                 // Reconnect the transactions in the common part of the chain.
                 foreach (var tx in commonChainTransactions.Values)
                 {
-                    var badInput = tx.ConnectInputs(all, false);
+                    var badInput = tx.ConnectForReorganize(all);
                     Debug.Assert(badInput == null, "Failed to connect " + tx.HashAsString + ", " + badInput);
                 }
                 // Recalculate the unspent/spent buckets for the transactions the re-org did not affect.

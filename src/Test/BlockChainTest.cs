@@ -92,6 +92,18 @@ namespace BitCoinSharp.Test
         }
 
         [Test]
+        public void ReceiveCoins()
+        {
+            // Quick check that we can actually receive coins.
+            var tx1 = TestUtils.CreateFakeTx(_unitTestParams,
+                                             Utils.ToNanoCoins(1, 0),
+                                             _wallet.Keychain[0].ToAddress(_unitTestParams));
+            var b1 = TestUtils.CreateFakeBlock(_unitTestParams, _blockStore, tx1).Block;
+            _chain.Add(b1);
+            Assert.IsTrue(_wallet.GetBalance().CompareTo(0UL) > 0);
+        }
+
+        [Test]
         public void MerkleRoots()
         {
             // Test that merkle root verification takes place when a relevant transaction is present and doesn't when

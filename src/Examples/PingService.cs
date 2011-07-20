@@ -65,13 +65,15 @@ namespace BitCoinSharp.Examples
             // Fetch the first key in the wallet (should be the only key).
             var key = wallet.Keychain[0];
 
+            Console.WriteLine(wallet);
+
             // Load the block chain, if there is one stored locally.
             Console.WriteLine("Reading block store from disk");
             using (var blockStore = new BoundedOverheadBlockStore(@params, new FileInfo(filePrefix + ".blockchain")))
             {
                 // Connect to the localhost node. One minute timeout since we won't try any other peers
                 Console.WriteLine("Connecting ...");
-                using (var conn = new NetworkConnection(IPAddress.Loopback, @params, blockStore.GetChainHead().Height, 60000))
+                using (var conn = new NetworkConnection(Dns.GetHostAddresses("plan99.net")[0], @params, blockStore.GetChainHead().Height, 60000))
                 {
                     var chain = new BlockChain(@params, wallet, blockStore);
                     var peer = new Peer(@params, conn, chain);

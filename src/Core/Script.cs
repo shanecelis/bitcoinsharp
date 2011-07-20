@@ -483,6 +483,20 @@ namespace BitCoinSharp
             }
         }
 
+        /// <summary>
+        /// Create a script that sends coins directly to the given public key (eg in a coinbase transaction).
+        /// </summary>
+        internal static byte[] CreateOutputScript(byte[] pubkey)
+        {
+            // TODO: Do this by creating a Script *first* then having the script reassemble itself into bytes.
+            using (var bits = new MemoryStream())
+            {
+                WriteBytes(bits, pubkey);
+                bits.Write(OpCheckSig);
+                return bits.ToArray();
+            }
+        }
+
         internal static byte[] CreateInputScript(byte[] signature, byte[] pubkey)
         {
             // TODO: Do this by creating a Script *first* then having the script reassemble itself into bytes.

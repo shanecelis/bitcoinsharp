@@ -549,12 +549,13 @@ namespace BitCoinSharp
         /////////////////////////////////////////////////////////////////////////////////////////////////
         // Unit testing related methods.
 
-        private static int _coinbaseCounter;
+        // Used to make transactions unique.
+        private static int _txCounter;
 
         /// <summary>
         /// Adds a coinbase transaction to the block. This exists for unit tests.
         /// </summary>
-        internal void AddCoinbaseTransaction(Address to)
+        internal void AddCoinbaseTransaction(byte[] pubKeyTo)
         {
             Transactions = new List<Transaction>();
             var coinbase = new Transaction(Params);
@@ -562,13 +563,13 @@ namespace BitCoinSharp
             // transactions are distinguished by every TX output going to a different key.
             //
             // Here we will do things a bit differently so a new address isn't needed every time. We'll put a simple
-            // counter in the scriptSig so every transaction has a different hash. The output is also different.
-            // Real coinbase transactions use <pubkey> OP_CHECKSIG rather than a send to an address though there's
-            // nothing in the system that enforces that and both are just as valid.
-            coinbase.AddInput(new TransactionInput(Params, coinbase, new[] {(byte) _coinbaseCounter++}));
-            coinbase.AddOutput(new TransactionOutput(Params, coinbase, Utils.ToNanoCoins(50, 0), to));
+            // counter in the scriptSig so every transaction has a different hash.
+            coinbase.AddInput(new TransactionInput(Params, coinbase, new[] {(byte) _txCounter++}));
+            coinbase.AddOutput(new TransactionOutput(Params, coinbase, Script.CreateOutputScript(pubKeyTo)));
             Transactions.Add(coinbase);
         }
+
+        private static readonly byte[] _emptyBytes = new byte[32];
 
         /// <summary>
         /// Returns a solved block that builds on top of this one. This exists for unit tests.
@@ -577,7 +578,21 @@ namespace BitCoinSharp
         {
             var b = new Block(Params);
             b.DifficultyTarget = _difficultyTarget;
-            b.AddCoinbaseTransaction(to);
+            b.AddCoinbaseTransaction(_emptyBytes);
+
+            // Add a transaction paying 50 coins to the "to" address.
+            var t = new Transaction(Params);
+            t.AddOutput(new TransactionOutput(Params, t, Utils.ToNanoCoins(50, 0), to));
+            // The input does not really need to be a valid signature, as long as it has the right general form.
+            var input = new TransactionInput(Params, t, Script.CreateInputScript(_emptyBytes, _emptyBytes));
+            // Importantly the outpoint hash cannot be zero as that's how we detect a coinbase transaction in isolation
+            // but it must be unique to avoid 'different' transactions looking the same.
+            var counter = new byte[32];
+            counter[0] = (byte) _txCounter++;
+            input.Outpoint.Hash = new Sha256Hash(counter);
+            t.AddInput(input);
+            b.AddTransaction(t);
+
             b.PrevBlockHash = Hash;
             b.Time = time;
             b.Solve();

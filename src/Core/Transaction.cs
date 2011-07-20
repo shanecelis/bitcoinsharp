@@ -192,17 +192,21 @@ namespace BitCoinSharp
         /// Connects all inputs using the provided transactions. If any input cannot be connected returns that input or
         /// null on success.
         /// </summary>
-        internal TransactionInput ConnectInputs(IDictionary<Sha256Hash, Transaction> transactions, bool disconnect)
+        internal TransactionInput ConnectForReorganize(IDictionary<Sha256Hash, Transaction> transactions)
         {
             foreach (var input in _inputs)
             {
                 // Coinbase transactions, by definition, do not have connectable inputs.
                 if (input.IsCoinBase) continue;
-                if (input.Connect(transactions, disconnect) != TransactionInput.ConnectionResult.Success)
-                {
-                    // Could not connect this input, so return it and abort.
-                    return input;
-                }
+                var result = input.Connect(transactions, false);
+                // Connected to another tx in the wallet?
+                if (result == TransactionInput.ConnectionResult.Success)
+                    continue;
+                // The input doesn't exist in the wallet, eg because it belongs to somebody else (inbound spend).
+                if (result == TransactionInput.ConnectionResult.NoSuchTx)
+                    continue;
+                // Could not connect this input, so return it and abort.
+                return input;
             }
             return null;
         }
@@ -325,10 +329,13 @@ namespace BitCoinSharp
         /// </summary>
         public void AddInput(TransactionOutput from)
         {
-            _inputs.Add(new TransactionInput(Params, this, from));
+            AddInput(new TransactionInput(Params, this, from));
         }
 
-        internal void AddInput(TransactionInput input)
+        /// <summary>
+        /// Adds an input directly, with no checking that it's valid.
+        /// </summary>
+        public void AddInput(TransactionInput input)
         {
             _inputs.Add(input);
         }

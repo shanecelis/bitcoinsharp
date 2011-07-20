@@ -32,7 +32,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Hash of the transaction to which we refer.
         /// </summary>
-        internal Sha256Hash Hash { get; private set; }
+        internal Sha256Hash Hash { get; set; }
 
         /// <summary>
         /// Which output of that transaction we are talking about.
@@ -113,6 +113,11 @@ namespace BitCoinSharp
         internal byte[] ConnectedPubKeyHash
         {
             get { return ConnectedOutput.ScriptPubKey.PubKeyHash; }
+        }
+
+        public override string ToString()
+        {
+            return "outpoint " + Index + ":" + Hash;
         }
     }
 }
