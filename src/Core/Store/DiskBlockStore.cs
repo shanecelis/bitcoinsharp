@@ -147,7 +147,7 @@ namespace BitCoinSharp.Store
                         else
                         {
                             // Don't try to verify the genesis block to avoid upsetting the unit tests.
-                            b.Verify();
+                            b.VerifyHeader();
                             // Calculate its height and total chain work.
                             s = prev.Build(b);
                         }

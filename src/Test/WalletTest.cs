@@ -44,48 +44,12 @@ namespace BitCoinSharp.Test
             _blockStore.Dispose();
         }
 
-        private static Transaction CreateFakeTx(ulong nanocoins, Address to)
-        {
-            var t = new Transaction(_params);
-            var o1 = new TransactionOutput(_params, t, nanocoins, to);
-            t.AddOutput(o1);
-            // Make a previous tx simply to send us sufficient coins. This previous tx is not really valid but it doesn't
-            // matter for our purposes.
-            var prevTx = new Transaction(_params);
-            var prevOut = new TransactionOutput(_params, prevTx, nanocoins, to);
-            prevTx.AddOutput(prevOut);
-            // Connect it.
-            t.AddInput(prevOut);
-            return t;
-        }
-
-        private class BlockPair
-        {
-            public StoredBlock StoredBlock { get; set; }
-            public Block Block { get; set; }
-        }
-
-        // Emulates receiving a valid block that builds on top of the chain.
-        private BlockPair CreateFakeBlock(params Transaction[] transactions)
-        {
-            var b = _blockStore.GetChainHead().Header.CreateNextBlock(new EcKey().ToAddress(_params));
-            foreach (var tx in transactions)
-                b.AddTransaction(tx);
-            b.Solve();
-            var pair = new BlockPair();
-            pair.Block = b;
-            pair.StoredBlock = _blockStore.GetChainHead().Build(b);
-            _blockStore.Put(pair.StoredBlock);
-            _blockStore.SetChainHead(pair.StoredBlock);
-            return pair;
-        }
-
         [Test]
         public void BasicSpending()
         {
             // We'll set up a wallet that receives a coin, then sends a coin of lesser value and keeps the change.
             var v1 = Utils.ToNanoCoins(1, 0);
-            var t1 = CreateFakeTx(v1, _myAddress);
+            var t1 = TestUtils.CreateFakeTx(_params, v1, _myAddress);
 
             _wallet.Receive(t1, null, BlockChain.NewBlockType.BestChain);
             Assert.AreEqual(v1, _wallet.GetBalance());
@@ -106,13 +70,13 @@ namespace BitCoinSharp.Test
         {
             // The wallet receives a coin on the main chain, then on a side chain. Only main chain counts towards balance.
             var v1 = Utils.ToNanoCoins(1, 0);
-            var t1 = CreateFakeTx(v1, _myAddress);
+            var t1 = TestUtils.CreateFakeTx(_params, v1, _myAddress);
 
             _wallet.Receive(t1, null, BlockChain.NewBlockType.BestChain);
             Assert.AreEqual(v1, _wallet.GetBalance());
 
             var v2 = Utils.ToNanoCoins(0, 50);
-            var t2 = CreateFakeTx(v2, _myAddress);
+            var t2 = TestUtils.CreateFakeTx(_params, v2, _myAddress);
             _wallet.Receive(t2, null, BlockChain.NewBlockType.SideChain);
 
             Assert.AreEqual(v1, _wallet.GetBalance());
@@ -121,7 +85,7 @@ namespace BitCoinSharp.Test
         [Test]
         public void Listener()
         {
-            var fakeTx = CreateFakeTx(Utils.ToNanoCoins(1, 0), _myAddress);
+            var fakeTx = TestUtils.CreateFakeTx(_params, Utils.ToNanoCoins(1, 0), _myAddress);
             var didRun = false;
             _wallet.CoinsReceived +=
                 (sender, e) =>
@@ -142,10 +106,10 @@ namespace BitCoinSharp.Test
             // Receive 5 coins then half a coin.
             var v1 = Utils.ToNanoCoins(5, 0);
             var v2 = Utils.ToNanoCoins(0, 50);
-            var t1 = CreateFakeTx(v1, _myAddress);
-            var t2 = CreateFakeTx(v2, _myAddress);
-            var b1 = CreateFakeBlock(t1).StoredBlock;
-            var b2 = CreateFakeBlock(t2).StoredBlock;
+            var t1 = TestUtils.CreateFakeTx(_params, v1, _myAddress);
+            var t2 = TestUtils.CreateFakeTx(_params, v2, _myAddress);
+            var b1 = TestUtils.CreateFakeBlock(_params, _blockStore, t1).StoredBlock;
+            var b2 = TestUtils.CreateFakeBlock(_params, _blockStore, t2).StoredBlock;
             var expected = Utils.ToNanoCoins(5, 50);
             _wallet.Receive(t1, b1, BlockChain.NewBlockType.BestChain);
             _wallet.Receive(t2, b2, BlockChain.NewBlockType.BestChain);
@@ -163,7 +127,7 @@ namespace BitCoinSharp.Test
                 _wallet.GetBalance(Wallet.BalanceType.Estimated)));
 
             // Now confirm the transaction by including it into a block.
-            var b3 = CreateFakeBlock(spend).StoredBlock;
+            var b3 = TestUtils.CreateFakeBlock(_params, _blockStore, spend).StoredBlock;
             _wallet.Receive(spend, b3, BlockChain.NewBlockType.BestChain);
 
             // Change is confirmed. We started with 5.50 so we should have 4.50 left.
@@ -178,22 +142,22 @@ namespace BitCoinSharp.Test
         [Test]
         public void BlockChainCatchup()
         {
-            var tx1 = CreateFakeTx(Utils.ToNanoCoins(1, 0), _myAddress);
-            var b1 = CreateFakeBlock(tx1).StoredBlock;
+            var tx1 = TestUtils.CreateFakeTx(_params, Utils.ToNanoCoins(1, 0), _myAddress);
+            var b1 = TestUtils.CreateFakeBlock(_params, _blockStore, tx1).StoredBlock;
             _wallet.Receive(tx1, b1, BlockChain.NewBlockType.BestChain);
             // Send 0.10 to somebody else.
             var send1 = _wallet.CreateSend(new EcKey().ToAddress(_params), Utils.ToNanoCoins(0, 10), _myAddress);
             // Pretend it makes it into the block chain, our wallet state is cleared but we still have the keys, and we
             // want to get back to our previous state. We can do this by just not confirming the transaction as
             // createSend is stateless.
-            var b2 = CreateFakeBlock(send1).StoredBlock;
+            var b2 = TestUtils.CreateFakeBlock(_params, _blockStore, send1).StoredBlock;
             _wallet.Receive(send1, b2, BlockChain.NewBlockType.BestChain);
             Assert.AreEqual(Utils.BitcoinValueToFriendlyString(_wallet.GetBalance()), "0.90");
             // And we do it again after the catch-up.
             var send2 = _wallet.CreateSend(new EcKey().ToAddress(_params), Utils.ToNanoCoins(0, 10), _myAddress);
             // What we'd really like to do is prove the official client would accept it .... no such luck unfortunately.
             _wallet.ConfirmSend(send2);
-            var b3 = CreateFakeBlock(send2).StoredBlock;
+            var b3 = TestUtils.CreateFakeBlock(_params, _blockStore, send2).StoredBlock;
             _wallet.Receive(send2, b3, BlockChain.NewBlockType.BestChain);
             Assert.AreEqual(Utils.BitcoinValueToFriendlyString(_wallet.GetBalance()), "0.80");
         }
@@ -202,7 +166,7 @@ namespace BitCoinSharp.Test
         public void Balances()
         {
             var nanos = Utils.ToNanoCoins(1, 0);
-            var tx1 = CreateFakeTx(nanos, _myAddress);
+            var tx1 = TestUtils.CreateFakeTx(_params, nanos, _myAddress);
             _wallet.Receive(tx1, null, BlockChain.NewBlockType.BestChain);
             Assert.AreEqual(nanos, tx1.GetValueSentToMe(_wallet, true));
             // Send 0.10 to somebody else.
@@ -237,7 +201,7 @@ namespace BitCoinSharp.Test
 
             // Receive 1 BTC.
             var nanos = Utils.ToNanoCoins(1, 0);
-            var t1 = CreateFakeTx(nanos, _myAddress);
+            var t1 = TestUtils.CreateFakeTx(_params, nanos, _myAddress);
             _wallet.Receive(t1, null, BlockChain.NewBlockType.BestChain);
             // Create a send to a merchant.
             var send1 = _wallet.CreateSend(new EcKey().ToAddress(_params), Utils.ToNanoCoins(0, 50));

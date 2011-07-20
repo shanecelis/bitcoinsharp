@@ -64,6 +64,7 @@
     <Compile Include="ScriptTest.cs" />
     <Compile Include="Store\BoundedOverheadBlockStoreTest.cs" />
     <Compile Include="Store\DiskBlockStoreTest.cs" />
+    <Compile Include="TestUtils.cs" />
     <Compile Include="UtilsTest.cs" />
     <Compile Include="VarIntTest.cs" />
     <Compile Include="WalletTest.cs" />

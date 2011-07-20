@@ -36,6 +36,6 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("0.2.135.36")]
-[assembly: AssemblyFileVersion("0.2.135.37")]
+[assembly: AssemblyVersion("0.2.140.41")]
+[assembly: AssemblyFileVersion("0.2.140.41")]
 [assembly: InternalsVisibleTo("BitCoinSharp.Test")]

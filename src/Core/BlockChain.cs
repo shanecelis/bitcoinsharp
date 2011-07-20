@@ -160,15 +160,31 @@ namespace BitCoinSharp
                     return true;
                 }
 
-                // Prove the block is internally valid: hash is lower than target, merkle root is correct and so on.
+                // Does this block contain any transactions we might care about? Check this up front before verifying the
+                // blocks validity so we can skip the merkle root verification if the contents aren't interesting. This saves
+                // a lot of time for big blocks.
+                var contentsImportant = false;
+                var walletToTxMap = new Dictionary<Wallet, List<Transaction>>();
+                if (block.Transactions != null)
+                {
+                    ScanTransactions(block, walletToTxMap);
+                    contentsImportant = walletToTxMap.Count > 0;
+                }
+
+                // Prove the block is internally valid: hash is lower than target, etc. This only checks the block contents
+                // if there is a tx sending or receiving coins using an address in one of our wallets. And those transactions
+                // are only lightly verified: presence in a valid connecting block is taken as proof of validity. See the
+                // article here for more details: http://code.google.com/p/bitcoinj/wiki/SecurityModel
                 try
                 {
-                    block.Verify();
+                    block.VerifyHeader();
+                    if (contentsImportant)
+                        block.VerifyTransactions();
                 }
                 catch (VerificationException e)
                 {
                     _log.Error("Failed to verify block:", e);
-                    _log.Error(block.ToString());
+                    _log.Error(block.HashAsString);
                     throw;
                 }
 
@@ -191,9 +207,7 @@ namespace BitCoinSharp
                 var newStoredBlock = storedPrev.Build(block);
                 CheckDifficultyTransitions(storedPrev, newStoredBlock);
                 _blockStore.Put(newStoredBlock);
-                // block.transactions may be null here if we received only a header and not a full block. This does not
-                // happen currently but might in future if GetHeaders is implemented.
-                ConnectBlock(newStoredBlock, storedPrev, block.Transactions);
+                ConnectBlock(newStoredBlock, storedPrev, walletToTxMap);
 
                 if (tryConnecting)
                     TryConnectingUnconnected();
@@ -205,7 +219,7 @@ namespace BitCoinSharp
 
         /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
         /// <exception cref="BitCoinSharp.VerificationException" />
-        private void ConnectBlock(StoredBlock newStoredBlock, StoredBlock storedPrev, IEnumerable<Transaction> newTransactions)
+        private void ConnectBlock(StoredBlock newStoredBlock, StoredBlock storedPrev, IDictionary<Wallet, List<Transaction>> newTransactions)
         {
             if (storedPrev.Equals(_chainHead))
             {
@@ -333,19 +347,21 @@ namespace BitCoinSharp
         }
 
         /// <exception cref="BitCoinSharp.VerificationException" />
-        private void SendTransactionsToWallet(StoredBlock block, NewBlockType blockType, IEnumerable<Transaction> newTransactions)
+        private static void SendTransactionsToWallet(StoredBlock block, NewBlockType blockType, IDictionary<Wallet, List<Transaction>> newTransactions)
         {
-            // Scan the transactions to find out if any mention addresses we own.
-            foreach (var tx in newTransactions)
+            foreach (var item in newTransactions)
             {
                 try
                 {
-                    ScanTransaction(block, tx, blockType);
+                    foreach (var tx in item.Value)
+                    {
+                        item.Key.Receive(tx, block, blockType);
+                    }
                 }
                 catch (ScriptException e)
                 {
-                    // We don't want scripts we don't understand to break the block chain,
-                    // so just note that this tx was not scanned here and continue.
+                    // We don't want scripts we don't understand to break the block chain so just note that this tx was
+                    // not scanned here and continue.
                     _log.WarnFormat("Failed to parse a script: {0}", e);
                 }
             }
@@ -453,40 +469,61 @@ namespace BitCoinSharp
                                                 receivedDifficulty.ToString(16) + " vs " + newDifficulty.ToString(16));
         }
 
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <summary>
+        /// For the transactions in the given block, update the txToWalletMap such that each wallet maps to a list of
+        /// transactions for which it is relevant.
+        /// </summary>
         /// <exception cref="BitCoinSharp.VerificationException" />
-        private void ScanTransaction(StoredBlock block, Transaction tx, NewBlockType blockType)
+        private void ScanTransactions(Block block, IDictionary<Wallet, List<Transaction>> walletToTxMap)
         {
-            foreach (var wallet in _wallets)
+            foreach (var tx in block.Transactions)
             {
-                var shouldReceive = false;
-                foreach (var output in tx.Outputs)
+                try
                 {
-                    // TODO: Handle more types of outputs, not just regular to address outputs.
-                    if (output.ScriptPubKey.IsSentToIp) return;
-                    // This is not thread safe as a key could be removed between the call to isMine and receive.
-                    if (output.IsMine(wallet))
+                    foreach (var wallet in _wallets)
                     {
-                        shouldReceive = true;
-                    }
-                }
-
-                // Coinbase transactions don't have anything useful in their inputs (as they create coins out of thin air).
-                if (!tx.IsCoinBase)
-                {
-                    foreach (var i in tx.Inputs)
-                    {
-                        var pubkey = i.ScriptSig.PubKey;
-                        // This is not thread safe as a key could be removed between the call to isPubKeyMine and receive.
-                        if (wallet.IsPubKeyMine(pubkey))
+                        var shouldReceive = false;
+                        foreach (var output in tx.Outputs)
                         {
-                            shouldReceive = true;
+                            // TODO: Handle more types of outputs, not just regular to address outputs.
+                            if (output.ScriptPubKey.IsSentToIp) return;
+                            // This is not thread safe as a key could be removed between the call to isMine and receive.
+                            if (output.IsMine(wallet))
+                            {
+                                shouldReceive = true;
+                            }
                         }
+
+                        // Coinbase transactions don't have anything useful in their inputs (as they create coins out of thin air).
+                        if (!shouldReceive && !tx.IsCoinBase)
+                        {
+                            foreach (var i in tx.Inputs)
+                            {
+                                var pubkey = i.ScriptSig.PubKey;
+                                // This is not thread safe as a key could be removed between the call to isPubKeyMine and receive.
+                                if (wallet.IsPubKeyMine(pubkey))
+                                {
+                                    shouldReceive = true;
+                                }
+                            }
+                        }
+
+                        if (!shouldReceive) continue;
+                        List<Transaction> txList;
+                        if (!walletToTxMap.TryGetValue(wallet, out txList))
+                        {
+                            txList = new List<Transaction>();
+                            walletToTxMap[wallet] = txList;
+                        }
+                        txList.Add(tx);
                     }
                 }
-
-                if (shouldReceive)
-                    wallet.Receive(tx, block, blockType);
+                catch (ScriptException e)
+                {
+                    // We don't want scripts we don't understand to break the block chain so just note that this tx was
+                    // not scanned here and continue.
+                    _log.Warn("Failed to parse a script: " + e);
+                }
             }
         }
 

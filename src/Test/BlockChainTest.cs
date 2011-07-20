@@ -31,13 +31,16 @@ namespace BitCoinSharp.Test
         private BlockChain _testNetChain;
 
         private Wallet _wallet;
-        private IBlockStore _chainBlockStore;
         private BlockChain _chain;
+        private IBlockStore _blockStore;
         private Address _coinbaseTo;
         private NetworkParameters _unitTestParams;
-        private Address _someOtherGuy;
 
-        // NOTE: Handling of chain splits/reorgs are in ChainSplitTests.
+        private void ResetBlockStore()
+        {
+            _blockStore = new MemoryBlockStore(_unitTestParams);
+        }
+
         [SetUp]
         public void SetUp()
         {
@@ -47,18 +50,18 @@ namespace BitCoinSharp.Test
             _unitTestParams = NetworkParameters.UnitTests();
             _wallet = new Wallet(_unitTestParams);
             _wallet.AddKey(new EcKey());
-            _chainBlockStore = new MemoryBlockStore(_unitTestParams);
-            _chain = new BlockChain(_unitTestParams, _wallet, _chainBlockStore);
+
+            ResetBlockStore();
+            _chain = new BlockChain(_unitTestParams, _wallet, _blockStore);
 
             _coinbaseTo = _wallet.Keychain[0].ToAddress(_unitTestParams);
-            _someOtherGuy = new EcKey().ToAddress(_unitTestParams);
         }
 
         [TearDown]
         public void TearDown()
         {
             _testNetChainBlockStore.Dispose();
-            _chainBlockStore.Dispose();
+            _blockStore.Dispose();
         }
 
         [Test]
@@ -83,8 +86,41 @@ namespace BitCoinSharp.Test
             {
                 b2.Nonce = n;
             }
+
             // Now it works because we reset the nonce.
             Assert.IsTrue(_testNetChain.Add(b2));
+        }
+
+        [Test]
+        public void MerkleRoots()
+        {
+            // Test that merkle root verification takes place when a relevant transaction is present and doesn't when
+            // there isn't any such tx present (as an optimization).
+            var tx1 = TestUtils.CreateFakeTx(_unitTestParams,
+                                             Utils.ToNanoCoins(1, 0),
+                                             _wallet.Keychain[0].ToAddress(_unitTestParams));
+            var b1 = TestUtils.CreateFakeBlock(_unitTestParams, _blockStore, tx1).Block;
+            _chain.Add(b1);
+            ResetBlockStore();
+            var hash = b1.MerkleRoot;
+            b1.MerkleRoot = Sha256Hash.ZeroHash;
+            try
+            {
+                _chain.Add(b1);
+                Assert.Fail();
+            }
+            catch (VerificationException)
+            {
+                // Expected.
+                b1.MerkleRoot = hash;
+            }
+            // Now add a second block with no relevant transactions and then break it.
+            var tx2 = TestUtils.CreateFakeTx(_unitTestParams, Utils.ToNanoCoins(1, 0),
+                                             new EcKey().ToAddress(_unitTestParams));
+            var b2 = TestUtils.CreateFakeBlock(_unitTestParams, _blockStore, tx2).Block;
+            b2.MerkleRoot = Sha256Hash.ZeroHash;
+            b2.Solve();
+            _chain.Add(b2); // Broken block is accepted because its contents don't matter to us.
         }
 
         [Test]
@@ -191,7 +227,7 @@ namespace BitCoinSharp.Test
             b2.Time = 1296734343;
             b2.PrevBlockHash = new Sha256Hash(Hex.Decode("000000033cc282bc1fa9dcae7a533263fd7fe66490f550d80076433340831604"));
             Assert.AreEqual("000000037b21cac5d30fc6fda2581cf7b2612908aed2abbcc429c45b0557a15f", b2.HashAsString);
-            b2.Verify();
+            b2.VerifyHeader();
             return b2;
         }
 
@@ -203,7 +239,7 @@ namespace BitCoinSharp.Test
             b1.Time = 1296734340;
             b1.PrevBlockHash = new Sha256Hash(Hex.Decode("00000007199508e34a9ff81e6ec0c477a4cccff2a4767a8eee39c11db367b008"));
             Assert.AreEqual("000000033cc282bc1fa9dcae7a533263fd7fe66490f550d80076433340831604", b1.HashAsString);
-            b1.Verify();
+            b1.VerifyHeader();
             return b1;
         }
     }
