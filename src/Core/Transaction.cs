@@ -246,9 +246,6 @@ namespace BitCoinSharp
                 Cursor += output.MessageSize;
             }
             _lockTime = ReadUint32();
-
-            // Store a hash, it may come in useful later (want to avoid re-serialization costs).
-            _hash = new Sha256Hash(Utils.ReverseBytes(Utils.DoubleDigest(Bytes, Offset, Cursor - Offset)));
         }
 
         /// <summary>

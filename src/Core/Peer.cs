@@ -388,6 +388,12 @@ namespace BitCoinSharp
                 throw new Exception("Peer does not have block chain");
             }
             var blocksToGet = (int) (chainHeight - _blockChain.ChainHead.Height);
+            if (blocksToGet < 0)
+            {
+                // This peer has fewer blocks than we do. It isn't usable.
+                // TODO: We can't do the right thing here until Mirons patch lands. For now just return a zero latch.
+                return new CountDownLatch(0);
+            }
             _chainCompletionLatch = new CountDownLatch(blocksToGet);
             if (blocksToGet > 0)
             {
