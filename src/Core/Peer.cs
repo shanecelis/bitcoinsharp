@@ -231,12 +231,12 @@ namespace BitCoinSharp
         /// </summary>
         /// <param name="blockHash">Hash of the block you were requesting.</param>
         /// <exception cref="System.IO.IOException" />
-        public GetDataFuture<Block> GetBlock(Sha256Hash blockHash)
+        public IAsyncResult BeginGetBlock(Sha256Hash blockHash, AsyncCallback callback, object state)
         {
             var getdata = new GetDataMessage(_params);
             var inventoryItem = new InventoryItem(InventoryItem.ItemType.Block, blockHash);
             getdata.AddItem(inventoryItem);
-            var future = new GetDataFuture<Block>(this, inventoryItem);
+            var future = new GetDataFuture<Block>(this, inventoryItem, callback, state);
             // Add to the list of things we're waiting for. It's important this come before the network send to avoid
             // race conditions.
             lock (_pendingGetBlockFutures)
@@ -247,52 +247,56 @@ namespace BitCoinSharp
             return future;
         }
 
+        public Block EndGetBlock(IAsyncResult asyncResult)
+        {
+            return ((GetDataFuture<Block>) asyncResult).Get();
+        }
+
         // A GetDataFuture wraps the result of a getblock or (in future) getTransaction so the owner of the object can
         // decide whether to wait forever, wait for a short while or check later after doing other work.
-        public class GetDataFuture<T>
+        private class GetDataFuture<T> : IAsyncResult
         {
-            private readonly Peer _enclosing;
+            private readonly Peer _peer;
             private bool _cancelled;
             private readonly InventoryItem _item;
+            private readonly AsyncCallback _callback;
+            private readonly object _state;
             private readonly CountDownLatch _latch;
+            private WaitHandle _waitHandle;
             private T _result;
 
-            internal GetDataFuture(Peer enclosing, InventoryItem item)
+            internal GetDataFuture(Peer peer, InventoryItem item, AsyncCallback callback, object state)
             {
-                _enclosing = enclosing;
+                _peer = peer;
                 _item = item;
+                _callback = callback;
+                _state = state;
                 _latch = new CountDownLatch(1);
             }
 
-            public bool Cancel()
-            {
-                // Cannot cancel a getdata - once sent, it's sent.
-                _cancelled = true;
-                return false;
-            }
-
-            public bool IsCancelled
-            {
-                get { return _cancelled; }
-            }
-
-            public bool IsDone
+            public bool IsCompleted
             {
                 get { return !Equals(_result, default(T)) || _cancelled; }
             }
 
-            public T Get()
+            public WaitHandle AsyncWaitHandle
             {
-                _latch.Await();
-                Debug.Assert(!Equals(_result, default(T)));
-                return _result;
+                get { return _waitHandle ?? (_waitHandle = new LatchWaitHandle(_latch)); }
             }
 
-            /// <exception cref="System.TimeoutException" />
-            public T Get(TimeSpan timeout)
+            public object AsyncState
             {
-                if (!_latch.Await(timeout))
-                    throw new TimeoutException();
+                get { return _state; }
+            }
+
+            public bool CompletedSynchronously
+            {
+                get { return false; }
+            }
+
+            internal T Get()
+            {
+                _latch.Await();
                 Debug.Assert(!Equals(_result, default(T)));
                 return _result;
             }
@@ -307,11 +311,37 @@ namespace BitCoinSharp
             /// </summary>
             internal void SetResult(T result)
             {
-                Debug.Assert(Thread.CurrentThread == _enclosing._thread); // Called from peer thread.
+                Debug.Assert(Thread.CurrentThread == _peer._thread); // Called from peer thread.
                 _result = result;
                 // Now release the thread that is waiting. We don't need to synchronize here as the latch establishes
                 // a memory barrier.
                 _latch.CountDown();
+                _callback(this);
+                if (_waitHandle != null)
+                {
+                    _waitHandle.Close();
+                    _waitHandle = null;
+                }
+            }
+
+            private class LatchWaitHandle : WaitHandle
+            {
+                private readonly CountDownLatch _latch;
+
+                public LatchWaitHandle(CountDownLatch latch)
+                {
+                    _latch = latch;
+                }
+
+                public override bool WaitOne(int millisecondsTimeout, bool exitContext)
+                {
+                    return WaitOne(TimeSpan.FromMilliseconds(millisecondsTimeout));
+                }
+
+                public override bool WaitOne(TimeSpan timeout, bool exitContext)
+                {
+                    return _latch.Await(timeout);
+                }
             }
         }
 

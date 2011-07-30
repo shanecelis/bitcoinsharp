@@ -23,7 +23,7 @@ namespace BitCoinSharp.Examples
     /// <summary>
     /// Downloads the block given a block hash from the localhost node and prints it out.
     /// </summary>
-    public class FetchBlock
+    public static class FetchBlock
     {
         public static void Run(string[] args)
         {
@@ -36,9 +36,9 @@ namespace BitCoinSharp.Examples
             peer.Start();
 
             var blockHash = new Sha256Hash(args[0]);
-            var future = peer.GetBlock(blockHash);
+            var future = peer.BeginGetBlock(blockHash, null, null);
             Console.WriteLine("Waiting for node to send us the requested block: " + blockHash);
-            var block = future.Get();
+            var block = peer.EndGetBlock(future);
             Console.WriteLine(block);
             peer.Disconnect();
         }

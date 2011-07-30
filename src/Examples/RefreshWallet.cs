@@ -24,7 +24,7 @@ namespace BitCoinSharp.Examples
     /// <summary>
     /// RefreshWallet loads a wallet, then processes the block chain to update the transaction pools within it.
     /// </summary>
-    public class RefreshWallet
+    public static class RefreshWallet
     {
         public static void Run(string[] args)
         {
