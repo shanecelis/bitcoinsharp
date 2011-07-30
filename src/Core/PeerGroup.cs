@@ -71,6 +71,9 @@ namespace BitCoinSharp
         // Callback for events related to chain download
         private IPeerEventListener _downloadListener;
 
+        // Callbacks for events related to peer connection/disconnection
+        private readonly ICollection<IPeerEventListener> _peerEventListeners;
+
         private readonly NetworkParameters _params;
         private readonly IBlockStore _blockStore;
         private readonly BlockChain _chain;
@@ -87,10 +90,27 @@ namespace BitCoinSharp
             _inactives = new LinkedBlockingQueue<PeerAddress>();
 
             _peers = new SynchronizedHashSet<Peer>();
+
+            _peerEventListeners = new SynchronizedHashSet<IPeerEventListener>();
+
             _peerPool = new ThreadPoolExecutor(_coreThreads, _defaultConnections,
                                                TimeSpan.FromSeconds(_threadKeepAliveSeconds),
                                                new LinkedBlockingQueue<IRunnable>(1),
                                                new PeerGroupThreadFactory());
+        }
+
+        /// <summary>
+        /// Callbacks to the listener are performed in the connection thread.  The callback
+        /// should not perform time consuming tasks.
+        /// </summary>
+        public void AddEventListener(IPeerEventListener listener)
+        {
+            _peerEventListeners.Add(listener);
+        }
+
+        public bool RemoveEventListener(IPeerEventListener listener)
+        {
+            return _peerEventListeners.Remove(listener);
         }
 
         /// <summary>
@@ -252,23 +272,16 @@ namespace BitCoinSharp
                                 _log.Info("running " + peer);
                                 peer.Run();
                             }
-                            catch (Exception ex)
+                            catch (PeerException ex)
                             {
-                                // do not propagate RuntimeException - log and try next peer
+                                // do not propagate PeerException - log and try next peer
                                 _log.Error("error while talking to peer", ex);
                             }
                             finally
                             {
                                 // In all cases, disconnect and put the address back on the queue.
                                 // We will retry this peer after all other peers have been tried.
-                                try
-                                {
-                                    peer.Disconnect();
-                                }
-                                catch (Exception)
-                                {
-                                    // ignore
-                                }
+                                peer.Disconnect();
 
                                 _inactives.Add(address);
                                 if (_peers.Remove(peer))
@@ -291,7 +304,7 @@ namespace BitCoinSharp
                     // Fatal error
                     _log.Error("Block store corrupt?", e);
                     _running = false;
-                    break;
+                    throw new IOException(e.Message, e);
                 }
 
                 // If we got here, we should retry this address because an error unrelated
@@ -345,6 +358,16 @@ namespace BitCoinSharp
             {
                 if (_downloadListener != null && _downloadPeer == null)
                     StartBlockChainDownloadFromPeer(peer);
+                lock (_peerEventListeners)
+                {
+                    foreach (var listener in _peerEventListeners)
+                    {
+                        lock (listener)
+                        {
+                            listener.OnPeerConnected(peer, _peers.Count);
+                        }
+                    }
+                }
             }
         }
 
@@ -359,7 +382,20 @@ namespace BitCoinSharp
                     {
                         var firstPeer = _peers.FirstOrDefault();
                         if (_downloadListener != null && firstPeer != null)
+                        {
                             StartBlockChainDownloadFromPeer(firstPeer);
+                        }
+                    }
+                }
+
+                lock (_peerEventListeners)
+                {
+                    foreach (var listener in _peerEventListeners)
+                    {
+                        lock (listener)
+                        {
+                            listener.OnPeerDisconnected(peer, _peers.Count);
+                        }
                     }
                 }
             }

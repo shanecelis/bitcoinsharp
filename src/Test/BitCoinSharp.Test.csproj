@@ -61,6 +61,7 @@
     <Compile Include="Discovery\SeedPeersTest.cs" />
     <Compile Include="EcKeyTest.cs" />
     <Compile Include="PeerAddressTest.cs" />
+    <Compile Include="PeerGroupTest.cs" />
     <Compile Include="ScriptTest.cs" />
     <Compile Include="Store\BoundedOverheadBlockStoreTest.cs" />
     <Compile Include="Store\DiskBlockStoreTest.cs" />

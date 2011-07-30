@@ -79,6 +79,7 @@
     <Compile Include="NetworkParameters.cs" />
     <Compile Include="Peer.cs" />
     <Compile Include="PeerAddress.cs" />
+    <Compile Include="PeerException.cs" />
     <Compile Include="PeerGroup.cs" />
     <Compile Include="Ping.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

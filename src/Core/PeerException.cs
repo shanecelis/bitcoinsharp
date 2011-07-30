@@ -14,31 +14,32 @@
  * limitations under the License.
  */
 
+using System;
+
 namespace BitCoinSharp
 {
     /// <summary>
-    /// Convenience abstract class for implementing a PeerEventListener.
+    /// Thrown when a problem occurs in communicating with a peer, and we should
+    /// retry.
     /// </summary>
-    /// <remarks>
-    /// The default method implementations do nothing.
-    /// 
-    /// @author miron@google.com (Miron Cuperman)
-    /// </remarks>
-    public class AbstractPeerEventListener : IPeerEventListener
+    public class PeerException : Exception
     {
-        public virtual void OnBlocksDownloaded(Peer peer, Block block, int blocksLeft)
+        public PeerException()
         {
         }
 
-        public virtual void OnChainDownloadStarted(Peer peer, int blocksLeft)
+        public PeerException(string message)
+            : base(message)
         {
         }
 
-        public virtual void OnPeerConnected(Peer peer, int peerCount)
+        public PeerException(Exception innerException)
+            : base(innerException.Message, innerException)
         {
         }
 
-        public virtual void OnPeerDisconnected(Peer peer, int peerCount)
+        public PeerException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
     }

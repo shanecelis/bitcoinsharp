@@ -101,9 +101,21 @@ namespace BitCoinSharp
         /// <summary>
         /// Connects to the peer.
         /// </summary>
+        /// <exception cref="BitCoinSharp.PeerException">When there is a temporary problem with the peer and we should retry later.</exception>
         public void Connect()
         {
-            _conn = new NetworkConnection(_address, _params, _bestHeight, 60000);
+            try
+            {
+                _conn = new NetworkConnection(_address, _params, _bestHeight, 60000);
+            }
+            catch (IOException ex)
+            {
+                throw new PeerException(ex);
+            }
+            catch (ProtocolException ex)
+            {
+                throw new PeerException(ex);
+            }
         }
 
         /// <summary>
@@ -112,6 +124,7 @@ namespace BitCoinSharp
         /// <remarks>
         /// Connect() must be called first.
         /// </remarks>
+        /// <exception cref="BitCoinSharp.PeerException">When there is a temporary problem with the peer and we should retry later.</exception>
         public void Run()
         {
             // This should be called in the network loop thread for this peer
@@ -119,6 +132,7 @@ namespace BitCoinSharp
                 throw new Exception("please call connect() first");
 
             _running = true;
+
             try
             {
                 while (true)
@@ -145,33 +159,32 @@ namespace BitCoinSharp
                     }
                 }
             }
-            catch (Exception e)
+            catch (IOException e)
             {
-                if (e is IOException && !_running)
+                Disconnect();
+                if (!_running)
                 {
                     // This exception was expected because we are tearing down the socket as part of quitting.
                     _log.Info("Shutting down peer loop");
                 }
                 else
                 {
-                    // We caught an unexpected exception.
-                    Console.Error.WriteLine(e);
+                    throw new PeerException(e);
                 }
             }
+            catch (ProtocolException e)
+            {
+                Disconnect();
+                throw new PeerException(e);
+            }
+            catch (Exception e)
+            {
+                Disconnect();
+                _log.Error("unexpected exception in peer loop", e);
+                throw;
+            }
 
-            try
-            {
-                _conn.Shutdown();
-            }
-            catch (IOException)
-            {
-                // Ignore exceptions on shutdown, socket might be dead
-            }
-
-            lock (this)
-            {
-                _running = false;
-            }
+            Disconnect();
         }
 
         /// <exception cref="System.IO.IOException" />
@@ -451,16 +464,18 @@ namespace BitCoinSharp
         /// <exception cref="System.IO.IOException" />
         public void StartBlockChainDownload()
         {
-            foreach (var listener in _eventListeners)
-            {
-                lock (listener)
-                {
-                    listener.OnChainDownloadStarted(this, GetPeerBlocksToGet());
-                }
-            }
-
+            // TODO: peer might still have blocks that we don't have, and even have a heavier
+            // chain even if the chain block count is lower.
             if (GetPeerBlocksToGet() > 0)
             {
+                foreach (var listener in _eventListeners)
+                {
+                    lock (listener)
+                    {
+                        listener.OnChainDownloadStarted(this, GetPeerBlocksToGet());
+                    }
+                }
+
                 // When we just want as many blocks as possible, we can set the target hash to zero.
                 BlockChainDownload(Sha256Hash.ZeroHash);
             }
@@ -474,7 +489,7 @@ namespace BitCoinSharp
             {
                 // This should not happen because we shouldn't have given the user a Peer that is to another client-mode
                 // node. If that happens it means the user overrode us somewhere.
-                throw new Exception("Peer does not have block chain");
+                return -1;
             }
             var blocksToGet = (int) (chainHeight - _blockChain.ChainHead.Height);
             return blocksToGet;
@@ -492,7 +507,8 @@ namespace BitCoinSharp
             try
             {
                 // This is the correct way to stop an IO bound loop
-                _conn.Shutdown();
+                if (_conn != null)
+                    _conn.Shutdown();
             }
             catch (IOException)
             {
