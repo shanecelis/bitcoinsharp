@@ -35,18 +35,39 @@ namespace BitCoinSharp
         private ulong _services;
         private uint _time;
 
+        /// <summary>
+        /// Construct a peer address from a serialized payload.
+        /// </summary>
         /// <exception cref="BitCoinSharp.ProtocolException" />
         public PeerAddress(NetworkParameters @params, byte[] payload, int offset, uint protocolVersion)
             : base(@params, payload, offset, protocolVersion)
         {
         }
 
+        /// <summary>
+        /// Construct a peer address from a memorized or hardcoded address.
+        /// </summary>
         public PeerAddress(IPAddress addr, int port, uint protocolVersion)
         {
             Addr = addr;
             Port = port;
             ProtocolVersion = protocolVersion;
             _services = 0;
+        }
+
+        public PeerAddress(IPAddress addr, int port)
+            : this(addr, port, NetworkParameters.ProtocolVersion)
+        {
+        }
+
+        public PeerAddress(IPAddress addr)
+            : this(addr, 0)
+        {
+        }
+
+        public PeerAddress(IPEndPoint addr)
+            : this(addr.Address, addr.Port)
+        {
         }
 
         /// <exception cref="System.IO.IOException" />
@@ -74,7 +95,6 @@ namespace BitCoinSharp
             stream.Write((byte) Port);
         }
 
-        /// <exception cref="BitCoinSharp.ProtocolException" />
         protected override void Parse()
         {
             // Format of a serialized address:

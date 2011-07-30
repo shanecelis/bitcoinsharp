@@ -16,6 +16,7 @@
 
 using System;
 using System.Net;
+using System.Threading;
 using BitCoinSharp.Store;
 
 namespace BitCoinSharp.Examples
@@ -29,18 +30,21 @@ namespace BitCoinSharp.Examples
         {
             Console.WriteLine("Connecting to node");
             var @params = NetworkParameters.ProdNet();
-            var conn = new NetworkConnection(IPAddress.Loopback, @params, 0, 60000);
-            var blockStore = new MemoryBlockStore(@params);
-            var chain = new BlockChain(@params, blockStore);
-            var peer = new Peer(@params, conn, chain);
-            peer.Start();
 
-            var blockHash = new Sha256Hash(args[0]);
-            var future = peer.BeginGetBlock(blockHash, null, null);
-            Console.WriteLine("Waiting for node to send us the requested block: " + blockHash);
-            var block = peer.EndGetBlock(future);
-            Console.WriteLine(block);
-            peer.Disconnect();
+            using (var blockStore = new MemoryBlockStore(@params))
+            {
+                var chain = new BlockChain(@params, blockStore);
+                var peer = new Peer(@params, new PeerAddress(IPAddress.Loopback), chain);
+                peer.Connect();
+                new Thread(peer.Run).Start();
+
+                var blockHash = new Sha256Hash(args[0]);
+                var future = peer.BeginGetBlock(blockHash, null, null);
+                Console.WriteLine("Waiting for node to send us the requested block: " + blockHash);
+                var block = peer.EndGetBlock(future);
+                Console.WriteLine(block);
+                peer.Disconnect();
+            }
         }
     }
 }

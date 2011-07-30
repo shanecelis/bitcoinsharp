@@ -16,10 +16,10 @@
 
 using System.Diagnostics;
 using System.IO;
-using BitCoinSharp.Collections;
+using BitCoinSharp.Collections.Generic;
 using BitCoinSharp.IO;
-using log4net;
 using Org.BouncyCastle.Math;
+using log4net;
 
 namespace BitCoinSharp.Store
 {

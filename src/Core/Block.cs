@@ -21,8 +21,8 @@ using System.IO;
 using System.Text;
 using BitCoinSharp.Common;
 using BitCoinSharp.IO;
-using log4net;
 using Org.BouncyCastle.Math;
+using log4net;
 
 namespace BitCoinSharp
 {

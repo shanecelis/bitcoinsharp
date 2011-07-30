@@ -73,55 +73,36 @@ namespace BitCoinSharp.Examples
             {
                 // Connect to the localhost node. One minute timeout since we won't try any other peers
                 Console.WriteLine("Connecting ...");
-                using (var conn = new NetworkConnection(Dns.GetHostAddresses("plan99.net")[0], @params, blockStore.GetChainHead().Height, 60000))
-                {
-                    var chain = new BlockChain(@params, wallet, blockStore);
-                    var peer = new Peer(@params, conn, chain);
-                    peer.Start();
+                var chain = new BlockChain(@params, wallet, blockStore);
 
-                    // We want to know when the balance changes.
-                    wallet.CoinsReceived +=
-                        (sender, e) =>
-                        {
-                            // Running on a peer thread.
-                            Debug.Assert(!e.NewBalance.Equals(0));
-                            // It's impossible to pick one specific identity that you receive coins from in BitCoin as there
-                            // could be inputs from many addresses. So instead we just pick the first and assume they were all
-                            // owned by the same person.
-                            var input = e.Tx.Inputs[0];
-                            var from = input.FromAddress;
-                            var value = e.Tx.GetValueSentToMe(wallet);
-                            Console.WriteLine("Received " + Utils.BitcoinValueToFriendlyString(value) + " from " + from);
-                            // Now send the coins back!
-                            var sendTx = wallet.SendCoins(peer, from, value);
-                            Debug.Assert(sendTx != null); // We should never try to send more coins than we have!
-                            Console.WriteLine("Sent coins back! Transaction hash is " + sendTx.HashAsString);
-                            wallet.SaveToFile(walletFile);
-                        };
+                var peerGroup = new PeerGroup(blockStore, @params, chain);
+                peerGroup.AddAddress(new PeerAddress(IPAddress.Loopback));
+                peerGroup.Start();
 
-                    var progress = peer.StartBlockChainDownload();
-                    var max = progress.Count; // Racy but no big deal.
-                    if (max > 0)
+                // We want to know when the balance changes.
+                wallet.CoinsReceived +=
+                    (sender, e) =>
                     {
-                        Console.WriteLine("Downloading block chain. " + (max > 1000 ? "This may take a while." : ""));
-                        var current = max;
-                        var lastPercent = 0;
-                        while (current > 0)
-                        {
-                            var pct = 100.0 - (100.0*(current/(double) max));
-                            if ((int) pct != lastPercent)
-                            {
-                                Console.WriteLine(string.Format("Chain download {0}% done", (int) pct));
-                                lastPercent = (int) pct;
-                            }
-                            progress.Await(TimeSpan.FromSeconds(1));
-                            current = progress.Count;
-                        }
-                    }
-                    Console.WriteLine("Send coins to: " + key.ToAddress(@params));
-                    Console.WriteLine("Waiting for coins to arrive. Press Ctrl-C to quit.");
-                    // The peer thread keeps us alive until something kills the process.
-                }
+                        // Running on a peer thread.
+                        Debug.Assert(!e.NewBalance.Equals(0));
+                        // It's impossible to pick one specific identity that you receive coins from in BitCoin as there
+                        // could be inputs from many addresses. So instead we just pick the first and assume they were all
+                        // owned by the same person.
+                        var input = e.Tx.Inputs[0];
+                        var from = input.FromAddress;
+                        var value = e.Tx.GetValueSentToMe(wallet);
+                        Console.WriteLine("Received " + Utils.BitcoinValueToFriendlyString(value) + " from " + from);
+                        // Now send the coins back!
+                        var sendTx = wallet.SendCoins(peerGroup, from, value);
+                        Debug.Assert(sendTx != null); // We should never try to send more coins than we have!
+                        Console.WriteLine("Sent coins back! Transaction hash is " + sendTx.HashAsString);
+                        wallet.SaveToFile(walletFile);
+                    };
+
+                peerGroup.DownloadBlockChain();
+                Console.WriteLine("Send coins to: " + key.ToAddress(@params));
+                Console.WriteLine("Waiting for coins to arrive. Press Ctrl-C to quit.");
+                // The PeerGroup thread keeps us alive until something kills the process.
             }
         }
     }

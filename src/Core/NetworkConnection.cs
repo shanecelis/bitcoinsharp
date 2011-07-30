@@ -50,18 +50,20 @@ namespace BitCoinSharp
         /// Connect to the given IP address using the port specified as part of the network parameters. Once construction
         /// is complete a functioning network channel is set up and running.
         /// </summary>
-        /// <param name="remoteIp">IP address to connect to. IPv6 is not currently supported by BitCoin.</param>
+        /// <param name="peerAddress">IP address to connect to. IPv6 is not currently supported by BitCoin. If port is not positive the default port from params is used.</param>
         /// <param name="params">Defines which network to connect to and details of the protocol.</param>
         /// <param name="bestHeight">How many blocks are in our best chain</param>
         /// <param name="connectTimeout">Timeout in milliseconds when initially connecting to peer</param>
         /// <exception cref="System.IO.IOException">If there is a network related failure.</exception>
         /// <exception cref="BitCoinSharp.ProtocolException">If the version negotiation failed.</exception>
-        public NetworkConnection(IPAddress remoteIp, NetworkParameters @params, uint bestHeight, int connectTimeout)
+        public NetworkConnection(PeerAddress peerAddress, NetworkParameters @params, uint bestHeight, int connectTimeout)
         {
             _params = @params;
-            _remoteIp = remoteIp;
+            _remoteIp = peerAddress.Addr;
 
-            var address = new IPEndPoint(remoteIp, @params.Port);
+            var port = (peerAddress.Port > 0) ? peerAddress.Port : @params.Port;
+
+            var address = new IPEndPoint(_remoteIp, port);
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             _socket.Connect(address);
             _socket.SendTimeout = _socket.ReceiveTimeout = connectTimeout;
@@ -99,6 +101,13 @@ namespace BitCoinSharp
             // newer clients use check-summing
             _serializer.UseChecksumming(peerVersion >= 209);
             // Handshake is done!
+        }
+
+        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="BitCoinSharp.ProtocolException" />
+        public NetworkConnection(IPAddress inetAddress, NetworkParameters @params, uint bestHeight, int connectTimeout)
+            : this(new PeerAddress(inetAddress), @params, bestHeight, connectTimeout)
+        {
         }
 
         /// <summary>

@@ -26,60 +26,99 @@ using log4net;
 namespace BitCoinSharp
 {
     /// <summary>
-    /// A Peer handles the high level communication with a BitCoin node. It requires a NetworkConnection to be set up for
-    /// it. After that it takes ownership of the connection, creates and manages its own thread used for communication
-    /// with the network. All these threads synchronize on the block chain.
+    /// A Peer handles the high level communication with a BitCoin node.
     /// </summary>
+    /// <remarks>
+    /// After making the connection with Connect(), call Run() to start the message handling loop.
+    /// </remarks>
     public class Peer
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (Peer));
 
-        private readonly NetworkConnection _conn;
+        private NetworkConnection _conn;
         private readonly NetworkParameters _params;
-        private Thread _thread;
-        // Whether the peer thread is supposed to be running or not. Set to false during shutdown so the peer thread
+        // Whether the peer loop is supposed to be running or not. Set to false during shutdown so the peer loop
         // knows to quit when the socket goes away.
         private bool _running;
         private readonly BlockChain _blockChain;
 
         // Used to notify clients when the initial block chain download is finished.
-        private CountDownLatch _chainCompletionLatch;
         // When we want to download a block or transaction from a peer, the InventoryItem is put here whilst waiting for
         // the response. Synchronized on itself.
         private readonly IList<GetDataFuture<Block>> _pendingGetBlockFutures;
 
+        private readonly uint _bestHeight;
+
+        private readonly PeerAddress _address;
+
+        private readonly List<IPeerEventListener> _eventListeners;
+
         /// <summary>
         /// Construct a peer that handles the given network connection and reads/writes from the given block chain. Note that
-        /// communication won't occur until you call start().
+        /// communication won't occur until you call Connect().
         /// </summary>
-        public Peer(NetworkParameters @params, NetworkConnection conn, BlockChain blockChain)
+        /// <param name="bestHeight">Our current best chain height, to facilitate downloading.</param>
+        public Peer(NetworkParameters @params, PeerAddress address, uint bestHeight, BlockChain blockChain)
         {
-            _conn = conn;
             _params = @params;
+            _address = address;
+            _bestHeight = bestHeight;
             _blockChain = blockChain;
             _pendingGetBlockFutures = new List<GetDataFuture<Block>>();
+            _eventListeners = new List<IPeerEventListener>();
         }
 
         /// <summary>
-        /// Starts the background thread that processes messages.
+        /// Construct a peer that handles the given network connection and reads/writes from the given block chain. Note that
+        /// communication won't occur until you call connect().
         /// </summary>
-        public void Start()
+        public Peer(NetworkParameters @params, PeerAddress address, BlockChain blockChain)
+            : this(@params, address, 0, blockChain)
         {
-            _thread = new Thread(Run);
+        }
+
+        public void AddEventListener(IPeerEventListener listener)
+        {
             lock (this)
             {
-                _running = true;
+                _eventListeners.Add(listener);
             }
-            _thread.Name = "BitCoin peer thread: " + _conn;
-            _thread.Start();
+        }
+
+        public void RemoveEventListener(IPeerEventListener listener)
+        {
+            lock (this)
+            {
+                _eventListeners.Remove(listener);
+            }
+        }
+
+        public override string ToString()
+        {
+            return "Peer(" + _address.Addr + ":" + _address.Port + ")";
         }
 
         /// <summary>
-        /// Runs in the peers network thread and manages communication with the peer.
+        /// Connects to the peer.
         /// </summary>
-        private void Run()
+        public void Connect()
         {
-            Debug.Assert(Thread.CurrentThread == _thread);
+            _conn = new NetworkConnection(_address, _params, _bestHeight, 60000);
+        }
+
+        /// <summary>
+        /// Runs in the peers network loop and manages communication with the peer.
+        /// </summary>
+        /// <remarks>
+        /// Connect() must be called first.
+        /// </remarks>
+        public void Run()
+        {
+            // This should be called in the network loop thread for this peer
+            if (_conn == null)
+                throw new Exception("please call connect() first");
+
+            _running = true;
             try
             {
                 while (true)
@@ -111,7 +150,7 @@ namespace BitCoinSharp
                 if (e is IOException && !_running)
                 {
                     // This exception was expected because we are tearing down the socket as part of quitting.
-                    _log.Info("Shutting down peer thread");
+                    _log.Info("Shutting down peer loop");
                 }
                 else
                 {
@@ -119,6 +158,16 @@ namespace BitCoinSharp
                     Console.Error.WriteLine(e);
                 }
             }
+
+            try
+            {
+                _conn.Shutdown();
+            }
+            catch (IOException)
+            {
+                // Ignore exceptions on shutdown, socket might be dead
+            }
+
             lock (this)
             {
                 _running = false;
@@ -128,7 +177,7 @@ namespace BitCoinSharp
         /// <exception cref="System.IO.IOException" />
         private void ProcessBlock(Block m)
         {
-            Debug.Assert(Thread.CurrentThread == _thread);
+            // This should called in the network loop thread for this peer
             try
             {
                 // Was this block requested by getblock?
@@ -152,13 +201,11 @@ namespace BitCoinSharp
                 if (_blockChain.Add(m))
                 {
                     // The block was successfully linked into the chain. Notify the user of our progress.
-                    if (_chainCompletionLatch != null)
+                    foreach (var listener in _eventListeners)
                     {
-                        _chainCompletionLatch.CountDown();
-                        if (_chainCompletionLatch.Count == 0)
+                        lock (listener)
                         {
-                            // All blocks fetched, so we don't need this anymore.
-                            _chainCompletionLatch = null;
+                            listener.OnBlocksDownloaded(this, m, GetPeerBlocksToGet());
                         }
                     }
                 }
@@ -177,19 +224,20 @@ namespace BitCoinSharp
             catch (VerificationException e)
             {
                 // We don't want verification failures to kill the thread.
-                _log.Warn("block verification failed", e);
+                _log.Warn("Block verification failed", e);
             }
             catch (ScriptException e)
             {
                 // We don't want script failures to kill the thread.
-                _log.Warn("script exception", e);
+                _log.Warn("Script exception", e);
             }
         }
 
         /// <exception cref="System.IO.IOException" />
         private void ProcessInv(InventoryMessage inv)
         {
-            Debug.Assert(Thread.CurrentThread == _thread);
+            // This should be called in the network loop thread for this peer
+
             // The peer told us about some blocks or transactions they have. For now we only care about blocks.
             // Note that as we don't actually want to store the entire block chain or even the headers of the block
             // chain, we may end up requesting blocks we already requested before. This shouldn't (in theory) happen
@@ -236,7 +284,7 @@ namespace BitCoinSharp
             var getdata = new GetDataMessage(_params);
             var inventoryItem = new InventoryItem(InventoryItem.ItemType.Block, blockHash);
             getdata.AddItem(inventoryItem);
-            var future = new GetDataFuture<Block>(this, inventoryItem, callback, state);
+            var future = new GetDataFuture<Block>(inventoryItem, callback, state);
             // Add to the list of things we're waiting for. It's important this come before the network send to avoid
             // race conditions.
             lock (_pendingGetBlockFutures)
@@ -256,8 +304,6 @@ namespace BitCoinSharp
         // decide whether to wait forever, wait for a short while or check later after doing other work.
         private class GetDataFuture<T> : IAsyncResult
         {
-            private readonly Peer _peer;
-            private bool _cancelled;
             private readonly InventoryItem _item;
             private readonly AsyncCallback _callback;
             private readonly object _state;
@@ -265,9 +311,8 @@ namespace BitCoinSharp
             private WaitHandle _waitHandle;
             private T _result;
 
-            internal GetDataFuture(Peer peer, InventoryItem item, AsyncCallback callback, object state)
+            internal GetDataFuture(InventoryItem item, AsyncCallback callback, object state)
             {
-                _peer = peer;
                 _item = item;
                 _callback = callback;
                 _state = state;
@@ -276,7 +321,7 @@ namespace BitCoinSharp
 
             public bool IsCompleted
             {
-                get { return !Equals(_result, default(T)) || _cancelled; }
+                get { return !Equals(_result, default(T)); }
             }
 
             public WaitHandle AsyncWaitHandle
@@ -311,7 +356,7 @@ namespace BitCoinSharp
             /// </summary>
             internal void SetResult(T result)
             {
-                Debug.Assert(Thread.CurrentThread == _peer._thread); // Called from peer thread.
+                // This should be called in the network loop thread for this peer
                 _result = result;
                 // Now release the thread that is waiting. We don't need to synchronize here as the latch establishes
                 // a memory barrier.
@@ -403,38 +448,40 @@ namespace BitCoinSharp
         /// Starts an asynchronous download of the block chain. The chain download is deemed to be complete once we've
         /// downloaded the same number of blocks that the peer advertised having in its version handshake message.
         /// </summary>
-        /// <returns>
-        /// A <see cref="BitCoinSharp.Threading.CountDownLatch">BitCoinSharp.Threading.CountDownLatch</see> that can be used to track progress and wait for completion.
-        /// </returns>
         /// <exception cref="System.IO.IOException" />
-        public CountDownLatch StartBlockChainDownload()
+        public void StartBlockChainDownload()
+        {
+            foreach (var listener in _eventListeners)
+            {
+                lock (listener)
+                {
+                    listener.OnChainDownloadStarted(this, GetPeerBlocksToGet());
+                }
+            }
+
+            if (GetPeerBlocksToGet() > 0)
+            {
+                // When we just want as many blocks as possible, we can set the target hash to zero.
+                BlockChainDownload(Sha256Hash.ZeroHash);
+            }
+        }
+
+        private int GetPeerBlocksToGet()
         {
             // Chain will overflow signed int blocks in ~41,000 years.
             var chainHeight = _conn.VersionMessage.BestHeight;
-            if (chainHeight == 0)
+            if (chainHeight <= 0)
             {
                 // This should not happen because we shouldn't have given the user a Peer that is to another client-mode
                 // node. If that happens it means the user overrode us somewhere.
                 throw new Exception("Peer does not have block chain");
             }
             var blocksToGet = (int) (chainHeight - _blockChain.ChainHead.Height);
-            if (blocksToGet < 0)
-            {
-                // This peer has fewer blocks than we do. It isn't usable.
-                // TODO: We can't do the right thing here until Mirons patch lands. For now just return a zero latch.
-                return new CountDownLatch(0);
-            }
-            _chainCompletionLatch = new CountDownLatch(blocksToGet);
-            if (blocksToGet > 0)
-            {
-                // When we just want as many blocks as possible, we can set the target hash to zero.
-                BlockChainDownload(Sha256Hash.ZeroHash);
-            }
-            return _chainCompletionLatch;
+            return blocksToGet;
         }
 
         /// <summary>
-        /// Terminates the network connection and stops the background thread.
+        /// Terminates the network connection and stops the message handling loop.
         /// </summary>
         public void Disconnect()
         {
@@ -444,7 +491,7 @@ namespace BitCoinSharp
             }
             try
             {
-                // This will cause the background thread to die, but it's really ugly. We must do a better job of this.
+                // This is the correct way to stop an IO bound loop
                 _conn.Shutdown();
             }
             catch (IOException)

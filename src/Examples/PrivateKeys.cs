@@ -57,20 +57,21 @@ namespace BitCoinSharp.Examples
                 wallet.AddKey(key);
 
                 // Find the transactions that involve those coins.
-                using (var conn = new NetworkConnection(IPAddress.Loopback, @params, 0, 60000))
                 using (var blockStore = new MemoryBlockStore(@params))
                 {
                     var chain = new BlockChain(@params, wallet, blockStore);
-                    var peer = new Peer(@params, conn, chain);
-                    peer.Start();
-                    peer.StartBlockChainDownload().Await();
+
+                    var peerGroup = new PeerGroup(blockStore, @params, chain);
+                    peerGroup.AddAddress(new PeerAddress(IPAddress.Loopback));
+                    peerGroup.Start();
+                    peerGroup.DownloadBlockChain();
+                    peerGroup.Stop();
 
                     // And take them!
                     Console.WriteLine("Claiming " + Utils.BitcoinValueToFriendlyString(wallet.GetBalance()) + " coins");
-                    wallet.SendCoins(peer, destination, wallet.GetBalance());
+                    wallet.SendCoins(peerGroup, destination, wallet.GetBalance());
                     // Wait a few seconds to let the packets flush out to the network (ugly).
                     Thread.Sleep(5000);
-                    peer.Disconnect();
                 }
             }
             catch (IndexOutOfRangeException)

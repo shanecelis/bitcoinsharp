@@ -505,7 +505,8 @@ namespace BitCoinSharp
         }
 
         /// <summary>
-        /// Sends coins to the given address, via the given <see cref="Peer">Peer</see>. Change is returned to the first key in the wallet.
+        /// Sends coins to the given address, via the given <see cref="PeerGroup">PeerGroup</see>.
+        /// Change is returned to the first key in the wallet.
         /// </summary>
         /// <param name="peer">The peer to send via.</param>
         /// <param name="to">Which address to send coins to.</param>
@@ -513,6 +514,32 @@ namespace BitCoinSharp
         /// <returns>
         /// The <see cref="Transaction">Transaction</see> that was created or null if there was insufficient balance to send the coins.
         /// </returns>
+        /// <exception cref="System.IO.IOException">If there was a problem broadcasting the transaction.</exception>
+        public Transaction SendCoins(PeerGroup peerGroup, Address to, ulong nanocoins)
+        {
+            lock (this)
+            {
+                var tx = CreateSend(to, nanocoins);
+                if (tx == null) // Not enough money! :-(
+                    return null;
+                if (!peerGroup.BroadcastTransaction(tx))
+                {
+                    throw new IOException("Failed to broadcast tx to all connected peers");
+                }
+
+                // TODO - retry logic
+                ConfirmSend(tx);
+                return tx;
+            }
+        }
+
+        /// <summary>
+        /// Sends coins to the given address, via the given <see cref="Peer">Peer</see>.
+        /// Change is returned to the first key in the wallet.
+        /// </summary>
+        /// <param name="to">Which address to send coins to.</param>
+        /// <param name="nanocoins">How many nanocoins to send. You can use Utils.ToNanoCoins() to calculate this.</param>
+        /// <returns>The <see cref="Transaction">Transaction</see> that was created or null if there was insufficient balance to send the coins.</returns>
         /// <exception cref="System.IO.IOException">If there was a problem broadcasting the transaction.</exception>
         public Transaction SendCoins(Peer peer, Address to, ulong nanocoins)
         {

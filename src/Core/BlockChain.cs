@@ -19,8 +19,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using BitCoinSharp.Store;
-using log4net;
 using Org.BouncyCastle.Math;
+using log4net;
 
 namespace BitCoinSharp
 {

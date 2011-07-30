@@ -34,37 +34,27 @@ namespace BitCoinSharp.Examples
 
             // Set up the components and link them together.
             var @params = NetworkParameters.TestNet();
-            var blockStore = new MemoryBlockStore(@params);
-            var conn = new NetworkConnection(IPAddress.Loopback, @params,
-                                             blockStore.GetChainHead().Height, 60000);
-            var chain = new BlockChain(@params, wallet, blockStore);
-            var peer = new Peer(@params, conn, chain);
-            peer.Start();
-
-            wallet.CoinsReceived +=
-                (sender, e) =>
-                {
-                    Console.WriteLine();
-                    Console.WriteLine("Received tx " + e.Tx.HashAsString);
-                    Console.WriteLine(e.Tx.ToString());
-                };
-
-            // Now download and process the block chain.
-            var progress = peer.StartBlockChainDownload();
-            var max = progress.Count; // Racy but no big deal.
-            if (max > 0)
+            using (var blockStore = new MemoryBlockStore(@params))
             {
-                Console.WriteLine("Downloading block chain. " + (max > 1000 ? "This may take a while." : ""));
-                var current = max;
-                while (current > 0)
-                {
-                    var pct = 100.0 - (100.0*(current/(double) max));
-                    Console.WriteLine(string.Format("Chain download {0}% done", (int) pct));
-                    progress.Await(TimeSpan.FromSeconds(1));
-                    current = progress.Count;
-                }
+                var chain = new BlockChain(@params, wallet, blockStore);
+
+                var peerGroup = new PeerGroup(blockStore, @params, chain);
+                peerGroup.AddAddress(new PeerAddress(IPAddress.Loopback));
+                peerGroup.Start();
+
+                wallet.CoinsReceived +=
+                    (sender, e) =>
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("Received tx " + e.Tx.HashAsString);
+                        Console.WriteLine(e.Tx.ToString());
+                    };
+
+                // Now download and process the block chain.
+                peerGroup.DownloadBlockChain();
+                peerGroup.Stop();
             }
-            peer.Disconnect();
+
             wallet.SaveToFile(file);
             Console.WriteLine();
             Console.WriteLine("Done!");
