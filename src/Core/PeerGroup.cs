@@ -56,8 +56,6 @@ namespace BitCoinSharp
         private const int _coreThreads = 1;
         private const int _threadKeepAliveSeconds = 1;
 
-        // Maximum number of connections this peerGroup will make
-        private readonly int _maxConnections;
         // Addresses to try to connect to, excluding active peers
         private readonly IBlockingQueue<PeerAddress> _inactives;
         // Connection initiation thread
@@ -82,7 +80,6 @@ namespace BitCoinSharp
         /// </summary>
         public PeerGroup(IBlockStore blockStore, NetworkParameters @params, BlockChain chain)
         {
-            _maxConnections = _defaultConnections;
             _blockStore = blockStore;
             _params = @params;
             _chain = chain;
@@ -90,7 +87,7 @@ namespace BitCoinSharp
             _inactives = new LinkedBlockingQueue<PeerAddress>();
 
             _peers = new SynchronizedHashSet<Peer>();
-            _peerPool = new ThreadPoolExecutor(_coreThreads, _maxConnections,
+            _peerPool = new ThreadPoolExecutor(_coreThreads, _defaultConnections,
                                                TimeSpan.FromSeconds(_threadKeepAliveSeconds),
                                                new LinkedBlockingQueue<IRunnable>(1),
                                                new PeerGroupThreadFactory());
@@ -99,7 +96,11 @@ namespace BitCoinSharp
         /// <summary>
         /// Depending on the environment, this should normally be between 1 and 10, default is 4.
         /// </summary>
-        public int MaxConnections { get; set; }
+        public int MaxConnections
+        {
+            get { return _peerPool.MaximumPoolSize; }
+            set { _peerPool.MaximumPoolSize = value; }
+        }
 
         /// <summary>
         /// Add an address to the list of potential peers to connect to.
@@ -167,16 +168,19 @@ namespace BitCoinSharp
         public bool BroadcastTransaction(Transaction tx)
         {
             var success = false;
-            foreach (var peer in _peers)
+            lock (_peers)
             {
-                try
+                foreach (var peer in _peers)
                 {
-                    peer.BroadcastTransaction(tx);
-                    success = true;
-                }
-                catch (IOException e)
-                {
-                    _log.Error("failed to broadcast to " + peer, e);
+                    try
+                    {
+                        peer.BroadcastTransaction(tx);
+                        success = true;
+                    }
+                    catch (IOException e)
+                    {
+                        _log.Error("failed to broadcast to " + peer, e);
+                    }
                 }
             }
             return success;
@@ -213,9 +217,12 @@ namespace BitCoinSharp
 
             _peerPool.ShutdownNow();
 
-            foreach (var peer in _peers)
+            lock (_peers)
             {
-                peer.Disconnect();
+                foreach (var peer in _peers)
+                {
+                    peer.Disconnect();
+                }
             }
         }
 
@@ -245,13 +252,27 @@ namespace BitCoinSharp
                                 _log.Info("running " + peer);
                                 peer.Run();
                             }
+                            catch (Exception ex)
+                            {
+                                // do not propagate RuntimeException - log and try next peer
+                                _log.Error("error while talking to peer", ex);
+                            }
                             finally
                             {
-                                // In all cases, put the address back on the queue.
+                                // In all cases, disconnect and put the address back on the queue.
                                 // We will retry this peer after all other peers have been tried.
+                                try
+                                {
+                                    peer.Disconnect();
+                                }
+                                catch (Exception)
+                                {
+                                    // ignore
+                                }
+
                                 _inactives.Add(address);
-                                _peers.Remove(peer);
-                                HandlePeerDeath(peer);
+                                if (_peers.Remove(peer))
+                                    HandlePeerDeath(peer);
                             }
                         });
                     break;
@@ -295,9 +316,12 @@ namespace BitCoinSharp
                 // TODO be more nuanced about which peer to download from. We can also try
                 // downloading from multiple peers and handle the case when a new peer comes along
                 // with a longer chain after we thought we were done.
-                var firstPeer = _peers.FirstOrDefault();
-                if (firstPeer != null)
-                    StartBlockChainDownloadFromPeer(firstPeer);
+                lock (_peers)
+                {
+                    var firstPeer = _peers.FirstOrDefault();
+                    if (firstPeer != null)
+                        StartBlockChainDownloadFromPeer(firstPeer);
+                }
             }
         }
 
@@ -331,9 +355,12 @@ namespace BitCoinSharp
                 if (peer == _downloadPeer)
                 {
                     _downloadPeer = null;
-                    var firstPeer = _peers.FirstOrDefault();
-                    if (_downloadListener != null && firstPeer != null)
-                        StartBlockChainDownloadFromPeer(firstPeer);
+                    lock (_peers)
+                    {
+                        var firstPeer = _peers.FirstOrDefault();
+                        if (_downloadListener != null && firstPeer != null)
+                            StartBlockChainDownloadFromPeer(firstPeer);
+                    }
                 }
             }
         }

@@ -97,7 +97,18 @@ namespace BitCoinSharp
             // BitCoinSharp is a client mode implementation. That means there's not much point in us talking to other client
             // mode nodes because we can't download the data from them we need to find/verify transactions.
             if (!_versionMessage.HasBlockChain())
+            {
+                // Shut down the socket
+                try
+                {
+                    Shutdown();
+                }
+                catch (IOException)
+                {
+                    // ignore exceptions while aborting
+                }
                 throw new ProtocolException("Peer does not have a copy of the block chain.");
+            }
             // newer clients use check-summing
             _serializer.UseChecksumming(peerVersion >= 209);
             // Handshake is done!
