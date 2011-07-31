@@ -33,13 +33,5 @@ namespace BitCoinSharp
         public virtual void OnChainDownloadStarted(Peer peer, int blocksLeft)
         {
         }
-
-        public virtual void OnPeerConnected(Peer peer, int peerCount)
-        {
-        }
-
-        public virtual void OnPeerDisconnected(Peer peer, int peerCount)
-        {
-        }
     }
 }

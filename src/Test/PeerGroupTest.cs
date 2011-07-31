@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using System;
 using BitCoinSharp.Store;
 using NUnit.Framework;
 
@@ -35,14 +36,6 @@ namespace BitCoinSharp.Test
             _blockStore = new MemoryBlockStore(_params);
             var chain = new BlockChain(_params, _wallet, _blockStore);
             _peerGroup = new PeerGroup(_blockStore, _params, chain);
-        }
-
-        [Test]
-        public void Listener()
-        {
-            var listener = new AbstractPeerEventListener();
-            _peerGroup.AddEventListener(listener);
-            Assert.IsTrue(_peerGroup.RemoveEventListener(listener));
         }
     }
 }

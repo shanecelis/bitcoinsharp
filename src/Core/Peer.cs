@@ -51,8 +51,6 @@ namespace BitCoinSharp
 
         private readonly PeerAddress _address;
 
-        private readonly List<IPeerEventListener> _eventListeners;
-
         /// <summary>
         /// Construct a peer that handles the given network connection and reads/writes from the given block chain. Note that
         /// communication won't occur until you call Connect().
@@ -65,7 +63,6 @@ namespace BitCoinSharp
             _bestHeight = bestHeight;
             _blockChain = blockChain;
             _pendingGetBlockFutures = new List<GetDataFuture<Block>>();
-            _eventListeners = new List<IPeerEventListener>();
         }
 
         /// <summary>
@@ -77,21 +74,18 @@ namespace BitCoinSharp
         {
         }
 
-        public void AddEventListener(IPeerEventListener listener)
-        {
-            lock (this)
-            {
-                _eventListeners.Add(listener);
-            }
-        }
+        /// <summary>
+        /// Called on a Peer thread when a block is received.
+        /// </summary>
+        /// <remarks>
+        /// The block may have transactions or may be a header only once getheaders is implemented.
+        /// </remarks>
+        public event EventHandler<BlocksDownloadedEventArgs> BlocksDownloaded;
 
-        public void RemoveEventListener(IPeerEventListener listener)
-        {
-            lock (this)
-            {
-                _eventListeners.Remove(listener);
-            }
-        }
+        /// <summary>
+        /// Called when a download is started with the initial number of blocks to be downloaded.
+        /// </summary>
+        public event EventHandler<ChainDownloadStartedEventArgs> ChainDownloadStarted;
 
         public override string ToString()
         {
@@ -214,12 +208,9 @@ namespace BitCoinSharp
                 if (_blockChain.Add(m))
                 {
                     // The block was successfully linked into the chain. Notify the user of our progress.
-                    foreach (var listener in _eventListeners)
+                    if (BlocksDownloaded != null)
                     {
-                        lock (listener)
-                        {
-                            listener.OnBlocksDownloaded(this, m, GetPeerBlocksToGet());
-                        }
+                        BlocksDownloaded(this, new BlocksDownloadedEventArgs(m, GetPeerBlocksToGet()));
                     }
                 }
                 else
@@ -468,12 +459,9 @@ namespace BitCoinSharp
             // chain even if the chain block count is lower.
             if (GetPeerBlocksToGet() > 0)
             {
-                foreach (var listener in _eventListeners)
+                if (ChainDownloadStarted != null)
                 {
-                    lock (listener)
-                    {
-                        listener.OnChainDownloadStarted(this, GetPeerBlocksToGet());
-                    }
+                    ChainDownloadStarted(this, new ChainDownloadStartedEventArgs(GetPeerBlocksToGet()));
                 }
 
                 // When we just want as many blocks as possible, we can set the target hash to zero.
@@ -514,6 +502,47 @@ namespace BitCoinSharp
             {
                 // Don't care about this.
             }
+        }
+    }
+
+    /// <summary>
+    /// Called on a Peer thread when a block is received.
+    /// </summary>
+    /// <remarks>
+    /// The block may have transactions or may be a header only once getheaders is implemented.
+    /// </remarks>
+    public class BlocksDownloadedEventArgs : EventArgs
+    {
+        /// <summary>
+        /// The downloaded block.
+        /// </summary>
+        public Block Block { get; private set; }
+
+        /// <summary>
+        /// The number of blocks left to download.
+        /// </summary>
+        public int BlocksLeft { get; private set; }
+
+        public BlocksDownloadedEventArgs(Block block, int blocksLeft)
+        {
+            Block = block;
+            BlocksLeft = blocksLeft;
+        }
+    }
+
+    /// <summary>
+    /// Called when a download is started with the initial number of blocks to be downloaded.
+    /// </summary>
+    public class ChainDownloadStartedEventArgs : EventArgs
+    {
+        /// <summary>
+        /// The number of blocks left to download.
+        /// </summary>
+        public int BlocksLeft { get; private set; }
+
+        public ChainDownloadStartedEventArgs(int blocksLeft)
+        {
+            BlocksLeft = blocksLeft;
         }
     }
 }

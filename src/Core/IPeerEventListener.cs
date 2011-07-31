@@ -45,19 +45,5 @@ namespace BitCoinSharp
         /// <param name="peer">The peer receiving the block.</param>
         /// <param name="blocksLeft">The number of blocks left to download.</param>
         void OnChainDownloadStarted(Peer peer, int blocksLeft);
-
-        /// <summary>
-        /// Called when a peer is connected.
-        /// </summary>
-        /// <param name="peer"></param>
-        /// <param name="peerCount">The total number of connected peers.</param>
-        void OnPeerConnected(Peer peer, int peerCount);
-
-        /// <summary>
-        /// Called when a peer is disconnected.
-        /// </summary>
-        /// <param name="peer"></param>
-        /// <param name="peerCount">The total number of connected peers.</param>
-        void OnPeerDisconnected(Peer peer, int peerCount);
     }
 }

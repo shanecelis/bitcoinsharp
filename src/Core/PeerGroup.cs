@@ -71,9 +71,6 @@ namespace BitCoinSharp
         // Callback for events related to chain download
         private IPeerEventListener _downloadListener;
 
-        // Callbacks for events related to peer connection/disconnection
-        private readonly ICollection<IPeerEventListener> _peerEventListeners;
-
         private readonly NetworkParameters _params;
         private readonly IBlockStore _blockStore;
         private readonly BlockChain _chain;
@@ -91,8 +88,6 @@ namespace BitCoinSharp
 
             _peers = new SynchronizedHashSet<Peer>();
 
-            _peerEventListeners = new SynchronizedHashSet<IPeerEventListener>();
-
             _peerPool = new ThreadPoolExecutor(_coreThreads, _defaultConnections,
                                                TimeSpan.FromSeconds(_threadKeepAliveSeconds),
                                                new LinkedBlockingQueue<IRunnable>(1),
@@ -100,18 +95,14 @@ namespace BitCoinSharp
         }
 
         /// <summary>
-        /// Callbacks to the listener are performed in the connection thread.  The callback
-        /// should not perform time consuming tasks.
+        /// Called when a peer is connected.
         /// </summary>
-        public void AddEventListener(IPeerEventListener listener)
-        {
-            _peerEventListeners.Add(listener);
-        }
+        public event EventHandler<PeerConnectedEventArgs> PeerConnected;
 
-        public bool RemoveEventListener(IPeerEventListener listener)
-        {
-            return _peerEventListeners.Remove(listener);
-        }
+        /// <summary>
+        /// Called when a peer is disconnected.
+        /// </summary>
+        public event EventHandler<PeerDisconnectedEventArgs> PeerDisconnected;
 
         /// <summary>
         /// Depending on the environment, this should normally be between 1 and 10, default is 4.
@@ -358,15 +349,9 @@ namespace BitCoinSharp
             {
                 if (_downloadListener != null && _downloadPeer == null)
                     StartBlockChainDownloadFromPeer(peer);
-                lock (_peerEventListeners)
+                if (PeerConnected != null)
                 {
-                    foreach (var listener in _peerEventListeners)
-                    {
-                        lock (listener)
-                        {
-                            listener.OnPeerConnected(peer, _peers.Count);
-                        }
-                    }
+                    PeerConnected(this, new PeerConnectedEventArgs(_peers.Count));
                 }
             }
         }
@@ -388,15 +373,9 @@ namespace BitCoinSharp
                     }
                 }
 
-                lock (_peerEventListeners)
+                if (PeerDisconnected != null)
                 {
-                    foreach (var listener in _peerEventListeners)
-                    {
-                        lock (listener)
-                        {
-                            listener.OnPeerDisconnected(peer, _peers.Count);
-                        }
-                    }
+                    PeerDisconnected(this, new PeerDisconnectedEventArgs(_peers.Count));
                 }
             }
         }
@@ -405,7 +384,8 @@ namespace BitCoinSharp
         {
             lock (this)
             {
-                peer.AddEventListener(_downloadListener);
+                peer.BlocksDownloaded += (sender, e) => _downloadListener.OnBlocksDownloaded((Peer) sender, e.Block, e.BlocksLeft);
+                peer.ChainDownloadStarted += (sender, e) => _downloadListener.OnChainDownloadStarted((Peer) sender, e.BlocksLeft);
                 try
                 {
                     peer.StartBlockChainDownload();
@@ -438,6 +418,38 @@ namespace BitCoinSharp
                 t.IsBackground = true;
                 return t;
             }
+        }
+    }
+
+    /// <summary>
+    /// Called when a peer is connected.
+    /// </summary>
+    public class PeerConnectedEventArgs : EventArgs
+    {
+        /// <summary>
+        /// The total number of connected peers.
+        /// </summary>
+        public int PeerCount { get; private set; }
+
+        public PeerConnectedEventArgs(int peerCount)
+        {
+            PeerCount = peerCount;
+        }
+    }
+
+    /// <summary>
+    /// Called when a peer is disconnected.
+    /// </summary>
+    public class PeerDisconnectedEventArgs : EventArgs
+    {
+        /// <summary>
+        /// The total number of connected peers.
+        /// </summary>
+        public int PeerCount { get; private set; }
+
+        public PeerDisconnectedEventArgs(int peerCount)
+        {
+            PeerCount = peerCount;
         }
     }
 }
