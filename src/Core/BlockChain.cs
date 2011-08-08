@@ -535,6 +535,7 @@ namespace BitCoinSharp
         /// Returns the block at the head of the current best chain. This is the block which represents the greatest
         /// amount of cumulative work done.
         /// </summary>
+        /// <exception cref="BlockStoreException"/>
         public StoredBlock ChainHead
         {
             get
@@ -546,8 +547,8 @@ namespace BitCoinSharp
             }
             private set
             {
-                _chainHead = value;
                 _blockStore.SetChainHead(value);
+                _chainHead = value;
             }
         }
 

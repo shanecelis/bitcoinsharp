@@ -415,6 +415,10 @@ namespace BitCoinSharp
             public Thread NewThread(IRunnable r)
             {
                 var t = new Thread(r.Run, 0) {Name = _namePrefix + _threadNumber.ReturnValueAndIncrement()};
+                // Lower the priority of the peer threads. This is to avoid competing with UI threads created by the API
+                // user when doing lots of work, like downloading the block chain. We select a priority level one lower
+                // than the parent thread, or the minimum.
+                t.Priority = (ThreadPriority) Math.Max((int) ThreadPriority.Lowest, ((int) Thread.CurrentThread.Priority) - 1);
                 t.IsBackground = true;
                 return t;
             }

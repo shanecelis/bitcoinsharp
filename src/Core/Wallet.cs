@@ -158,7 +158,10 @@ namespace BitCoinSharp
         {
             lock (this)
             {
-                SaveToFileStream(f.OpenWrite());
+                using (var stream = f.OpenWrite())
+                {
+                    SaveToFileStream(stream);
+                }
             }
         }
 
