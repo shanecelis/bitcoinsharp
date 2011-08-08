@@ -37,7 +37,7 @@ namespace BitCoinSharp
         public uint ClientVersion { get; private set; }
 
         /// <summary>
-        /// Flags defining what is supported. Right now <see cref="NodeNetwork">NodeNetwork</see> is the only flag defined.
+        /// Flags defining what is supported. Right now <see cref="NodeNetwork"/> is the only flag defined.
         /// </summary>
         public ulong LocalServices { get; private set; }
 
@@ -69,7 +69,7 @@ namespace BitCoinSharp
         /// </summary>
         public uint BestHeight { get; private set; }
 
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         public VersionMessage(NetworkParameters @params, byte[] msg)
             : base(@params, msg, 0)
         {
@@ -89,7 +89,7 @@ namespace BitCoinSharp
             BestHeight = newBestHeight;
         }
 
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         protected override void Parse()
         {
             ClientVersion = ReadUint32();
@@ -109,7 +109,7 @@ namespace BitCoinSharp
             BestHeight = ReadUint32();
         }
 
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public override void BitcoinSerializeToStream(Stream buf)
         {
             Utils.Uint32ToByteStreamLe(ClientVersion, buf);

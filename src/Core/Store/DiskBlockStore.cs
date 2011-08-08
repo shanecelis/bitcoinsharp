@@ -36,7 +36,7 @@ namespace BitCoinSharp.Store
         private Sha256Hash _chainHead;
         private readonly NetworkParameters _params;
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         public DiskBlockStore(NetworkParameters @params, FileInfo file)
         {
             _params = @params;
@@ -57,7 +57,7 @@ namespace BitCoinSharp.Store
             }
         }
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         private void CreateNewStore(NetworkParameters @params, FileInfo file)
         {
             // Create a new block store if the file wasn't found or anything went wrong whilst reading.
@@ -91,8 +91,8 @@ namespace BitCoinSharp.Store
             }
         }
 
-        /// <exception cref="System.IO.IOException" />
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="IOException"/>
+        /// <exception cref="BlockStoreException"/>
         private void Load(FileInfo file)
         {
             _log.InfoFormat("Reading block store from {0}", file);
@@ -170,7 +170,7 @@ namespace BitCoinSharp.Store
             }
         }
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         public void Put(StoredBlock block)
         {
             lock (this)
@@ -192,7 +192,7 @@ namespace BitCoinSharp.Store
             }
         }
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         public StoredBlock Get(Sha256Hash hash)
         {
             lock (this)
@@ -203,7 +203,7 @@ namespace BitCoinSharp.Store
             }
         }
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         public StoredBlock GetChainHead()
         {
             lock (this)
@@ -214,7 +214,7 @@ namespace BitCoinSharp.Store
             }
         }
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         public void SetChainHead(StoredBlock chainHead)
         {
             lock (this)

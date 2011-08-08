@@ -191,7 +191,7 @@ namespace BitCoinSharp.Collections.Generic
         /// </code>
         /// </example>
         /// </remarks>
-        /// <param name="action">The action to performe on each element.</param>
+        /// <param name="action">The action to perform on each element.</param>
         /// <returns>The number of elements processed.</returns>
         /// <exception cref="System.InvalidOperationException">
         /// If the queue cannot be drained at this time.
@@ -222,7 +222,7 @@ namespace BitCoinSharp.Collections.Generic
         /// </code>
         /// </example>
         /// </remarks>
-        /// <param name="action">The action to performe on each element.</param>
+        /// <param name="action">The action to perform on each element.</param>
         /// <param name="criteria">The criteria to filter the elements.</param>
         /// <returns>The number of elements processed.</returns>
         /// <exception cref="System.InvalidOperationException">
@@ -246,7 +246,7 @@ namespace BitCoinSharp.Collections.Generic
         /// being neither, either or both in the queue or processed when the 
         /// associated exception is thrown.
         /// </remarks>
-        /// <param name="action">The action to performe on each element.</param>
+        /// <param name="action">The action to perform on each element.</param>
         /// <param name="maxElements">the maximum number of elements to transfer</param>
         /// <returns>The number of elements processed.</returns>
         /// <exception cref="System.InvalidOperationException">
@@ -271,7 +271,7 @@ namespace BitCoinSharp.Collections.Generic
         /// being neither, either or both in the queue or processed when the 
         /// associated exception is thrown.
         /// </remarks>
-        /// <param name="action">The action to performe on each element.</param>
+        /// <param name="action">The action to perform on each element.</param>
         /// <param name="maxElements">the maximum number of elements to transfer</param>
         /// <param name="criteria">The criteria to filter the elements.</param>
         /// <returns>The number of elements processed.</returns>

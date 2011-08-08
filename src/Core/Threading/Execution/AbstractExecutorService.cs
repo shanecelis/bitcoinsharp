@@ -177,7 +177,7 @@ namespace BitCoinSharp.Threading.Execution
         /// thread, at the discretion of the <see cref="IExecutor"/> implementation.
         /// </remarks>
         /// <param name="action">The task to be executed.</param>
-        /// <exception cref="BitCoinSharp.Threading.Execution.RejectedExecutionException">
+        /// <exception cref="RejectedExecutionException">
         /// If the task cannot be accepted for execution.
         /// </exception>
         /// <exception cref="System.ArgumentNullException">
@@ -196,7 +196,7 @@ namespace BitCoinSharp.Threading.Execution
         /// thread, at the discretion of the <see cref="BitCoinSharp.Threading.IExecutor"/> implementation.
         /// </remarks>
         /// <param name="runnable">the runnable task</param>
-        /// <exception cref="BitCoinSharp.Threading.Execution.RejectedExecutionException">if the task cannot be accepted for execution.</exception>
+        /// <exception cref="RejectedExecutionException">if the task cannot be accepted for execution.</exception>
         /// <exception cref="System.ArgumentNullException">if the command is null</exception>    
         public virtual void Execute(IRunnable runnable)
         {
@@ -221,7 +221,7 @@ namespace BitCoinSharp.Threading.Execution
         /// </param>
         /// <returns> a Future representing pending completion of the task
         /// </returns>
-        /// <exception cref="BitCoinSharp.Threading.Execution.RejectedExecutionException">if the task cannot be accepted for execution.</exception>
+        /// <exception cref="RejectedExecutionException">if the task cannot be accepted for execution.</exception>
         /// <exception cref="System.ArgumentNullException">if the command is null</exception>
         public virtual IFuture<Void> Submit(IRunnable runnable)
         {

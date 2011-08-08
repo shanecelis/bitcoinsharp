@@ -60,7 +60,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Concatenates two scripts to form a new one. This is used when verifying transactions.
         /// </summary>
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="ScriptException"/>
         public static Script Join(Script a, Script b)
         {
             Debug.Assert(a._params == b._params);
@@ -77,7 +77,7 @@ namespace BitCoinSharp
         /// <param name="programBytes">Array of program bytes from a transaction.</param>
         /// <param name="offset">How many bytes into programBytes to start reading from.</param>
         /// <param name="length">How many bytes to read.</param>
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="ScriptException"/>
         public Script(NetworkParameters @params, byte[] programBytes, int offset, int length)
         {
             _params = @params;
@@ -136,7 +136,7 @@ namespace BitCoinSharp
             return buf.ToString();
         }
 
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="ScriptException"/>
         private byte[] GetData(int len)
         {
             try
@@ -169,7 +169,7 @@ namespace BitCoinSharp
         /// This is necessary to render the to/from addresses of transactions in a user interface.
         /// The official client does something similar.
         /// </remarks>
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="ScriptException"/>
         private void Parse(byte[] programBytes, int offset, int length)
         {
             // TODO: this is inefficient
@@ -234,7 +234,7 @@ namespace BitCoinSharp
         /// <remarks>
         /// This is useful for fetching the destination address of a transaction.
         /// </remarks>
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="ScriptException"/>
         public byte[] PubKeyHash
         {
             get
@@ -260,7 +260,7 @@ namespace BitCoinSharp
         /// <remarks>
         /// This is useful for fetching the source address of a transaction.
         /// </remarks>
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="ScriptException"/>
         public byte[] PubKey
         {
             get
@@ -283,7 +283,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Convenience wrapper around getPubKey. Only works for scriptSigs.
         /// </summary>
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="ScriptException"/>
         public Address FromAddress
         {
             get { return new Address(_params, Utils.Sha256Hash160(PubKey)); }
@@ -292,7 +292,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Gets the destination address from this script, if it's in the required form (see getPubKey).
         /// </summary>
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="ScriptException"/>
         public Address ToAddress
         {
             get { return new Address(_params, PubKeyHash); }
@@ -303,7 +303,7 @@ namespace BitCoinSharp
         /// require a transaction to operate on (eg to hash). The context transaction is typically
         /// the transaction having its inputs verified, ie the one where the scriptSig comes from.
         /// </summary>
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="ScriptException"/>
         public bool Run(Transaction context)
         {
             foreach (var chunk in _chunks)
@@ -353,7 +353,7 @@ namespace BitCoinSharp
         }
 
         // WARNING: Unfinished and untested!
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="ScriptException"/>
         private void ProcessOpCheckSig(Transaction context)
         {
             _stack.Pop();
@@ -407,7 +407,7 @@ namespace BitCoinSharp
             _stack.Push(new[] {val ? (byte) 1 : (byte) 0});
         }
 
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="ScriptException"/>
         private void ProcessOpEqualVerify()
         {
             _log.Debug("EQUALVERIFY");
@@ -443,7 +443,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Writes out the given byte buffer to the output stream with the correct opcode prefix
         /// </summary>
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         internal static void WriteBytes(Stream os, byte[] buf)
         {
             if (buf.Length < OpPushData1)

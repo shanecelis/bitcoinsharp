@@ -77,7 +77,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Writes message to to the output stream.
         /// </summary>
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public void Serialize(Message message, Stream @out)
         {
             string name;
@@ -117,8 +117,8 @@ namespace BitCoinSharp
         /// <summary>
         /// Reads a message from the given InputStream and returns it.
         /// </summary>
-        /// <exception cref="BitCoinSharp.ProtocolException" />
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="ProtocolException"/>
+        /// <exception cref="IOException"/>
         public Message Deserialize(Stream @in)
         {
             // A BitCoin protocol message has the following format.
@@ -230,7 +230,7 @@ namespace BitCoinSharp
             }
         }
 
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         private Message MakeMessage(string command, byte[] payloadBytes)
         {
             // We use an if ladder rather than reflection because reflection can be slow on some platforms.
@@ -269,7 +269,7 @@ namespace BitCoinSharp
             throw new ProtocolException("No support for deserializing message with name " + command);
         }
 
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         private void SeekPastMagicBytes(Stream @in)
         {
             var magicCursor = 3; // Which byte of the magic we're looking for currently.

@@ -37,7 +37,7 @@ namespace BitCoinSharp.Examples
     ///   <li>Wait for the block chain to download</li>
     ///   <li>Send some coins from your bitcoin client to the address provided in the PingService console</li>
     ///   <li>Leave it running until you get the coins back again</li>
-    /// </ol><p />
+    /// </ol><p/>
     /// The testnet can be slow or flaky as it's a shared resource. You can use the <a href="http://sourceforge.net/projects/bitcoin/files/Bitcoin/testnet-in-a-box/">testnet in a box</a>
     /// to do everything purely locally.
     /// </remarks>

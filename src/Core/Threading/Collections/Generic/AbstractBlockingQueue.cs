@@ -257,7 +257,7 @@ namespace BitCoinSharp.Threading.Collections.Generic
         /// </summary>
         /// <remarks>This implementaiton always return <see langword="true"/>.</remarks>
         /// <returns>
-        /// true if access to the <see cref="ICollection"></see> 
+        /// true if access to the <see cref="ICollection"/> 
         /// is synchronized (thread safe); otherwise, false.
         /// </returns>
         /// <filterpriority>2</filterpriority>

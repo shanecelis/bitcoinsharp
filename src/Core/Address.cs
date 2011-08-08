@@ -22,15 +22,15 @@ namespace BitCoinSharp
     /// A BitCoin address is fundamentally derived from an elliptic curve public key and a set of network parameters.
     /// </summary>
     /// <remarks>
-    /// It has several possible representations:<p />
+    /// It has several possible representations:<p/>
     /// <ol>
     ///   <li>The raw public key bytes themselves.</li>
     ///   <li>RIPEMD160 hash of the public key bytes.</li>
     ///   <li>A base58 encoded "human form" that includes a version and check code, to guard against typos.</li>
-    /// </ol><p />
+    /// </ol><p/>
     /// One may question whether the base58 form is really an improvement over the hash160 form, given
     /// they are both very unfriendly for typists. More useful representations might include QR codes
-    /// and identicons.<p />
+    /// and identicons.<p/>
     /// Note that an address is specific to a network because the first byte is a discriminator value.
     /// </remarks>
     public class Address : VersionedChecksummedBytes
@@ -39,7 +39,7 @@ namespace BitCoinSharp
         /// Construct an address from parameters and the hash160 form.
         /// </summary>
         /// <remarks>
-        /// Example:<p />
+        /// Example:<p/>
         /// <pre>new Address(NetworkParameters.prodNet(), Hex.decode("4a22c3c4cbb31e4d03b15550636762bda0baf85a"));</pre>
         /// </remarks>
         public Address(NetworkParameters @params, byte[] hash160)
@@ -53,10 +53,10 @@ namespace BitCoinSharp
         /// Construct an address from parameters and the standard "human readable" form.
         /// </summary>
         /// <remarks>
-        /// Example:<p />
+        /// Example:<p/>
         /// <pre>new Address(NetworkParameters.prodNet(), "17kzeh4N8g49GFvdDzSf8PjaPfyoD1MndL");</pre>
         /// </remarks>
-        /// <exception cref="BitCoinSharp.AddressFormatException" />
+        /// <exception cref="AddressFormatException"/>
         public Address(NetworkParameters @params, string address)
             : base(address)
         {

@@ -26,7 +26,7 @@ namespace BitCoinSharp
     /// <remarks>
     /// Progress, StartDownload, DoneDownload maybe be overridden to change the way the user
     /// is notified.
-    /// <p />
+    /// <p/>
     /// Methods are called with the event listener object locked so your
     /// implementation does not have to be thread safe. 
     /// 
@@ -94,7 +94,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Wait for the chain to be downloaded. 
         /// </summary>
-        /// <exception cref="System.Threading.ThreadInterruptedException" />
+        /// <exception cref="ThreadInterruptedException"/>
         public void Await()
         {
             _done.WaitOne();

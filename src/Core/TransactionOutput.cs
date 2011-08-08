@@ -52,7 +52,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Deserializes a transaction output message. This is usually part of a transaction message.
         /// </summary>
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         public TransactionOutput(NetworkParameters @params, Transaction parent, byte[] payload, int offset)
             : base(@params, payload, offset)
         {
@@ -81,13 +81,13 @@ namespace BitCoinSharp
             _availableForSpending = true;
         }
 
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="ScriptException"/>
         public Script ScriptPubKey
         {
             get { return _scriptPubKey ?? (_scriptPubKey = new Script(Params, _scriptBytes, 0, _scriptBytes.Length)); }
         }
 
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         protected override void Parse()
         {
             _value = ReadUint64();
@@ -95,7 +95,7 @@ namespace BitCoinSharp
             _scriptBytes = ReadBytes(scriptLen);
         }
 
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public override void BitcoinSerializeToStream(Stream stream)
         {
             Debug.Assert(_scriptBytes != null);

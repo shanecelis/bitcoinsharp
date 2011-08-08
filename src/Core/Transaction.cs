@@ -57,7 +57,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Creates a transaction from the given serialized bytes, eg, from a block or a tx network message.
         /// </summary>
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         public Transaction(NetworkParameters @params, byte[] payloadBytes)
             : base(@params, payloadBytes, 0)
         {
@@ -66,7 +66,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Creates a transaction by reading payload starting from offset bytes in. Length of a transaction is fixed.
         /// </summary>
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         public Transaction(NetworkParameters @params, byte[] payload, int offset)
             : base(@params, payload, offset)
         {
@@ -153,7 +153,7 @@ namespace BitCoinSharp
         /// blocks containing the input transactions if the key is in the wallet but the transactions are not.
         /// </summary>
         /// <returns>Sum in nanocoins.</returns>
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="ScriptException"/>
         public ulong GetValueSentFromMe(Wallet wallet)
         {
             // This is tested in WalletTest.
@@ -227,7 +227,7 @@ namespace BitCoinSharp
             Single, // 3
         }
 
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         protected override void Parse()
         {
             _version = ReadUint32();
@@ -359,7 +359,7 @@ namespace BitCoinSharp
         /// </remarks>
         /// <param name="hashType">This should always be set to SigHash.ALL currently. Other types are unused. </param>
         /// <param name="wallet">A wallet is required to fetch the keys needed for signing.</param>
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="ScriptException"/>
         public void SignInputs(SigHash hashType, Wallet wallet)
         {
             Debug.Assert(_inputs.Count > 0);
@@ -443,11 +443,11 @@ namespace BitCoinSharp
         /// of the connectedTx and thus spend the money.
         /// </summary>
         /// <remarks>
-        /// <b>WARNING: NOT FINISHED</b><p />
+        /// <b>WARNING: NOT FINISHED</b><p/>
         /// </remarks>
         /// <param name="inputIndex">Which input to verify.</param>
         /// <param name="connectedTx">The Transaction that the input is connected to.</param>
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="ScriptException"/>
         public bool VerifyInput(int inputIndex, Transaction connectedTx)
         {
             var input = _inputs[inputIndex];
@@ -457,7 +457,7 @@ namespace BitCoinSharp
             return false;
         }
 
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public override void BitcoinSerializeToStream(Stream stream)
         {
             Utils.Uint32ToByteStreamLe(_version, stream);

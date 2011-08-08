@@ -30,7 +30,7 @@ namespace BitCoinSharp
         {
         }
 
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         protected override void Parse()
         {
             // nothing to parse for now

@@ -118,7 +118,7 @@ namespace BitCoinSharp.Threading.Execution
         /// </param>
         /// <returns> a Future representing pending completion of the task
         /// </returns>
-        /// <exception cref="BitCoinSharp.Threading.Execution.RejectedExecutionException">if the task cannot be accepted for execution.</exception>
+        /// <exception cref="RejectedExecutionException">if the task cannot be accepted for execution.</exception>
         /// <exception cref="System.ArgumentNullException">if the command is null</exception>
         IFuture<Void> Submit(IRunnable runnable);
 

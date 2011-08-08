@@ -32,7 +32,7 @@ namespace BitCoinSharp
     /// <remarks>
     /// The Wallet is read and written from disk, so be sure to follow the Java serialization versioning rules here. We
     /// use the built in Java serialization to avoid the need to pull in a potentially large (code-size) third party
-    /// serialization library.<p />
+    /// serialization library.<p/>
     /// </remarks>
     [Serializable]
     public class Wallet
@@ -153,7 +153,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Uses Java serialization to save the wallet to the given file.
         /// </summary>
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public void SaveToFile(FileInfo f)
         {
             lock (this)
@@ -165,7 +165,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Uses Java serialization to save the wallet to the given file stream.
         /// </summary>
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public void SaveToFileStream(FileStream f)
         {
             lock (this)
@@ -178,7 +178,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Returns a wallet deserialized from the given file.
         /// </summary>
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public static Wallet LoadFromFile(FileInfo f)
         {
             return LoadFromFileStream(f.OpenRead());
@@ -187,7 +187,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Returns a wallet deserialized from the given file input stream.
         /// </summary>
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public static Wallet LoadFromFileStream(FileStream f)
         {
             var ois = new BinaryFormatter();
@@ -195,24 +195,24 @@ namespace BitCoinSharp
         }
 
         /// <summary>
-        /// Called by the <see cref="BlockChain">BlockChain</see> when we receive a new block that sends coins to one of our addresses or
+        /// Called by the <see cref="BlockChain"/> when we receive a new block that sends coins to one of our addresses or
         /// spends coins from one of our addresses (note that a single transaction can do both).
         /// </summary>
         /// <remarks>
         /// This is necessary for the internal book-keeping Wallet does. When a transaction is received that sends us
         /// coins it is added to a pool so we can use it later to create spends. When a transaction is received that
-        /// consumes outputs they are marked as spent so they won't be used in future.<p />
+        /// consumes outputs they are marked as spent so they won't be used in future.<p/>
         /// A transaction that spends our own coins can be received either because a spend we created was accepted by the
         /// network and thus made it into a block, or because our keys are being shared between multiple instances and
         /// some other node spent the coins instead. We still have to know about that to avoid accidentally trying to
-        /// double spend.<p />
+        /// double spend.<p/>
         /// A transaction may be received multiple times if is included into blocks in parallel chains. The blockType
         /// parameter describes whether the containing block is on the main/best chain or whether it's on a presently
         /// inactive side chain. We must still record these transactions and the blocks they appear in because a future
         /// block might change which chain is best causing a reorganize. A re-org can totally change our balance!
         /// </remarks>
-        /// <exception cref="BitCoinSharp.VerificationException" />
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="VerificationException"/>
+        /// <exception cref="ScriptException"/>
         internal void Receive(Transaction tx, StoredBlock block, BlockChain.NewBlockType blockType)
         {
             lock (this)
@@ -221,8 +221,8 @@ namespace BitCoinSharp
             }
         }
 
-        /// <exception cref="BitCoinSharp.VerificationException" />
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="VerificationException"/>
+        /// <exception cref="ScriptException"/>
         private void Receive(Transaction tx, StoredBlock block, BlockChain.NewBlockType blockType, bool reorg)
         {
             lock (this)
@@ -331,7 +331,7 @@ namespace BitCoinSharp
         /// Handle when a transaction becomes newly active on the best chain, either due to receiving a new block or a
         /// re-org making inactive transactions active.
         /// </summary>
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="VerificationException"/>
         private void ProcessTxFromBestChain(Transaction tx)
         {
             // This TX may spend our existing outputs even though it was not pending. This can happen in unit
@@ -358,7 +358,7 @@ namespace BitCoinSharp
         /// when we receive our own spends, we've already marked the outputs as spent previously (during tx creation) so
         /// there's no need to go through and do it again.
         /// </summary>
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="VerificationException"/>
         private void UpdateForSpends(Transaction tx)
         {
             foreach (var input in tx.Inputs)
@@ -435,8 +435,8 @@ namespace BitCoinSharp
         /// A re-organize means that the consensus (chain) of the network has diverged and now changed from what we
         /// believed it was previously. Usually this won't matter because the new consensus will include all our old
         /// transactions assuming we are playing by the rules. However it's theoretically possible for our balance to
-        /// change in arbitrary ways, most likely, we could lose some money we thought we had.<p />
-        /// It is safe to use methods of wallet whilst inside this callback.<p />
+        /// change in arbitrary ways, most likely, we could lose some money we thought we had.<p/>
+        /// It is safe to use methods of wallet whilst inside this callback.<p/>
         /// TODO: Finish this interface.
         /// </remarks>
         public event EventHandler<EventArgs> Reorganized;
@@ -505,16 +505,16 @@ namespace BitCoinSharp
         }
 
         /// <summary>
-        /// Sends coins to the given address, via the given <see cref="PeerGroup">PeerGroup</see>.
+        /// Sends coins to the given address, via the given <see cref="PeerGroup"/>.
         /// Change is returned to the first key in the wallet.
         /// </summary>
-        /// <param name="peer">The peer to send via.</param>
+        /// <param name="peerGroup">The peer group to send via.</param>
         /// <param name="to">Which address to send coins to.</param>
         /// <param name="nanocoins">How many nanocoins to send. You can use Utils.toNanoCoins() to calculate this.</param>
         /// <returns>
-        /// The <see cref="Transaction">Transaction</see> that was created or null if there was insufficient balance to send the coins.
+        /// The <see cref="Transaction"/> that was created or null if there was insufficient balance to send the coins.
         /// </returns>
-        /// <exception cref="System.IO.IOException">If there was a problem broadcasting the transaction.</exception>
+        /// <exception cref="IOException">If there was a problem broadcasting the transaction.</exception>
         public Transaction SendCoins(PeerGroup peerGroup, Address to, ulong nanocoins)
         {
             lock (this)
@@ -534,13 +534,14 @@ namespace BitCoinSharp
         }
 
         /// <summary>
-        /// Sends coins to the given address, via the given <see cref="Peer">Peer</see>.
+        /// Sends coins to the given address, via the given <see cref="Peer"/>.
         /// Change is returned to the first key in the wallet.
         /// </summary>
+        /// <param name="peer">The peer to send via.</param>
         /// <param name="to">Which address to send coins to.</param>
         /// <param name="nanocoins">How many nanocoins to send. You can use Utils.ToNanoCoins() to calculate this.</param>
-        /// <returns>The <see cref="Transaction">Transaction</see> that was created or null if there was insufficient balance to send the coins.</returns>
-        /// <exception cref="System.IO.IOException">If there was a problem broadcasting the transaction.</exception>
+        /// <returns>The <see cref="Transaction"/> that was created or null if there was insufficient balance to send the coins.</returns>
+        /// <exception cref="IOException">If there was a problem broadcasting the transaction.</exception>
         public Transaction SendCoins(Peer peer, Address to, ulong nanocoins)
         {
             lock (this)
@@ -570,7 +571,7 @@ namespace BitCoinSharp
         /// our coins. This should be an address we own (is in the keychain).
         /// </param>
         /// <returns>
-        /// A new <see cref="Transaction">Transaction</see> or null if we cannot afford this send.
+        /// A new <see cref="Transaction"/> or null if we cannot afford this send.
         /// </returns>
         internal Transaction CreateSend(Address address, ulong nanocoins, Address changeAddress)
         {
@@ -719,13 +720,13 @@ namespace BitCoinSharp
         }
 
         /// <summary>
-        /// Returns the available balance of this wallet. See <see cref="BalanceType.Available">BalanceType.Available</see> for details on what this
+        /// Returns the available balance of this wallet. See <see cref="BalanceType.Available"/> for details on what this
         /// means.
         /// </summary>
         /// <remarks>
         /// Note: the estimated balance is usually the one you want to show to the end user - however attempting to
         /// actually spend these coins may result in temporary failure. This method returns how much you can safely
-        /// provide to <see cref="CreateSend(Address, ulong)">CreateSend(Address, Org.BouncyCastle.Math.BigInteger)</see>.
+        /// provide to <see cref="CreateSend(Address, ulong)"/>.
         /// </remarks>
         public ulong GetBalance()
         {
@@ -821,7 +822,7 @@ namespace BitCoinSharp
         }
 
         /// <summary>
-        /// Called by the <see cref="BlockChain">BlockChain</see> when the best chain (representing total work done) has changed. In this case,
+        /// Called by the <see cref="BlockChain"/> when the best chain (representing total work done) has changed. In this case,
         /// we need to go through our transactions and find out if any have become invalid. It's possible for our balance
         /// to go down in this case: money we thought we had can suddenly vanish if the rest of the network agrees it
         /// should be so.
@@ -829,7 +830,7 @@ namespace BitCoinSharp
         /// <remarks>
         /// The oldBlocks/newBlocks lists are ordered height-wise from top first to bottom last.
         /// </remarks>
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="VerificationException"/>
         internal void Reorganize(IList<StoredBlock> oldBlocks, IList<StoredBlock> newBlocks)
         {
             lock (this)

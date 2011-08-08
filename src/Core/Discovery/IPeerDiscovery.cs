@@ -30,7 +30,7 @@ namespace BitCoinSharp.Discovery
         /// <summary>
         /// Returns an array of addresses. This method may block.
         /// </summary>
-        /// <exception cref="BitCoinSharp.Discovery.PeerDiscoveryException" />
+        /// <exception cref="PeerDiscoveryException"/>
         IEnumerable<EndPoint> GetPeers();
     }
 }

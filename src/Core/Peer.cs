@@ -95,7 +95,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Connects to the peer.
         /// </summary>
-        /// <exception cref="BitCoinSharp.PeerException">When there is a temporary problem with the peer and we should retry later.</exception>
+        /// <exception cref="PeerException">When there is a temporary problem with the peer and we should retry later.</exception>
         public void Connect()
         {
             try
@@ -118,7 +118,7 @@ namespace BitCoinSharp
         /// <remarks>
         /// Connect() must be called first.
         /// </remarks>
-        /// <exception cref="BitCoinSharp.PeerException">When there is a temporary problem with the peer and we should retry later.</exception>
+        /// <exception cref="PeerException">When there is a temporary problem with the peer and we should retry later.</exception>
         public void Run()
         {
             // This should be called in the network loop thread for this peer
@@ -181,7 +181,7 @@ namespace BitCoinSharp
             Disconnect();
         }
 
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         private void ProcessBlock(Block m)
         {
             // This should called in the network loop thread for this peer
@@ -237,7 +237,7 @@ namespace BitCoinSharp
             }
         }
 
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         private void ProcessInv(InventoryMessage inv)
         {
             // This should be called in the network loop thread for this peer
@@ -282,7 +282,7 @@ namespace BitCoinSharp
         /// whether it's done later.
         /// </summary>
         /// <param name="blockHash">Hash of the block you were requesting.</param>
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public IAsyncResult BeginGetBlock(Sha256Hash blockHash, AsyncCallback callback, object state)
         {
             var getdata = new GetDataMessage(_params);
@@ -396,15 +396,15 @@ namespace BitCoinSharp
 
         /// <summary>
         /// Send the given Transaction, ie, make a payment with BitCoins. To create a transaction you can broadcast, use
-        /// a <see cref="Wallet">Wallet</see>. After the broadcast completes, confirm the send using the wallet confirmSend() method.
+        /// a <see cref="Wallet"/>. After the broadcast completes, confirm the send using the wallet confirmSend() method.
         /// </summary>
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         internal void BroadcastTransaction(Transaction tx)
         {
             _conn.WriteMessage(tx);
         }
 
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         private void BlockChainDownload(Sha256Hash toHash)
         {
             // This may run in ANY thread.
@@ -452,7 +452,7 @@ namespace BitCoinSharp
         /// Starts an asynchronous download of the block chain. The chain download is deemed to be complete once we've
         /// downloaded the same number of blocks that the peer advertised having in its version handshake message.
         /// </summary>
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public void StartBlockChainDownload()
         {
             // TODO: peer might still have blocks that we don't have, and even have a heavier

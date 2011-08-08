@@ -25,7 +25,7 @@ namespace BitCoinSharp.Store
     /// </summary>
     /// <remarks>
     /// A BlockStore is a map of hashes to StoredBlock. The hash is the double digest of the BitCoin serialization
-    /// of the block header, <b>not</b> the header with the extra data as well.<p />
+    /// of the block header, <b>not</b> the header with the extra data as well.<p/>
     /// BlockStores are thread safe.
     /// </remarks>
     public interface IBlockStore : IDisposable
@@ -35,26 +35,26 @@ namespace BitCoinSharp.Store
         /// StoredBlock directly. Can throw if there is a problem with the underlying storage layer such as running out of
         /// disk space.
         /// </summary>
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         void Put(StoredBlock block);
 
         /// <summary>
         /// Returns the StoredBlock given a hash. The returned values block.getHash() method will be equal to the
         /// parameter. If no such block is found, returns null.
         /// </summary>
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         StoredBlock Get(Sha256Hash hash);
 
         /// <summary>
-        /// Returns the <see cref="StoredBlock">StoredBlock</see> that represents the top of the chain of greatest total work.
+        /// Returns the <see cref="StoredBlock"/> that represents the top of the chain of greatest total work.
         /// </summary>
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         StoredBlock GetChainHead();
 
         /// <summary>
-        /// Sets the <see cref="StoredBlock">StoredBlock</see> that represents the top of the chain of greatest total work.
+        /// Sets the <see cref="StoredBlock"/> that represents the top of the chain of greatest total work.
         /// </summary>
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         void SetChainHead(StoredBlock chainHead);
     }
 }

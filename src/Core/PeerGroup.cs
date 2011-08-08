@@ -38,10 +38,10 @@ namespace BitCoinSharp
     /// Each peer runs a network listener in its own thread. When a connection is lost, a new peer
     /// will be tried after a delay as long as the number of connections less than the maximum.
     /// 
-    /// <p />Connections are made to addresses from a provided list. When that list is exhausted,
+    /// <p/>Connections are made to addresses from a provided list. When that list is exhausted,
     /// we start again from the head of the list.
     /// 
-    /// <p />The PeerGroup can broadcast a transaction to the currently connected set of peers. It can
+    /// <p/>The PeerGroup can broadcast a transaction to the currently connected set of peers. It can
     /// also handle download of the block chain from peers, restarting the process when peers die.
     /// 
     /// @author miron@google.com (Miron Cuperman a.k.a devrandom)
@@ -241,7 +241,7 @@ namespace BitCoinSharp
         /// Try connecting to a peer. If we exceed the number of connections, delay and try
         /// again.
         /// </summary>
-        /// <exception cref="System.Threading.ThreadInterruptedException" />
+        /// <exception cref="ThreadInterruptedException"/>
         private void TryNextPeer()
         {
             var address = _inactives.Take();

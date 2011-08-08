@@ -38,7 +38,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Construct a peer address from a serialized payload.
         /// </summary>
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         public PeerAddress(NetworkParameters @params, byte[] payload, int offset, uint protocolVersion)
             : base(@params, payload, offset, protocolVersion)
         {
@@ -70,7 +70,7 @@ namespace BitCoinSharp
         {
         }
 
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public override void BitcoinSerializeToStream(Stream stream)
         {
             if (ProtocolVersion >= 31402)

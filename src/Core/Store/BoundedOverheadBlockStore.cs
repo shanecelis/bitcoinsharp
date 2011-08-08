@@ -29,10 +29,10 @@ namespace BitCoinSharp.Store
     /// <remarks>
     /// This implementation is designed to have constant memory usage, regardless of the size of the block chain being
     /// stored. It exploits operating system level buffering and the fact that get() requests are, in normal usage,
-    /// localized in chain space.<p />
+    /// localized in chain space.<p/>
     /// Blocks are stored sequentially. Most blocks are fetched out of a small in-memory cache. The slowest part is
     /// traversing difficulty transition points, which requires seeking backwards over around 2000 blocks. On a Google
-    /// Nexus S phone this takes a couple of seconds. On a MacBook Pro it takes around 50msec.<p />
+    /// Nexus S phone this takes a couple of seconds. On a MacBook Pro it takes around 50msec.<p/>
     /// The store has much room for optimization. Expanding the size of the cache will likely allow us to traverse
     /// difficulty transitions without using too much memory and without hitting the disk at all, for the case of initial
     /// block chain download. Storing the hashes on disk would allow us to avoid deserialization and hashing which is
@@ -80,7 +80,7 @@ namespace BitCoinSharp.Store
             }
 
             // This should be static but the language does not allow for it.
-            /// <exception cref="System.IO.IOException" />
+            /// <exception cref="IOException"/>
             public void Write(Stream channel, StoredBlock block)
             {
                 using (var buf = ByteBuffer.Allocate(Size))
@@ -102,7 +102,7 @@ namespace BitCoinSharp.Store
                 }
             }
 
-            /// <exception cref="System.IO.IOException" />
+            /// <exception cref="IOException"/>
             public bool Read(Stream channel, long position, ByteBuffer buffer)
             {
                 buffer.Position = 0;
@@ -127,7 +127,7 @@ namespace BitCoinSharp.Store
                 get { return new BigInteger(1, _chainWork); }
             }
 
-            /// <exception cref="BitCoinSharp.ProtocolException" />
+            /// <exception cref="ProtocolException"/>
             public Block GetHeader(NetworkParameters @params)
             {
                 return new Block(@params, _blockHeader);
@@ -138,14 +138,14 @@ namespace BitCoinSharp.Store
                 get { return _height; }
             }
 
-            /// <exception cref="BitCoinSharp.ProtocolException" />
+            /// <exception cref="ProtocolException"/>
             public StoredBlock ToStoredBlock(NetworkParameters @params)
             {
                 return new StoredBlock(GetHeader(@params), ChainWork, Height);
             }
         }
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         public BoundedOverheadBlockStore(NetworkParameters @params, FileInfo file)
         {
             _params = @params;
@@ -161,7 +161,7 @@ namespace BitCoinSharp.Store
             }
         }
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         private void CreateNewStore(NetworkParameters @params, FileInfo file)
         {
             // Create a new block store if the file wasn't found or anything went wrong whilst reading.
@@ -197,8 +197,8 @@ namespace BitCoinSharp.Store
             }
         }
 
-        /// <exception cref="System.IO.IOException" />
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="IOException"/>
+        /// <exception cref="BlockStoreException"/>
         private void Load(FileInfo file)
         {
             _log.InfoFormat("Reading block store from {0}", file);
@@ -229,7 +229,7 @@ namespace BitCoinSharp.Store
         // TODO: This is ugly, fix!
         private readonly Record _dummyRecord = new Record();
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         public void Put(StoredBlock block)
         {
             lock (this)
@@ -252,7 +252,7 @@ namespace BitCoinSharp.Store
             }
         }
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         public StoredBlock Get(Sha256Hash hash)
         {
             lock (this)
@@ -304,9 +304,9 @@ namespace BitCoinSharp.Store
 
         private ByteBuffer _buf = ByteBuffer.Allocate(Record.Size);
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
-        /// <exception cref="System.IO.IOException" />
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="BlockStoreException"/>
+        /// <exception cref="IOException"/>
+        /// <exception cref="ProtocolException"/>
         private Record GetRecord(Sha256Hash hash)
         {
             var startPos = _channel.Position;
@@ -341,7 +341,7 @@ namespace BitCoinSharp.Store
             return null;
         }
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         public StoredBlock GetChainHead()
         {
             lock (this)
@@ -350,7 +350,7 @@ namespace BitCoinSharp.Store
             }
         }
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         public void SetChainHead(StoredBlock chainHead)
         {
             lock (this)

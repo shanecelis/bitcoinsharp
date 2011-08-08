@@ -21,14 +21,14 @@ using Org.BouncyCastle.Math;
 namespace BitCoinSharp
 {
     /// <summary>
-    /// Wraps a <see cref="Block">Block</see> object with extra data that can be derived from the block chain but is slow or inconvenient to
+    /// Wraps a <see cref="Block"/> object with extra data that can be derived from the block chain but is slow or inconvenient to
     /// calculate. By storing it alongside the block header we reduce the amount of work required significantly.
     /// Recalculation is slow because the fields are cumulative - to find the chainWork you have to iterate over every
     /// block in the chain back to the genesis block, which involves lots of seeking/loading etc. So we just keep a
     /// running total: it's a disk space vs CPU/IO tradeoff.
     /// </summary>
     /// <remarks>
-    /// StoredBlocks are put inside a <see cref="IBlockStore">IBlockStore</see> which saves them to memory or disk.
+    /// StoredBlocks are put inside a <see cref="IBlockStore"/> which saves them to memory or disk.
     /// </remarks>
     [Serializable]
     public class StoredBlock
@@ -94,7 +94,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Creates a new StoredBlock, calculating the additional fields by adding to the values in this block.
         /// </summary>
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="VerificationException"/>
         public StoredBlock Build(Block block)
         {
             // Stored blocks track total work done in this chain, because the canonical chain is the one that represents
@@ -109,7 +109,7 @@ namespace BitCoinSharp
         /// <tt>store.get(this.getHeader().getPrevBlockHash())</tt>.
         /// </summary>
         /// <returns>The previous block in the chain or null if it was not found in the store.</returns>
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         public StoredBlock GetPrev(IBlockStore store)
         {
             return store.Get(Header.PrevBlockHash);

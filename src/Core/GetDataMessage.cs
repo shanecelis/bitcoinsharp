@@ -21,7 +21,7 @@ namespace BitCoinSharp
     [Serializable]
     public class GetDataMessage : ListMessage
     {
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         public GetDataMessage(NetworkParameters @params, byte[] payloadBytes)
             : base(@params, payloadBytes)
         {

@@ -85,7 +85,7 @@ namespace BitCoinSharp.Collections.Generic
 
         /// <summary>
         /// Determines whether the <see cref="ICollection{T}"/> contains a specific 
-        /// value. This implementation searchs the element by iterating through the 
+        /// value. This implementation searches the element by iterating through the 
         /// enumerator returned by <see cref="GetEnumerator()"/> method.
         /// </summary>
         /// 
@@ -160,7 +160,7 @@ namespace BitCoinSharp.Collections.Generic
         /// </para>
         /// </remarks>
         /// <param name="targetArray">
-        /// The array into which the elements of the colleciton are to be
+        /// The array into which the elements of the collection are to be
         /// stored, if it is big enough; otherwise, a new array of the same 
         /// runtime type is allocated for this purpose.
         /// </param>
@@ -234,7 +234,7 @@ namespace BitCoinSharp.Collections.Generic
         /// <summary>
         /// Does the actual work of copying to array. Subclass is recommended to 
         /// override this method instead of <see cref="CopyTo(T[], int)"/> method, which 
-        /// does all neccessary parameter checking and raises proper exception
+        /// does all necessary parameter checking and raises proper exception
         /// before calling this method.
         /// </summary>
         /// <param name="array">
@@ -266,7 +266,7 @@ namespace BitCoinSharp.Collections.Generic
         /// </summary>
         /// <remarks>
         /// If <typeparamref name="T"/> is <see cref="object"/> but array is 
-        /// actaully <c>string[]</c>, the returned array is always <c>string[]</c>.
+        /// actually <c>string[]</c>, the returned array is always <c>string[]</c>.
         /// </remarks>
         /// <param name="array">
         /// The source array.
@@ -368,7 +368,7 @@ namespace BitCoinSharp.Collections.Generic
         /// Returns an enumerator that iterates through a collection.
         /// </summary>
         /// <returns>
-        /// An <see cref="T:System.Collections.IEnumerator"></see> 
+        /// An <see cref="T:System.Collections.IEnumerator"/> 
         /// object that can be used to iterate through the collection.
         /// </returns>
         /// <filterpriority>2</filterpriority>
@@ -382,25 +382,25 @@ namespace BitCoinSharp.Collections.Generic
         #region ICollection Members
 
         /// <summary>
-        /// Copies the elements of the <see cref="T:System.Collections.ICollection"></see> 
-        /// to an <see cref="T:System.Array"></see>, starting at a particular 
-        /// <see cref="T:System.Array"></see> index.
+        /// Copies the elements of the <see cref="T:System.Collections.ICollection"/> 
+        /// to an <see cref="T:System.Array"/>, starting at a particular 
+        /// <see cref="T:System.Array"/> index.
         /// </summary>
-        /// <param name="array">The one-dimensional <see cref="T:System.Array"></see> 
+        /// <param name="array">The one-dimensional <see cref="T:System.Array"/> 
         /// that is the destination of the elements copied from 
-        /// <see cref="T:System.Collections.ICollection"></see>. The 
-        /// <see cref="T:System.Array"></see> must have zero-based indexing. </param>
+        /// <see cref="T:System.Collections.ICollection"/>. The 
+        /// <see cref="T:System.Array"/> must have zero-based indexing. </param>
         /// <param name="index">The zero-based index in array at which copying begins. </param>
         /// <exception cref="T:System.ArgumentNullException">array is null. </exception>
         /// <exception cref="T:System.ArgumentOutOfRangeException">index is less than zero. </exception>
         /// <exception cref="T:System.ArgumentException">
         /// array is multidimensional.-or- index is equal to or greater than 
         /// the length of array.-or- The number of elements in the source 
-        /// <see cref="T:System.Collections.ICollection"></see> is greater 
+        /// <see cref="T:System.Collections.ICollection"/> is greater 
         /// than the available space from index to the end of the destination 
         /// array. </exception>
         /// <exception cref="T:System.InvalidCastException">
-        /// The type of the source <see cref="T:System.Collections.ICollection"></see> 
+        /// The type of the source <see cref="T:System.Collections.ICollection"/> 
         /// cannot be cast automatically to the type of the destination array. </exception>
         /// <filterpriority>2</filterpriority>
         void ICollection.CopyTo(Array array, int index)
@@ -427,11 +427,11 @@ namespace BitCoinSharp.Collections.Generic
 
         /// <summary>
         /// Gets a value indicating whether access to the 
-        /// <see cref="T:System.Collections.ICollection"></see> 
+        /// <see cref="T:System.Collections.ICollection"/> 
         /// is synchronized (thread safe).
         /// </summary>
         /// <returns>
-        /// true if access to the <see cref="T:System.Collections.ICollection"></see> 
+        /// true if access to the <see cref="T:System.Collections.ICollection"/> 
         /// is synchronized (thread safe); otherwise, false.
         /// </returns>
         /// <filterpriority>2</filterpriority>
@@ -442,11 +442,11 @@ namespace BitCoinSharp.Collections.Generic
 
         /// <summary>
         /// Gets an object that can be used to synchronize access to the 
-        /// <see cref="T:System.Collections.ICollection"></see>.
+        /// <see cref="T:System.Collections.ICollection"/>.
         /// </summary>
         /// <returns>
         /// An object that can be used to synchronize access to the 
-        /// <see cref="T:System.Collections.ICollection"></see>.
+        /// <see cref="T:System.Collections.ICollection"/>.
         /// </returns>
         /// <filterpriority>2</filterpriority>
         object ICollection.SyncRoot
@@ -460,7 +460,7 @@ namespace BitCoinSharp.Collections.Generic
         /// Returns a <see cref="string"/> that represents the current <see cref="object"/>.
         /// </summary>
         /// <remarks>
-        /// This implmentation list out all the elements separated by comma.
+        /// This implementation list out all the elements separated by comma.
         /// </remarks>
         /// <returns>
         /// A <see cref="string"/> that represents the current <see cref="object"/>.
@@ -517,12 +517,12 @@ namespace BitCoinSharp.Collections.Generic
 
         /// <summary>
         /// Gets an object that can be used to synchronize access to the 
-        /// <see cref="T:System.Collections.ICollection"></see>.
+        /// <see cref="T:System.Collections.ICollection"/>.
         /// </summary>
         /// <remarks>This implementation returns <see langword="null"/>.</remarks>
         /// <returns>
         /// An object that can be used to synchronize access to the 
-        /// <see cref="T:System.Collections.ICollection"></see>.
+        /// <see cref="T:System.Collections.ICollection"/>.
         /// </returns>
         /// <filterpriority>2</filterpriority>
         protected virtual object SyncRoot
@@ -534,7 +534,7 @@ namespace BitCoinSharp.Collections.Generic
         /// Gets a value indicating whether access to the <see cref="ICollection"/> 
         /// is synchronized (thread safe).
         /// </summary>
-        /// <remarks>This implementaiton always return <see langword="false"/>.</remarks>
+        /// <remarks>This implementation always return <see langword="false"/>.</remarks>
         /// <returns>
         /// true if access to the <see cref="ICollection"/> 
         /// is synchronized (thread safe); otherwise, false.

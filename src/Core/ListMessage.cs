@@ -30,7 +30,7 @@ namespace BitCoinSharp
 
         private const ulong _maxInventoryItems = 50000;
 
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         protected ListMessage(NetworkParameters @params, byte[] bytes)
             : base(@params, bytes, 0)
         {
@@ -52,7 +52,7 @@ namespace BitCoinSharp
             _items.Add(item);
         }
 
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         protected override void Parse()
         {
             // An inv is vector<CInv> where CInv is int+hash. The int is either 1 or 2 for tx or block.
@@ -89,7 +89,7 @@ namespace BitCoinSharp
             Bytes = null;
         }
 
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public override void BitcoinSerializeToStream(Stream stream)
         {
             stream.Write(new VarInt((ulong) _items.Count).Encode());

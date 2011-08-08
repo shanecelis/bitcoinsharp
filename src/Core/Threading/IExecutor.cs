@@ -19,6 +19,7 @@
 #endregion
 
 using System;
+using BitCoinSharp.Threading.Execution;
 
 namespace BitCoinSharp.Threading
 {
@@ -85,7 +86,7 @@ namespace BitCoinSharp.Threading
         /// thread, at the discretion of the <see cref="BitCoinSharp.Threading.IExecutor"/> implementation.
         /// </remarks>
         /// <param name="command">the runnable task</param>
-        /// <exception cref="BitCoinSharp.Threading.Execution.RejectedExecutionException">if the task cannot be accepted for execution.</exception>
+        /// <exception cref="RejectedExecutionException">if the task cannot be accepted for execution.</exception>
         /// <exception cref="System.ArgumentNullException">if the command is null</exception>
         void Execute(IRunnable command);
 
@@ -97,7 +98,7 @@ namespace BitCoinSharp.Threading
         /// thread, at the discretion of the <see cref="IExecutor"/> implementation.
         /// </remarks>
         /// <param name="action">The task to be executed.</param>
-        /// <exception cref="BitCoinSharp.Threading.Execution.RejectedExecutionException">
+        /// <exception cref="RejectedExecutionException">
         /// If the task cannot be accepted for execution.
         /// </exception>
         /// <exception cref="System.ArgumentNullException">

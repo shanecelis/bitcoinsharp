@@ -62,21 +62,21 @@ namespace BitCoinSharp
         /// <summary>
         /// Deserializes the message. This is usually part of a transaction message.
         /// </summary>
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         public TransactionOutPoint(NetworkParameters @params, byte[] payload, int offset)
             : base(@params, payload, offset)
         {
         }
 
         // All zeros.
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         protected override void Parse()
         {
             Hash = ReadHash();
             Index = (int) ReadUint32();
         }
 
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public override void BitcoinSerializeToStream(Stream stream)
         {
             stream.Write(Utils.ReverseBytes(Hash.Bytes));
@@ -109,7 +109,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Convenience method to get the connected outputs pubkey hash.
         /// </summary>
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="ScriptException"/>
         internal byte[] ConnectedPubKeyHash
         {
             get { return ConnectedOutput.ScriptPubKey.PubKeyHash; }

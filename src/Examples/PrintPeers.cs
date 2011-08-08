@@ -40,7 +40,7 @@ namespace BitCoinSharp.Examples
             }
         }
 
-        /// <exception cref="BitCoinSharp.Discovery.PeerDiscoveryException" />
+        /// <exception cref="PeerDiscoveryException"/>
         private static void PrintIrc()
         {
             var start = Environment.TickCount;
@@ -51,7 +51,7 @@ namespace BitCoinSharp.Examples
             PrintElapsed(start);
         }
 
-        /// <exception cref="BitCoinSharp.Discovery.PeerDiscoveryException" />
+        /// <exception cref="PeerDiscoveryException"/>
         private static void PrintDns()
         {
             var start = Environment.TickCount;
@@ -60,7 +60,7 @@ namespace BitCoinSharp.Examples
             PrintElapsed(start);
         }
 
-        /// <exception cref="BitCoinSharp.Discovery.PeerDiscoveryException" />
+        /// <exception cref="PeerDiscoveryException"/>
         public static void Run(string[] args)
         {
             Console.WriteLine("=== IRC ===");

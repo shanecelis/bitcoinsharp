@@ -69,10 +69,10 @@ namespace BitCoinSharp
         /// Convert an amount expressed in the way humans are used to into nanocoins.
         /// </summary>
         /// <remarks>
-        /// This takes string in a format understood by <see cref="System.Double.Parse(string)">System.Double(string)</see>,
+        /// This takes string in a format understood by <see cref="System.Double.Parse(string)"/>,
         /// for example "0", "1", "0.10", "1.23E3", "1234.5E-5".
         /// </remarks>
-        /// <exception cref="System.ArithmeticException">If you try to specify fractional nanocoins.</exception>
+        /// <exception cref="ArithmeticException">If you try to specify fractional nanocoins.</exception>
         public static ulong ToNanoCoins(string coins)
         {
             var value = decimal.Parse(coins, NumberStyles.Float)*Coin;
@@ -99,7 +99,7 @@ namespace BitCoinSharp
             @out[offset + 3] = (byte) (val >> 24);
         }
 
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public static void Uint32ToByteStreamLe(uint val, Stream stream)
         {
             stream.Write((byte) (val >> 0));
@@ -108,7 +108,7 @@ namespace BitCoinSharp
             stream.Write((byte) (val >> 24));
         }
 
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public static void Uint64ToByteStreamLe(ulong val, Stream stream)
         {
             var bytes = BitConverter.GetBytes(val);
@@ -120,7 +120,7 @@ namespace BitCoinSharp
         }
 
         /// <summary>
-        /// See <see cref="DoubleDigest(byte[], int, int)">DoubleDigest(byte[], int, int)</see>.
+        /// See <see cref="DoubleDigest(byte[], int, int)"/>.
         /// </summary>
         public static byte[] DoubleDigest(byte[] input)
         {

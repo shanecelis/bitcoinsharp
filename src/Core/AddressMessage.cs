@@ -29,19 +29,19 @@ namespace BitCoinSharp
 
         internal IList<PeerAddress> Addresses { get; private set; }
 
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         internal AddressMessage(NetworkParameters @params, byte[] payload, int offset)
             : base(@params, payload, offset)
         {
         }
 
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         internal AddressMessage(NetworkParameters @params, byte[] payload)
             : base(@params, payload, 0)
         {
         }
 
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         protected override void Parse()
         {
             var numAddresses = ReadVarInt();

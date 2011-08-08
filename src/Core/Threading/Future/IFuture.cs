@@ -19,6 +19,7 @@
 #endregion
 
 using System;
+using BitCoinSharp.Threading.Execution;
 
 namespace BitCoinSharp.Threading.Future
 {
@@ -96,8 +97,8 @@ namespace BitCoinSharp.Threading.Future
         /// retrieves its result.
         /// </remarks>
         /// <returns>the computed result</returns>
-        /// <exception cref="BitCoinSharp.Threading.Execution.CancellationException">if the computation was cancelled.</exception>
-        /// <exception cref="BitCoinSharp.Threading.Execution.ExecutionException">if the computation threw an exception.</exception>
+        /// <exception cref="CancellationException">if the computation was cancelled.</exception>
+        /// <exception cref="ExecutionException">if the computation threw an exception.</exception>
         /// <exception cref="System.Threading.ThreadInterruptedException">if the current thread was interrupted while waiting.</exception>
         T GetResult();
 
@@ -110,8 +111,8 @@ namespace BitCoinSharp.Threading.Future
         /// </remarks>
         /// <param name="durationToWait">the <see cref="System.TimeSpan"/> to wait.</param>
         /// <returns>the computed result</returns>
-        /// <exception cref="BitCoinSharp.Threading.Execution.CancellationException">if the computation was cancelled.</exception>
-        /// <exception cref="BitCoinSharp.Threading.Execution.ExecutionException">if the computation threw an exception.</exception>
+        /// <exception cref="CancellationException">if the computation was cancelled.</exception>
+        /// <exception cref="ExecutionException">if the computation threw an exception.</exception>
         /// <exception cref="System.Threading.ThreadInterruptedException">if the current thread was interrupted while waiting.</exception>
         /// <exception cref="TimeoutException">if the computation threw an exception.</exception>
         T GetResult(TimeSpan durationToWait);

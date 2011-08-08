@@ -77,14 +77,14 @@ namespace BitCoinSharp
         /// <summary>
         /// Deserializes an input message. This is usually part of a transaction message.
         /// </summary>
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         public TransactionInput(NetworkParameters @params, Transaction parentTransaction, byte[] payload, int offset)
             : base(@params, payload, offset)
         {
             ParentTransaction = parentTransaction;
         }
 
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         protected override void Parse()
         {
             Outpoint = new TransactionOutPoint(Params, Bytes, Cursor);
@@ -94,7 +94,7 @@ namespace BitCoinSharp
             _sequence = ReadUint32();
         }
 
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public override void BitcoinSerializeToStream(Stream stream)
         {
             Outpoint.BitcoinSerializeToStream(stream);
@@ -114,7 +114,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Returns the input script.
         /// </summary>
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="ScriptException"/>
         public Script ScriptSig
         {
             get
@@ -133,7 +133,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Convenience method that returns the from address of this input by parsing the scriptSig.
         /// </summary>
-        /// <exception cref="BitCoinSharp.ScriptException">If the scriptSig could not be understood (eg, if this is a coinbase transaction).</exception>
+        /// <exception cref="ScriptException">If the scriptSig could not be understood (eg, if this is a coinbase transaction).</exception>
         public Address FromAddress
         {
             get

@@ -23,7 +23,7 @@ namespace BitCoinSharp.Examples
 {
     /// <summary>
     /// This example shows how to solve the challenge Hal posted here:<p/>
-    ///   <a href="http://www.bitcoin.org/smf/index.php?topic=3638.0">http://www.bitcoin.org/smf/index.php?topic=3638.0</a><p />
+    ///   <a href="http://www.bitcoin.org/smf/index.php?topic=3638.0"/><p/>
     /// in which a private key with some coins associated with it is published. The goal is to import the private key,
     /// claim the coins and then send them to a different address.
     /// </summary>

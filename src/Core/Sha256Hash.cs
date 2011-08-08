@@ -61,7 +61,7 @@ namespace BitCoinSharp
         }
 
         /// <summary>
-        /// Hash code of the byte array as calculated by <see cref="object.GetHashCode()">object.GetHashCode()</see>. Note the difference between a SHA256
+        /// Hash code of the byte array as calculated by <see cref="object.GetHashCode"/>. Note the difference between a SHA256
         /// secure bytes and the type of quick/dirty bytes used by the Java hashCode method which is designed for use in
         /// bytes tables.
         /// </summary>

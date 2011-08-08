@@ -39,7 +39,7 @@ namespace BitCoinSharp.Discovery
         /// Once all the list has been iterated, null will be returned for each subsequent query.
         /// </summary>
         /// <returns>The address/port of the next node.</returns>
-        /// <exception cref="PeerDiscoveryException" />
+        /// <exception cref="PeerDiscoveryException"/>
         public EndPoint GetPeer()
         {
             return NextPeer();
@@ -55,7 +55,7 @@ namespace BitCoinSharp.Discovery
         /// <summary>
         /// Returns an array containing all the Bitcoin nodes within the list.
         /// </summary>
-        /// <exception cref="BitCoinSharp.Discovery.PeerDiscoveryException" />
+        /// <exception cref="PeerDiscoveryException"/>
         public IEnumerable<EndPoint> GetPeers()
         {
             return AllPeers();

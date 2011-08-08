@@ -23,7 +23,7 @@ namespace BitCoinSharp
     {
         private readonly string _name;
 
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         public UnknownMessage(NetworkParameters @params, string name, byte[] payloadBytes)
             : base(@params, payloadBytes, 0)
         {
@@ -35,7 +35,7 @@ namespace BitCoinSharp
             return "Unknown message [" + _name + "]: " + (Bytes == null ? "" : Utils.BytesToHexString(Bytes));
         }
 
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         protected override void Parse()
         {
         }

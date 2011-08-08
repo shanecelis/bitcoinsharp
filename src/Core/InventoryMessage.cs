@@ -21,7 +21,7 @@ namespace BitCoinSharp
     [Serializable]
     public class InventoryMessage : ListMessage
     {
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         public InventoryMessage(NetworkParameters @params, byte[] bytes)
             : base(@params, bytes)
         {

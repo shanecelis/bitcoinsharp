@@ -46,7 +46,7 @@ namespace BitCoinSharp
         /// <remarks>
         /// The first block in every chain is a well known constant shared between all BitCoin implementations. For a
         /// block to be valid, it must be eventually possible to work backwards to the genesis block by following the
-        /// prevBlockHash pointers in the block headers.<p />
+        /// prevBlockHash pointers in the block headers.<p/>
         /// The genesis blocks for both test and prod networks contain the timestamp of when they were created,
         /// and a message in the coinbase transaction. It says, <i>"The Times 03/Jan/2009 Chancellor on brink of second bailout for banks"</i>.
         /// </remarks>
@@ -68,12 +68,12 @@ namespace BitCoinSharp
         public uint PacketMagic { get; private set; }
 
         /// <summary>
-        /// First byte of a base58 encoded address. See <see cref="Address">Address</see>
+        /// First byte of a base58 encoded address. See <see cref="Address"/>
         /// </summary>
         public int AddressHeader { get; private set; }
 
         /// <summary>
-        /// First byte of a base58 encoded dumped private key. See <see cref="DumpedPrivateKey">DumpedPrivateKey</see>.
+        /// First byte of a base58 encoded dumped private key. See <see cref="DumpedPrivateKey"/>.
         /// </summary>
         public int DumpedPrivateKeyHeader { get; private set; }
 

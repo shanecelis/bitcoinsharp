@@ -27,14 +27,14 @@ using log4net;
 namespace BitCoinSharp
 {
     /// <summary>
-    /// A block is the foundation of the BitCoin system. It records a set of <see cref="Transaction">Transaction</see>s together with
+    /// A block is the foundation of the BitCoin system. It records a set of <see cref="Transaction"/>s together with
     /// some data that links it into a place in the global block chain, and proves that a difficult calculation was done
     /// over its contents. See the BitCoin technical paper for more detail on blocks.
     /// </summary>
     /// <remarks>
     /// To get a block, you can either build one from the raw bytes you can get from another implementation,
-    /// or request one specifically using <see cref="Peer.GetBlock(Sha256Hash)">Peer.GetBlock(byte[])</see>, or grab one from a downloaded
-    /// <see cref="BlockChain">BlockChain</see>.
+    /// or request one specifically using <see cref="Peer.BeginGetBlock"/>, or grab one from a downloaded
+    /// <see cref="BlockChain"/>.
     /// </remarks>
     [Serializable]
     public class Block : Message
@@ -90,13 +90,13 @@ namespace BitCoinSharp
         /// <summary>
         /// Constructs a block object from the BitCoin wire format.
         /// </summary>
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         public Block(NetworkParameters @params, byte[] payloadBytes)
             : base(@params, payloadBytes, 0)
         {
         }
 
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         protected override void Parse()
         {
             _version = ReadUint32();
@@ -124,7 +124,7 @@ namespace BitCoinSharp
             }
         }
 
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         private void WriteHeader(Stream stream)
         {
             Utils.Uint32ToByteStreamLe(_version, stream);
@@ -135,7 +135,7 @@ namespace BitCoinSharp
             Utils.Uint32ToByteStreamLe(_nonce, stream);
         }
 
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public override void BitcoinSerializeToStream(Stream stream)
         {
             WriteHeader(stream);
@@ -191,7 +191,7 @@ namespace BitCoinSharp
         /// target that covers 5% of all possible hash values. Then the work of the block will be 20. As the target gets
         /// lower, the amount of work goes up.
         /// </remarks>
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="VerificationException"/>
         public BigInteger GetWork()
         {
             var target = GetDifficultyTargetAsInteger();
@@ -263,7 +263,7 @@ namespace BitCoinSharp
         /// target is represented using a compact form. If this form decodes to a value that is out of bounds,
         /// an exception is thrown.
         /// </summary>
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="VerificationException"/>
         public BigInteger GetDifficultyTargetAsInteger()
         {
             var target = Utils.DecodeCompactBits(_difficultyTarget);
@@ -275,7 +275,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Returns true if the hash of the block is OK (lower than difficulty target).
         /// </summary>
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="VerificationException"/>
         private bool CheckProofOfWork(bool throwException)
         {
             // This part is key - it is what proves the block was as difficult to make as it claims
@@ -300,7 +300,7 @@ namespace BitCoinSharp
             return true;
         }
 
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="VerificationException"/>
         private void CheckTimestamp()
         {
             // Allow injection of a fake clock to allow unit testing.
@@ -309,7 +309,7 @@ namespace BitCoinSharp
                 throw new VerificationException("Block too far in future");
         }
 
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="VerificationException"/>
         private void CheckMerkleRoot()
         {
             var calculatedRoot = CalculateMerkleRoot();
@@ -385,7 +385,7 @@ namespace BitCoinSharp
             return tree;
         }
 
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="VerificationException"/>
         private void CheckTransactions()
         {
             // The first transaction in a block must always be a coinbase transaction.
@@ -405,7 +405,7 @@ namespace BitCoinSharp
         /// <b>not</b> everything that is required for a block to be valid, only what is checkable independent of the
         /// chain and without a transaction index.
         /// </summary>
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="VerificationException"/>
         public void VerifyHeader()
         {
             // Prove that this block is OK. It might seem that we can just ignore most of these checks given that the
@@ -420,7 +420,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Checks the block contents
         /// </summary>
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="VerificationException"/>
         public void VerifyTransactions()
         {
             // Now we need to check that the body of the block actually matches the headers. The network won't generate
@@ -435,7 +435,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Verifies both the header and that the transactions hash to the merkle root.
         /// </summary>
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="VerificationException"/>
         public void Verify()
         {
             VerifyHeader();
@@ -518,7 +518,7 @@ namespace BitCoinSharp
 
         /// <summary>
         /// Returns the difficulty of the proof of work that this block should meet encoded in compact form. The
-        /// <see cref="BlockChain">BlockChain</see> verifies that this is not too easy by looking at the length of the chain when the block is
+        /// <see cref="BlockChain"/> verifies that this is not too easy by looking at the length of the chain when the block is
         /// added. To find the actual value the hash should be compared against, use getDifficultyTargetBI.
         /// </summary>
         public uint DifficultyTarget

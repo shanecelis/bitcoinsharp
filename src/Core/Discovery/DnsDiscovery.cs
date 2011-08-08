@@ -26,7 +26,7 @@ namespace BitCoinSharp.Discovery
     /// </summary>
     /// <remarks>
     /// This class does not support the testnet as currently there are no DNS servers providing testnet hosts.
-    /// If this class is being used for testnet you must specify the hostnames to use.<p />
+    /// If this class is being used for testnet you must specify the hostnames to use.<p/>
     /// Failure to resolve individual host names will not cause an Exception to be thrown.
     /// However, if all hosts passed fail to resolve a PeerDiscoveryException will be thrown during getPeers().
     /// </remarks>
@@ -65,7 +65,7 @@ namespace BitCoinSharp.Discovery
             _netParams = netParams;
         }
 
-        /// <exception cref="BitCoinSharp.Discovery.PeerDiscoveryException" />
+        /// <exception cref="PeerDiscoveryException"/>
         public IEnumerable<EndPoint> GetPeers()
         {
             ICollection<EndPoint> addresses = new HashSet<EndPoint>();

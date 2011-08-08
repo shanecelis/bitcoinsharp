@@ -71,7 +71,7 @@ namespace BitCoinSharp.Discovery
         /// Returns a list of peers that were found in the IRC channel. Note that just because a peer appears in the list
         /// does not mean it is accepting connections.
         /// </summary>
-        /// <exception cref="BitCoinSharp.Discovery.PeerDiscoveryException" />
+        /// <exception cref="PeerDiscoveryException"/>
         public IEnumerable<EndPoint> GetPeers()
         {
             var addresses = new List<EndPoint>();

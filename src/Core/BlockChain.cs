@@ -25,22 +25,22 @@ using log4net;
 namespace BitCoinSharp
 {
     /// <summary>
-    /// A BlockChain holds a series of <see cref="Block">Block</see> objects, links them together, and knows how to verify that the
-    /// chain follows the rules of the <see cref="NetworkParameters">NetworkParameters</see> for this chain.
+    /// A BlockChain holds a series of <see cref="Block"/> objects, links them together, and knows how to verify that the
+    /// chain follows the rules of the <see cref="NetworkParameters"/> for this chain.
     /// </summary>
     /// <remarks>
-    /// A BlockChain requires a <see cref="Wallet">Wallet</see> to receive transactions that it finds during the initial download. However,
-    /// if you don't care about this, you can just pass in an empty wallet and nothing bad will happen.<p />
-    /// A newly constructed BlockChain is empty. To fill it up, use a <see cref="Peer">Peer</see> object to download the chain from the
-    /// network.<p />
-    /// <b>Notes</b><p />
+    /// A BlockChain requires a <see cref="Wallet"/> to receive transactions that it finds during the initial download. However,
+    /// if you don't care about this, you can just pass in an empty wallet and nothing bad will happen.<p/>
+    /// A newly constructed BlockChain is empty. To fill it up, use a <see cref="Peer"/> object to download the chain from the
+    /// network.<p/>
+    /// <b>Notes</b><p/>
     /// The 'chain' can actually be a tree although in normal operation it can be thought of as a simple list. In such a
     /// situation there are multiple stories of the economy competing to become the one true consensus. This can happen
     /// naturally when two miners solve a block within a few seconds of each other, or it can happen when the chain is
-    /// under attack.<p />
+    /// under attack.<p/>
     /// A reference to the head block of every chain is stored. If you can reach the genesis block by repeatedly walking
     /// through the prevBlock pointers, then we say this is a full chain. If you cannot reach the genesis block we say it is
-    /// an orphan chain.<p />
+    /// an orphan chain.<p/>
     /// Orphan chains can occur when blocks are solved and received during the initial block chain download,
     /// or if we connect to a peer that doesn't send us blocks in order.
     /// </remarks>
@@ -72,12 +72,12 @@ namespace BitCoinSharp
         private readonly IList<Block> _unconnectedBlocks = new List<Block>();
 
         /// <summary>
-        /// Constructs a BlockChain connected to the given wallet and store. To obtain a <see cref="Wallet">Wallet</see> you can construct
-        /// one from scratch, or you can deserialize a saved wallet from disk using <see cref="Wallet.LoadFromFile(System.IO.FileInfo)">Wallet.LoadFromFile(System.IO.FileInfo)</see><p />
+        /// Constructs a BlockChain connected to the given wallet and store. To obtain a <see cref="Wallet"/> you can construct
+        /// one from scratch, or you can deserialize a saved wallet from disk using <see cref="Wallet.LoadFromFile"/>.
         /// </summary>
         /// <remarks>
-        /// For the store you can use a <see cref="MemoryBlockStore">MemoryBlockStore</see> if you don't care about saving the downloaded data, or a
-        /// <see cref="BoundedOverheadBlockStore">BoundedOverheadBlockStore</see> if you'd like to ensure fast start-up the next time you run the program.
+        /// For the store you can use a <see cref="MemoryBlockStore"/> if you don't care about saving the downloaded data, or a
+        /// <see cref="BoundedOverheadBlockStore"/> if you'd like to ensure fast start-up the next time you run the program.
         /// </remarks>
         public BlockChain(NetworkParameters @params, Wallet wallet, IBlockStore blockStore)
             : this(@params, new List<Wallet>(), blockStore)
@@ -125,8 +125,8 @@ namespace BitCoinSharp
         /// exception is thrown. If the block is OK but cannot be connected to the chain at this time, returns false.
         /// If the block can be connected to the chain, returns true.
         /// </summary>
-        /// <exception cref="BitCoinSharp.VerificationException" />
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="VerificationException"/>
+        /// <exception cref="ScriptException"/>
         public bool Add(Block block)
         {
             lock (this)
@@ -139,9 +139,9 @@ namespace BitCoinSharp
         private int _statsLastTime = Environment.TickCount;
         private long _statsBlocksAdded;
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
-        /// <exception cref="BitCoinSharp.VerificationException" />
-        /// <exception cref="BitCoinSharp.ScriptException" />
+        /// <exception cref="BlockStoreException"/>
+        /// <exception cref="VerificationException"/>
+        /// <exception cref="ScriptException"/>
         private bool Add(Block block, bool tryConnecting)
         {
             lock (this)
@@ -217,8 +217,8 @@ namespace BitCoinSharp
             }
         }
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="BlockStoreException"/>
+        /// <exception cref="VerificationException"/>
         private void ConnectBlock(StoredBlock newStoredBlock, StoredBlock storedPrev, IDictionary<Wallet, List<Transaction>> newTransactions)
         {
             if (storedPrev.Equals(_chainHead))
@@ -263,8 +263,8 @@ namespace BitCoinSharp
         /// <summary>
         /// Called as part of connecting a block when the new block results in a different chain having higher total work.
         /// </summary>
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="BlockStoreException"/>
+        /// <exception cref="VerificationException"/>
         private void HandleNewBestChain(StoredBlock newChainHead)
         {
             // This chain has overtaken the one we currently believe is best. Reorganize is required.
@@ -293,7 +293,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Returns the set of contiguous blocks between 'higher' and 'lower'. Higher is included, lower is not.
         /// </summary>
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         private IList<StoredBlock> GetPartialChain(StoredBlock higher, StoredBlock lower)
         {
             Debug.Assert(higher.Height > lower.Height);
@@ -313,7 +313,7 @@ namespace BitCoinSharp
         /// Locates the point in the chain at which newStoredBlock and chainHead diverge. Returns null if no split point was
         /// found (ie they are part of the same chain).
         /// </summary>
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         private StoredBlock FindSplit(StoredBlock newChainHead, StoredBlock chainHead)
         {
             var currentChainCursor = chainHead;
@@ -346,7 +346,7 @@ namespace BitCoinSharp
             SideChain
         }
 
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="VerificationException"/>
         private static void SendTransactionsToWallet(StoredBlock block, NewBlockType blockType, IDictionary<Wallet, List<Transaction>> newTransactions)
         {
             foreach (var item in newTransactions)
@@ -370,9 +370,9 @@ namespace BitCoinSharp
         /// <summary>
         /// For each block in unconnectedBlocks, see if we can now fit it on top of the chain and if so, do so.
         /// </summary>
-        /// <exception cref="BitCoinSharp.VerificationException" />
-        /// <exception cref="BitCoinSharp.ScriptException" />
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="VerificationException"/>
+        /// <exception cref="ScriptException"/>
+        /// <exception cref="BlockStoreException"/>
         private void TryConnectingUnconnected()
         {
             // For each block in our unconnected list, try and fit it onto the head of the chain. If we succeed remove it
@@ -406,8 +406,8 @@ namespace BitCoinSharp
         /// <summary>
         /// Throws an exception if the blocks difficulty is not correct.
         /// </summary>
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="BlockStoreException"/>
+        /// <exception cref="VerificationException"/>
         private void CheckDifficultyTransitions(StoredBlock storedPrev, StoredBlock storedNext)
         {
             var prev = storedPrev.Header;
@@ -473,7 +473,7 @@ namespace BitCoinSharp
         /// For the transactions in the given block, update the txToWalletMap such that each wallet maps to a list of
         /// transactions for which it is relevant.
         /// </summary>
-        /// <exception cref="BitCoinSharp.VerificationException" />
+        /// <exception cref="VerificationException"/>
         private void ScanTransactions(Block block, IDictionary<Wallet, List<Transaction>> walletToTxMap)
         {
             foreach (var tx in block.Transactions)

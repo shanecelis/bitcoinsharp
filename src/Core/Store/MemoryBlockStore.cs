@@ -19,7 +19,7 @@ using System.Collections.Generic;
 namespace BitCoinSharp.Store
 {
     /// <summary>
-    /// Keeps <see cref="StoredBlock">StoredBlock</see>s in memory. Used primarily for unit testing.
+    /// Keeps <see cref="StoredBlock"/>s in memory. Used primarily for unit testing.
     /// </summary>
     public class MemoryBlockStore : IBlockStore
     {
@@ -36,7 +36,7 @@ namespace BitCoinSharp.Store
             SetChainHead(storedGenesis);
         }
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         public void Put(StoredBlock block)
         {
             lock (this)
@@ -46,7 +46,7 @@ namespace BitCoinSharp.Store
             }
         }
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         public StoredBlock Get(Sha256Hash hash)
         {
             lock (this)
@@ -62,7 +62,7 @@ namespace BitCoinSharp.Store
             return _chainHead;
         }
 
-        /// <exception cref="BitCoinSharp.Store.BlockStoreException" />
+        /// <exception cref="BlockStoreException"/>
         public void SetChainHead(StoredBlock chainHead)
         {
             _chainHead = chainHead;

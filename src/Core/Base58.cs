@@ -26,7 +26,7 @@ namespace BitCoinSharp
     /// Flickr, which you may see reference to around the internet.
     /// </summary>
     /// <remarks>
-    /// Satoshi says: why base-58 instead of standard base-64 encoding?<p />
+    /// Satoshi says: why base-58 instead of standard base-64 encoding?<p/>
     /// <ul>
     ///   <li>Don't want 0OIl characters that look the same in some fonts and
     ///     could be used to create visually identical looking account numbers.</li>
@@ -63,7 +63,7 @@ namespace BitCoinSharp
             return s.ToString();
         }
 
-        /// <exception cref="BitCoinSharp.AddressFormatException" />
+        /// <exception cref="AddressFormatException"/>
         public static byte[] Decode(string input)
         {
             var bytes = DecodeToBigInteger(input).ToByteArray();
@@ -84,7 +84,7 @@ namespace BitCoinSharp
             return tmp;
         }
 
-        /// <exception cref="BitCoinSharp.AddressFormatException" />
+        /// <exception cref="AddressFormatException"/>
         public static BigInteger DecodeToBigInteger(string input)
         {
             var bi = BigInteger.ValueOf(0);
@@ -105,7 +105,7 @@ namespace BitCoinSharp
         /// Uses the checksum in the last 4 bytes of the decoded data to verify the rest are correct. The checksum is
         /// removed from the returned data.
         /// </summary>
-        /// <exception cref="BitCoinSharp.AddressFormatException">If the input is not base 58 or the checksum does not validate.</exception>
+        /// <exception cref="AddressFormatException">If the input is not base 58 or the checksum does not validate.</exception>
         public static byte[] DecodeChecked(string input)
         {
             var tmp = Decode(input);

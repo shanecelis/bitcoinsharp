@@ -26,7 +26,7 @@ namespace BitCoinSharp
     /// and on the wire, are derived from this class.
     /// </summary>
     /// <remarks>
-    /// This class is not useful for library users. If you want to talk to the network see the <see cref="Peer">Peer</see> class.
+    /// This class is not useful for library users. If you want to talk to the network see the <see cref="Peer"/> class.
     /// </remarks>
     [Serializable]
     public abstract class Message
@@ -81,7 +81,7 @@ namespace BitCoinSharp
             Params = @params;
         }
 
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         internal Message(NetworkParameters @params, byte[] msg, int offset, uint protocolVersion = NetworkParameters.ProtocolVersion)
         {
             ProtocolVersion = protocolVersion;
@@ -109,7 +109,7 @@ namespace BitCoinSharp
         // It's somewhat painful to work with in Java, so some of these objects support a second
         // serialization mechanism - the standard Java serialization system. This is used when things
         // are serialized to the wallet.
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="ProtocolException"/>
         protected abstract void Parse();
 
         public virtual byte[] BitcoinSerialize()
@@ -124,7 +124,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Serializes this message to the provided stream. If you just want the raw bytes use bitcoinSerialize().
         /// </summary>
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public virtual void BitcoinSerializeToStream(Stream stream)
         {
         }

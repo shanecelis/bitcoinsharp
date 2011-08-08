@@ -26,7 +26,7 @@ namespace BitCoinSharp
     /// <summary>
     /// A NetworkConnection handles talking to a remote BitCoin peer at a low level. It understands how to read and write
     /// messages off the network, but doesn't asynchronously communicate with the peer or handle the higher level details
-    /// of the protocol. After constructing a NetworkConnection, use a <see cref="Peer">Peer</see> to hand off communication to a
+    /// of the protocol. After constructing a NetworkConnection, use a <see cref="Peer"/> to hand off communication to a
     /// background thread.
     /// </summary>
     /// <remarks>
@@ -54,8 +54,8 @@ namespace BitCoinSharp
         /// <param name="params">Defines which network to connect to and details of the protocol.</param>
         /// <param name="bestHeight">How many blocks are in our best chain</param>
         /// <param name="connectTimeout">Timeout in milliseconds when initially connecting to peer</param>
-        /// <exception cref="System.IO.IOException">If there is a network related failure.</exception>
-        /// <exception cref="BitCoinSharp.ProtocolException">If the version negotiation failed.</exception>
+        /// <exception cref="IOException">If there is a network related failure.</exception>
+        /// <exception cref="ProtocolException">If the version negotiation failed.</exception>
         public NetworkConnection(PeerAddress peerAddress, NetworkParameters @params, uint bestHeight, int connectTimeout)
         {
             _params = @params;
@@ -114,8 +114,8 @@ namespace BitCoinSharp
             // Handshake is done!
         }
 
-        /// <exception cref="System.IO.IOException" />
-        /// <exception cref="BitCoinSharp.ProtocolException" />
+        /// <exception cref="IOException"/>
+        /// <exception cref="ProtocolException"/>
         public NetworkConnection(IPAddress inetAddress, NetworkParameters @params, uint bestHeight, int connectTimeout)
             : this(new PeerAddress(inetAddress), @params, bestHeight, connectTimeout)
         {
@@ -124,7 +124,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Sends a "ping" message to the remote node. The protocol doesn't presently use this feature much.
         /// </summary>
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public void Ping()
         {
             WriteMessage(new Ping());
@@ -134,7 +134,7 @@ namespace BitCoinSharp
         /// Shuts down the network socket. Note that there's no way to wait for a socket to be fully flushed out to the
         /// wire, so if you call this immediately after sending a message it might not get sent.
         /// </summary>
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public void Shutdown()
         {
             _socket.Disconnect(false);
@@ -150,8 +150,8 @@ namespace BitCoinSharp
         /// Reads a network message from the wire, blocking until the message is fully received.
         /// </summary>
         /// <returns>An instance of a Message subclass</returns>
-        /// <exception cref="BitCoinSharp.ProtocolException">If the message is badly formatted, failed checksum or there was a TCP failure.</exception>
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="ProtocolException">If the message is badly formatted, failed checksum or there was a TCP failure.</exception>
+        /// <exception cref="IOException"/>
         public Message ReadMessage()
         {
             return _serializer.Deserialize(_in);
@@ -162,7 +162,7 @@ namespace BitCoinSharp
         /// this should be "tx" for example. It's safe to call this from multiple threads simultaneously,
         /// the actual writing will be serialized.
         /// </summary>
-        /// <exception cref="System.IO.IOException" />
+        /// <exception cref="IOException"/>
         public void WriteMessage(Message message)
         {
             lock (_out)

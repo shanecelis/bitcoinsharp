@@ -38,7 +38,7 @@ namespace BitCoinSharp.Collections.Generic
     internal abstract class AbstractEnumerator<T> : IEnumerator<T>, IEnumerable<T> //NET_ONLY
     {
         /// <summary>
-        /// Indicates if the enumerator has not startet, is in progress, 
+        /// Indicates if the enumerator has not started, is in progress, 
         /// or has already finished.
         /// </summary>
         private EnumeratorState _state = EnumeratorState.BeforeStart;
@@ -49,7 +49,7 @@ namespace BitCoinSharp.Collections.Generic
         /// Returns an enumerator that iterates through the collection.
         /// </summary>
         /// <returns>
-        /// A <see cref="T:System.Collections.Generic.IEnumerator`1"></see> 
+        /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> 
         /// that can be used to iterate through the collection.
         /// </returns>
         /// <filterpriority>1</filterpriority>
@@ -149,7 +149,7 @@ namespace BitCoinSharp.Collections.Generic
         /// <see cref="DoReset"/> protected method instead.
         /// </remarks>
         /// <exception cref="NotSupportedException">
-        /// Always thown.
+        /// Always thrown.
         /// </exception>
         /// <exception cref="T:System.InvalidOperationException">
         /// The collection was modified after the enumerator was created. 
@@ -163,7 +163,7 @@ namespace BitCoinSharp.Collections.Generic
 
         /// <summary>
         /// For derived class to implement the <see cref="Reset"/> function. 
-        /// This implmenetation always throw <see cref="NotSupportedException"/>.
+        /// This implementation always throw <see cref="NotSupportedException"/>.
         /// </summary>
         protected virtual void DoReset()
         {
@@ -175,23 +175,23 @@ namespace BitCoinSharp.Collections.Generic
         #region Nested type: EnumeratorState
 
         /// <summary>
-        /// Indicates if the enumerator has not startet, is in progress, 
+        /// Indicates if the enumerator has not started, is in progress, 
         /// or has already finished.
         /// </summary>
         private enum EnumeratorState
         {
             /// <summary>
-            /// Enuemrator has not started.
+            /// Enumerator has not started.
             /// </summary>
             BeforeStart,
 
             /// <summary>
-            /// Enuemrator is in progress.
+            /// Enumerator is in progress.
             /// </summary>
             InProgress,
 
             /// <summary>
-            /// Enuemrator has already finished.
+            /// Enumerator has already finished.
             /// </summary>
             AfterFinish,
         }
