@@ -58,7 +58,7 @@ namespace BitCoinSharp
             var pct = 100.0 - (100.0*(blocksLeft/(double) _originalBlocksLeft));
             if ((int) pct != _lastPercent)
             {
-                Progress(pct, UnixTime.FromUnixTime(block.Time*1000));
+                Progress(pct, UnixTime.FromUnixTime(block.TimeSeconds*1000));
                 _lastPercent = (int) pct;
             }
         }

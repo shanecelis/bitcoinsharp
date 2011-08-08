@@ -16,9 +16,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using BitCoinSharp.IO;
 using log4net;
@@ -50,25 +48,10 @@ namespace BitCoinSharp
         private byte[] _program;
         private int _cursor;
 
-        // The stack consists of an ordered series of data buffers growing from zero up.
-        private readonly Stack<byte[]> _stack;
         // The program is a set of byte[]s where each element is either [opcode] or [data, data, data ...]
         private IList<byte[]> _chunks;
         private byte[] _programCopy; // TODO: remove this
         private readonly NetworkParameters _params;
-
-        /// <summary>
-        /// Concatenates two scripts to form a new one. This is used when verifying transactions.
-        /// </summary>
-        /// <exception cref="ScriptException"/>
-        public static Script Join(Script a, Script b)
-        {
-            Debug.Assert(a._params == b._params);
-            var fullProg = new byte[a._programCopy.Length + b._programCopy.Length];
-            Array.Copy(a._programCopy, 0, fullProg, 0, a._programCopy.Length);
-            Array.Copy(b._programCopy, 0, fullProg, a._programCopy.Length, b._programCopy.Length);
-            return new Script(a._params, fullProg, 0, fullProg.Length);
-        }
 
         /// <summary>
         /// Construct a Script using the given network parameters and a range of the programBytes array.
@@ -81,14 +64,8 @@ namespace BitCoinSharp
         public Script(NetworkParameters @params, byte[] programBytes, int offset, int length)
         {
             _params = @params;
-            _stack = new Stack<byte[]>();
             Parse(programBytes, offset, length);
         }
-
-        /// <summary>
-        /// If true, running a program will log its instructions.
-        /// </summary>
-        public bool Tracing { get; set; }
 
         /// <summary>
         /// Returns the program opcodes as a string, for example "[1234] DUP HAHS160"
@@ -296,146 +273,6 @@ namespace BitCoinSharp
         public Address ToAddress
         {
             get { return new Address(_params, PubKeyHash); }
-        }
-
-        /// <summary>
-        /// Runs the script with the given Transaction as the "context". Some operations like CHECKSIG
-        /// require a transaction to operate on (eg to hash). The context transaction is typically
-        /// the transaction having its inputs verified, ie the one where the scriptSig comes from.
-        /// </summary>
-        /// <exception cref="ScriptException"/>
-        public bool Run(Transaction context)
-        {
-            foreach (var chunk in _chunks)
-            {
-                if (chunk.Length == 1)
-                {
-                    var opcode = chunk[0];
-                    switch (opcode)
-                    {
-                        case OpDup:
-                            ProcessOpDup();
-                            break;
-                        case OpHash160:
-                            ProcessOpHash160();
-                            break;
-                        case OpEqualVerify:
-                            ProcessOpEqualVerify();
-                            break;
-                        case OpCheckSig:
-                            ProcessOpCheckSig(context);
-                            break;
-                        default:
-                            _log.DebugFormat("Unknown/unimplemented opcode: {0}", opcode);
-                            break;
-                    }
-                }
-                else
-                {
-                    // Data block, push it onto the stack.
-                    _log.DebugFormat("Push {0}", Utils.BytesToHexString(chunk));
-                    _stack.Push(chunk);
-                }
-            }
-            var result = _stack.Pop();
-            if (result.Length != 1)
-                throw new ScriptException("Script left junk at the top of the stack: " + Utils.BytesToHexString(result));
-            return result[0] == 1;
-        }
-
-        internal void LogStack()
-        {
-            var stack = _stack.ToList();
-            for (var i = 0; i < stack.Count; i++)
-            {
-                _log.DebugFormat("Stack[{0}]: {1}", i, Utils.BytesToHexString(stack[i]));
-            }
-        }
-
-        // WARNING: Unfinished and untested!
-        /// <exception cref="ScriptException"/>
-        private void ProcessOpCheckSig(Transaction context)
-        {
-            _stack.Pop();
-            var sigAndHashType = _stack.Pop();
-            // The signature has an extra byte on the end to indicate the type of hash. The signature
-            // is over the contents of the program, minus the signature itself of course.
-            var hashType = sigAndHashType[sigAndHashType.Length - 1];
-            // The high bit of the hashType byte is set to indicate "anyone can pay".
-            var anyoneCanPay = hashType >= 0x80;
-            // Mask out the top bit.
-            hashType &= 0x7F;
-            Transaction.SigHash sigHash;
-            switch (hashType)
-            {
-                case 1:
-                    sigHash = Transaction.SigHash.All;
-                    break;
-                case 2:
-                    sigHash = Transaction.SigHash.None;
-                    break;
-                case 3:
-                    sigHash = Transaction.SigHash.Single;
-                    break;
-                default:
-                    // TODO: This should probably not be an exception.
-                    throw new ScriptException("Unknown sighash byte: " + sigAndHashType[sigAndHashType.Length - 1]);
-            }
-
-            var sig = new byte[sigAndHashType.Length - 1];
-            Array.Copy(sigAndHashType, 0, sig, 0, sig.Length);
-
-            _log.DebugFormat("CHECKSIG: hashtype={0} anyoneCanPay={1}", sigHash, anyoneCanPay);
-            if (context == null)
-            {
-                // TODO: Fix the unit tests to run scripts in transaction context then remove this.
-                PushBool(true);
-                return;
-            }
-            // TODO: Implement me!
-            // Transaction tx = context.simplify(sigHash, 0, anyoneCanPay);
-
-            // The steps to do so are as follows:
-            //   - Use the hashtype to fiddle the transaction as appropriate
-            //   - Serialize the transaction and hash it
-            //   - Use EC code to verify the hash matches the signature
-            PushBool(true);
-        }
-
-        private void PushBool(bool val)
-        {
-            _stack.Push(new[] {val ? (byte) 1 : (byte) 0});
-        }
-
-        /// <exception cref="ScriptException"/>
-        private void ProcessOpEqualVerify()
-        {
-            _log.Debug("EQUALVERIFY");
-            var a = _stack.Pop();
-            var b = _stack.Pop();
-            if (!a.SequenceEqual(b))
-                throw new ScriptException("EQUALVERIFY failed: " + Utils.BytesToHexString(a) + " vs " +
-                                          Utils.BytesToHexString(b));
-        }
-
-        /// <summary>
-        /// Replaces the top item in the stack with a hash160 of it
-        /// </summary>
-        private void ProcessOpHash160()
-        {
-            var buf = _stack.Pop();
-            var hash = Utils.Sha256Hash160(buf);
-            _stack.Push(hash);
-            _log.DebugFormat("HASH160: output is {0}", Utils.BytesToHexString(hash));
-        }
-
-        /// <summary>
-        /// Duplicates the top item on the stack
-        /// </summary>
-        private void ProcessOpDup()
-        {
-            _log.Debug("DUP");
-            _stack.Push(_stack.Peek().ToArray());
         }
 
         ////////////////////// Interface for writing scripts from scratch ////////////////////////////////

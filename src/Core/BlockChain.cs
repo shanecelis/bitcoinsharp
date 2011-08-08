@@ -79,6 +79,7 @@ namespace BitCoinSharp
         /// For the store you can use a <see cref="MemoryBlockStore"/> if you don't care about saving the downloaded data, or a
         /// <see cref="BoundedOverheadBlockStore"/> if you'd like to ensure fast start-up the next time you run the program.
         /// </remarks>
+        /// <exception cref="BlockStoreException"/>
         public BlockChain(NetworkParameters @params, Wallet wallet, IBlockStore blockStore)
             : this(@params, new List<Wallet>(), blockStore)
         {
@@ -90,6 +91,7 @@ namespace BitCoinSharp
         /// Constructs a BlockChain that has no wallet at all. This is helpful when you don't actually care about sending
         /// and receiving coins but rather, just want to explore the network data structures.
         /// </summary>
+        /// <exception cref="BlockStoreException"/>
         public BlockChain(NetworkParameters @params, IBlockStore blockStore)
             : this(@params, new List<Wallet>(), blockStore)
         {
@@ -98,6 +100,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Constructs a BlockChain connected to the given list of wallets and a store.
         /// </summary>
+        /// <exception cref="BlockStoreException"/>
         public BlockChain(NetworkParameters @params, IEnumerable<Wallet> wallets, IBlockStore blockStore)
         {
             _blockStore = blockStore;
@@ -225,7 +228,7 @@ namespace BitCoinSharp
             {
                 // This block connects to the best known block, it is a normal continuation of the system.
                 ChainHead = newStoredBlock;
-                _log.InfoFormat("Chain is now {0} blocks high", _chainHead.Height);
+                _log.DebugFormat("Chain is now {0} blocks high", _chainHead.Height);
                 if (newTransactions != null)
                     SendTransactionsToWallet(newStoredBlock, NewBlockType.BestChain, newTransactions);
             }
@@ -437,10 +440,10 @@ namespace BitCoinSharp
                 }
                 cursor = _blockStore.Get(cursor.Header.PrevBlockHash);
             }
-            _log.InfoFormat("Difficulty transition traversal took {0}ms", Environment.TickCount - now);
+            _log.DebugFormat("Difficulty transition traversal took {0}ms", Environment.TickCount - now);
 
             var blockIntervalAgo = cursor.Header;
-            var timespan = (int) (prev.Time - blockIntervalAgo.Time);
+            var timespan = (int) (prev.TimeSeconds - blockIntervalAgo.TimeSeconds);
             // Limit the adjustment step.
             if (timespan < _params.TargetTimespan/4)
                 timespan = _params.TargetTimespan/4;
@@ -453,7 +456,7 @@ namespace BitCoinSharp
 
             if (newDifficulty.CompareTo(_params.ProofOfWorkLimit) > 0)
             {
-                _log.WarnFormat("Difficulty hit proof of work limit: {0}", newDifficulty.ToString(16));
+                _log.DebugFormat("Difficulty hit proof of work limit: {0}", newDifficulty.ToString(16));
                 newDifficulty = _params.ProofOfWorkLimit;
             }
 

@@ -35,7 +35,6 @@ namespace BitCoinSharp.Test
         {
             var sigProgBytes = Hex.Decode(_sigProg);
             var script = new Script(_params, sigProgBytes, 0, sigProgBytes.Length);
-            script.Tracing = true;
             // Test we can extract the from address.
             var hash160 = Utils.Sha256Hash160(script.PubKey);
             var a = new Address(_params, hash160);
@@ -50,15 +49,6 @@ namespace BitCoinSharp.Test
             var pubkey = new Script(_params, pubkeyBytes, 0, pubkeyBytes.Length);
             var toAddr = new Address(_params, pubkey.PubKeyHash);
             Assert.AreEqual("mkFQohBpy2HDXrCwyMrYL5RtfrmeiuuPY2", toAddr.ToString());
-
-            // To verify a transaction as legitimate, both scripts are concatenated and then the whole
-            // thing is run. So check we can do that.
-            var sigBytes = Hex.Decode(_sigProg);
-            var sig = new Script(_params, sigBytes, 0, sigBytes.Length);
-            var allScript = Script.Join(sig, pubkey);
-            allScript.Tracing = true;
-            Assert.IsTrue(allScript.Run(null));
-            allScript.LogStack();
         }
 
         [Test]
@@ -66,7 +56,6 @@ namespace BitCoinSharp.Test
         {
             var bytes = Hex.Decode("41043e96222332ea7848323c08116dddafbfa917b8e37f0bdf63841628267148588a09a43540942d58d49717ad3fabfe14978cf4f0a8b84d2435dad16e9aa4d7f935ac");
             var s = new Script(_params, bytes, 0, bytes.Length);
-            s.Tracing = true;
             Assert.IsTrue(s.IsSentToIp);
         }
     }

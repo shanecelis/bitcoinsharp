@@ -133,7 +133,7 @@ namespace BitCoinSharp
             n.Interval = _interval;
             n.TargetTimespan = _targetTimespan;
             n.GenesisBlock = CreateGenesis(n);
-            n.GenesisBlock.Time = 1296688602;
+            n.GenesisBlock.TimeSeconds = 1296688602;
             n.GenesisBlock.DifficultyTarget = 0x1d07fff8;
             n.GenesisBlock.Nonce = 384568319;
             var genesisHash = n.GenesisBlock.HashAsString;
@@ -165,7 +165,7 @@ namespace BitCoinSharp
             n.TargetTimespan = _targetTimespan;
             n.GenesisBlock = CreateGenesis(n);
             n.GenesisBlock.DifficultyTarget = 0x1d00ffff;
-            n.GenesisBlock.Time = 1231006505;
+            n.GenesisBlock.TimeSeconds = 1231006505;
             n.GenesisBlock.Nonce = 2083236893;
             var genesisHash = n.GenesisBlock.HashAsString;
             Debug.Assert(genesisHash.Equals("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"), genesisHash);
