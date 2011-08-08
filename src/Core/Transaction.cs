@@ -436,27 +436,6 @@ namespace BitCoinSharp
             }
         }
 
-        /// <summary>
-        /// Given a named input and the transaction output it connects to, runs the script formed from the
-        /// concatenation of the input and output scripts, returning true if the link is valid. In
-        /// this way, we prove that the creator of this transaction is allowed to redeem the output
-        /// of the connectedTx and thus spend the money.
-        /// </summary>
-        /// <remarks>
-        /// <b>WARNING: NOT FINISHED</b><p/>
-        /// </remarks>
-        /// <param name="inputIndex">Which input to verify.</param>
-        /// <param name="connectedTx">The Transaction that the input is connected to.</param>
-        /// <exception cref="ScriptException"/>
-        public bool VerifyInput(int inputIndex, Transaction connectedTx)
-        {
-            var input = _inputs[inputIndex];
-            var inScript = input.ScriptSig;
-            var pubkey = inScript.PubKey;
-
-            return false;
-        }
-
         /// <exception cref="IOException"/>
         public override void BitcoinSerializeToStream(Stream stream)
         {

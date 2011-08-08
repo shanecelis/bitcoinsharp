@@ -173,7 +173,17 @@ namespace BitCoinSharp.Store
                     _channel.Dispose();
                     _channel = null;
                 }
-                file.Delete();
+                if (file.Exists)
+                {
+                    try
+                    {
+                        file.Delete();
+                    }
+                    catch (IOException)
+                    {
+                        throw new BlockStoreException("Could not delete old store in order to recreate it");
+                    }
+                }
                 _channel = file.Create(); // Create fresh.
                 _channel.Write(_fileFormatVersion);
             }
@@ -220,7 +230,8 @@ namespace BitCoinSharp.Store
             }
             // Chain head pointer is the first thing in the file.
             var chainHeadHash = new byte[32];
-            _channel.Read(chainHeadHash);
+            if (_channel.Read(chainHeadHash) < chainHeadHash.Length)
+                throw new BlockStoreException("Truncated store: could not read chain head hash.");
             _chainHead = new Sha256Hash(chainHeadHash);
             _log.InfoFormat("Read chain head from disk: {0}", _chainHead);
             _channel.Position = _channel.Length - Record.Size;
