@@ -111,7 +111,8 @@ namespace BitCoinSharp.Store
                 }
                 // Chain head pointer is the first thing in the file.
                 var chainHeadHash = new byte[32];
-                input.Read(chainHeadHash);
+                if (input.Read(chainHeadHash) < chainHeadHash.Length)
+                    throw new BlockStoreException("Truncated block store: cannot read chain head hash");
                 _chainHead = new Sha256Hash(chainHeadHash);
                 _log.InfoFormat("Read chain head from disk: {0}", _chainHead);
                 var now = Environment.TickCount;

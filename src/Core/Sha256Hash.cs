@@ -88,7 +88,7 @@ namespace BitCoinSharp
             get { return _bytes; }
         }
 
-        public Sha256Hash Clone()
+        public Sha256Hash Duplicate()
         {
             return new Sha256Hash(_bytes);
         }

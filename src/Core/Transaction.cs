@@ -272,8 +272,8 @@ namespace BitCoinSharp
             s.AppendLine();
             if (IsCoinBase)
             {
-                var script = "???";
-                var script2 = "???";
+                string script;
+                string script2;
                 try
                 {
                     script = _inputs[0].ScriptSig.ToString();
@@ -281,6 +281,8 @@ namespace BitCoinSharp
                 }
                 catch (ScriptException)
                 {
+                    script = "???";
+                    script2 = "???";
                 }
                 return "     == COINBASE TXN (scriptSig " + script + ")  (scriptPubKey " + script2 + ")";
             }

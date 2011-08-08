@@ -205,13 +205,13 @@ namespace BitCoinSharp
         {
             var block = new Block(Params);
             block._nonce = _nonce;
-            block._prevBlockHash = _prevBlockHash.Clone();
-            block._merkleRoot = MerkleRoot.Clone();
+            block._prevBlockHash = _prevBlockHash.Duplicate();
+            block._merkleRoot = MerkleRoot.Duplicate();
             block._version = _version;
             block._time = _time;
             block._difficultyTarget = _difficultyTarget;
             block.Transactions = null;
-            block._hash = Hash.Clone();
+            block._hash = Hash.Duplicate();
             return block;
         }
 
