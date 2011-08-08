@@ -18,7 +18,7 @@ using BitCoinSharp.Store;
 
 namespace BitCoinSharp.Test
 {
-    public class TestUtils
+    public static class TestUtils
     {
         public static Transaction CreateFakeTx(NetworkParameters @params, ulong nanocoins, Address to)
         {

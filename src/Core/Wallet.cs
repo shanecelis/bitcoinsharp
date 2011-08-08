@@ -955,8 +955,7 @@ namespace BitCoinSharp
                 // Now replay the act of receiving the blocks that were previously in a side chain. This will:
                 //   - Move any transactions that were pending and are now accepted into the right bucket.
                 //   - Connect the newly active transactions.
-                newBlocks.Reverse(); // Need bottom-to-top but we get top-to-bottom.
-                foreach (var b in newBlocks)
+                foreach (var b in newBlocks.Reverse()) // Need bottom-to-top but we get top-to-bottom.
                 {
                     _log.InfoFormat("Replaying block {0}", b.Header.HashAsString);
                     ICollection<Transaction> txns = new HashSet<Transaction>();

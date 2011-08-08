@@ -42,7 +42,7 @@ namespace BitCoinSharp
         /// The term nanocoin is very misleading, though, because there are only 100 million
         /// of them in a coin (whereas one would expect 1 billion.
         /// </remarks>
-        public static readonly ulong Coin = 100000000;
+        public const ulong Coin = 100000000;
 
         /// <summary>
         /// How many "nanocoins" there are in 0.01 BitCoins.
@@ -52,7 +52,7 @@ namespace BitCoinSharp
         /// The term nanocoin is very misleading, though, because there are only 100 million
         /// of them in a coin (whereas one would expect 1 billion).
         /// </remarks>
-        public static readonly ulong Cent = 1000000;
+        public const ulong Cent = 1000000;
 
         /// <summary>
         /// Convert an amount expressed in the way humans are used to into nanocoins.

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-using System;
 using BitCoinSharp.Store;
 using NUnit.Framework;
 
