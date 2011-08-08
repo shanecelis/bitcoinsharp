@@ -295,7 +295,7 @@ namespace BitCoinSharp
                     // Fatal error
                     _log.Error("Block store corrupt?", e);
                     _running = false;
-                    throw new IOException(e.Message, e);
+                    throw new Exception(e.Message, e);
                 }
 
                 // If we got here, we should retry this address because an error unrelated

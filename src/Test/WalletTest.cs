@@ -177,6 +177,51 @@ namespace BitCoinSharp.Test
         }
 
         [Test]
+        public void Transactions()
+        {
+            // This test covers a bug in which Transaction.getValueSentFromMe was calculating incorrectly.
+            var tx = TestUtils.CreateFakeTx(_params, Utils.ToNanoCoins(1, 0), _myAddress);
+            // Now add another output (ie, change) that goes to some other address.
+            var someOtherGuy = new EcKey().ToAddress(_params);
+            var output = new TransactionOutput(_params, tx, Utils.ToNanoCoins(0, 5), someOtherGuy);
+            tx.AddOutput(output);
+            // Note that tx is no longer valid: it spends more than it imports. However checking transactions balance
+            // correctly isn't possible in SPV mode because value is a property of outputs not inputs. Without all
+            // transactions you can't check they add up.
+            _wallet.Receive(tx, null, BlockChain.NewBlockType.BestChain);
+            // Now the other guy creates a transaction which spends that change.
+            var tx2 = new Transaction(_params);
+            tx2.AddInput(output);
+            tx2.AddOutput(new TransactionOutput(_params, tx2, Utils.ToNanoCoins(0, 5), _myAddress));
+            // tx2 doesn't send any coins from us, even though the output is in the wallet.
+            Assert.AreEqual(Utils.ToNanoCoins(0, 0), tx2.GetValueSentFromMe(_wallet));
+        }
+
+        [Test]
+        public void Bounce()
+        {
+            // This test covers bug 64 (False double spends). Check that if we create a spend and it's immediately sent
+            // back to us, this isn't considered as a double spend.
+            var coin1 = Utils.ToNanoCoins(1, 0);
+            var coinHalf = Utils.ToNanoCoins(0, 50);
+            // Start by giving us 1 coin.
+            var inbound1 = TestUtils.CreateFakeTx(_params, coin1, _myAddress);
+            _wallet.Receive(inbound1, null, BlockChain.NewBlockType.BestChain);
+            // Send half to some other guy. Sending only half then waiting for a confirm is important to ensure the tx is
+            // in the unspent pool, not pending or spent.
+            var someOtherGuy = new EcKey().ToAddress(_params);
+            var outbound1 = _wallet.CreateSend(someOtherGuy, coinHalf);
+            _wallet.ConfirmSend(outbound1);
+            _wallet.Receive(outbound1, null, BlockChain.NewBlockType.BestChain);
+            // That other guy gives us the coins right back.
+            var inbound2 = new Transaction(_params);
+            inbound2.AddOutput(new TransactionOutput(_params, inbound2, coinHalf, _myAddress));
+            inbound2.AddInput(outbound1.Outputs[0]);
+            _wallet.Receive(inbound2, null, BlockChain.NewBlockType.BestChain);
+            Assert.AreEqual(coin1, _wallet.GetBalance());
+        }
+
+        [Test]
         public void FinneyAttack()
         {
             // A Finney attack is where a miner includes a transaction spending coins to themselves but does not

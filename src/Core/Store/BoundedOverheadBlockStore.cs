@@ -346,7 +346,10 @@ namespace BitCoinSharp.Store
         {
             lock (this)
             {
-                return Get(_chainHead);
+                var head = Get(_chainHead);
+                if (head == null)
+                    throw new BlockStoreException("Corrupted block store: chain head not found");
+                return head;
             }
         }
 

@@ -379,10 +379,13 @@ namespace BitCoinSharp
                     //   A  -> spent by B [pending]
                     //     \-> spent by C [chain]
                     var doubleSpent = input.Outpoint.FromTx; // == A
+                    Debug.Assert(doubleSpent != null);
                     var index = input.Outpoint.Index;
                     var output = doubleSpent.Outputs[index];
                     var spentBy = output.SpentBy;
+                    Debug.Assert(spentBy != null);
                     var connected = spentBy.ParentTransaction;
+                    Debug.Assert(connected != null);
                     if (Pending.Remove(connected.Hash))
                     {
                         _log.InfoFormat("Saw double spend from chain override pending tx {0}", connected.HashAsString);
@@ -468,17 +471,7 @@ namespace BitCoinSharp
                     var connectedOutput = input.Outpoint.ConnectedOutput;
                     connectedOutput.MarkAsSpent(input);
                 }
-                // Some of the outputs probably send coins back to us, eg for change or because this transaction is just
-                // consolidating the wallet. Mark any output that is NOT back to us as spent. Then add this TX to the
-                // pending pool.
-                foreach (var output in tx.Outputs)
-                {
-                    if (!output.IsMine(this))
-                    {
-                        // This output didn't go to us, so by definition it is now spent.
-                        output.MarkAsSpent(null);
-                    }
-                }
+                // Add to the pending pool. It'll be moved out once we receive this transaction on the best chain.
                 Pending[tx.Hash] = tx;
             }
         }
