@@ -46,6 +46,10 @@ namespace BitCoinSharp
 
         private readonly BitcoinSerializer _serializer;
 
+        public NetworkConnection()
+        {
+        }
+
         /// <summary>
         /// Connect to the given IP address using the port specified as part of the network parameters. Once construction
         /// is complete a functioning network channel is set up and running.
@@ -135,7 +139,7 @@ namespace BitCoinSharp
         /// wire, so if you call this immediately after sending a message it might not get sent.
         /// </summary>
         /// <exception cref="IOException"/>
-        public void Shutdown()
+        public virtual void Shutdown()
         {
             _socket.Disconnect(false);
             _socket.Close();
@@ -152,7 +156,7 @@ namespace BitCoinSharp
         /// <returns>An instance of a Message subclass</returns>
         /// <exception cref="ProtocolException">If the message is badly formatted, failed checksum or there was a TCP failure.</exception>
         /// <exception cref="IOException"/>
-        public Message ReadMessage()
+        public virtual Message ReadMessage()
         {
             return _serializer.Deserialize(_in);
         }
@@ -163,7 +167,7 @@ namespace BitCoinSharp
         /// the actual writing will be serialized.
         /// </summary>
         /// <exception cref="IOException"/>
-        public void WriteMessage(Message message)
+        public virtual void WriteMessage(Message message)
         {
             lock (_out)
             {
@@ -174,7 +178,7 @@ namespace BitCoinSharp
         /// <summary>
         /// Returns the version message received from the other end of the connection during the handshake.
         /// </summary>
-        public VersionMessage VersionMessage
+        public virtual VersionMessage VersionMessage
         {
             get { return _versionMessage; }
         }

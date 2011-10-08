@@ -44,7 +44,7 @@ namespace BitCoinSharp.Test
         // Emulates receiving a valid block that builds on top of the chain.
         public static BlockPair CreateFakeBlock(NetworkParameters @params, IBlockStore blockStore, params Transaction[] transactions)
         {
-            var b = blockStore.GetChainHead().Header.CreateNextBlock(new EcKey().ToAddress(@params));
+            var b = MakeTestBlock(@params, blockStore);
             // Coinbase tx was already added.
             foreach (var tx in transactions)
                 b.AddTransaction(tx);
@@ -55,6 +55,28 @@ namespace BitCoinSharp.Test
             blockStore.Put(pair.StoredBlock);
             blockStore.SetChainHead(pair.StoredBlock);
             return pair;
+        }
+
+        /// <exception cref="BlockStoreException"/>
+        public static Block MakeTestBlock(NetworkParameters @params, IBlockStore blockStore)
+        {
+            return blockStore.GetChainHead().Header.CreateNextBlock(new EcKey().ToAddress(@params));
+        }
+
+        /// <exception cref="BlockStoreException"/>
+        public static Block MakeSolvedTestBlock(NetworkParameters @params, IBlockStore blockStore)
+        {
+            var b = blockStore.GetChainHead().Header.CreateNextBlock(new EcKey().ToAddress(@params));
+            b.Solve();
+            return b;
+        }
+
+        /// <exception cref="BlockStoreException"/>
+        public static Block MakeSolvedTestBlock(NetworkParameters @params, Block prev)
+        {
+            var b = prev.CreateNextBlock(new EcKey().ToAddress(@params));
+            b.Solve();
+            return b;
         }
     }
 }

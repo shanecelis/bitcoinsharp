@@ -39,6 +39,16 @@ namespace BitCoinSharp
         {
         }
 
+        public IList<Sha256Hash> Locator
+        {
+            get { return _locator; }
+        }
+
+        public Sha256Hash StopHash
+        {
+            get { return _stopHash; }
+        }
+
         public override string ToString()
         {
             var b = new StringBuilder();

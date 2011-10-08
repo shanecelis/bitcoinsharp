@@ -38,6 +38,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="Moq">
+      <HintPath>..\..\lib\Moq.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\nunit.framework.dll</HintPath>
@@ -62,7 +65,9 @@
     <Compile Include="EcKeyTest.cs" />
     <Compile Include="PeerAddressTest.cs" />
     <Compile Include="PeerGroupTest.cs" />
+    <Compile Include="PeerTest.cs" />
     <Compile Include="ScriptTest.cs" />
+    <Compile Include="Moq\SetupExtensions.cs" />
     <Compile Include="Store\BoundedOverheadBlockStoreTest.cs" />
     <Compile Include="Store\DiskBlockStoreTest.cs" />
     <Compile Include="TestUtils.cs" />

@@ -98,18 +98,27 @@ namespace BitCoinSharp
         /// <exception cref="PeerException">When there is a temporary problem with the peer and we should retry later.</exception>
         public void Connect()
         {
-            try
+            lock (this)
             {
-                _conn = new NetworkConnection(_address, _params, _bestHeight, 60000);
+                try
+                {
+                    _conn = new NetworkConnection(_address, _params, _bestHeight, 60000);
+                }
+                catch (IOException ex)
+                {
+                    throw new PeerException(ex);
+                }
+                catch (ProtocolException ex)
+                {
+                    throw new PeerException(ex);
+                }
             }
-            catch (IOException ex)
-            {
-                throw new PeerException(ex);
-            }
-            catch (ProtocolException ex)
-            {
-                throw new PeerException(ex);
-            }
+        }
+
+        // For testing
+        internal NetworkConnection Connection
+        {
+            set { _conn = value; }
         }
 
         /// <summary>
@@ -155,7 +164,6 @@ namespace BitCoinSharp
             }
             catch (IOException e)
             {
-                Disconnect();
                 if (!_running)
                 {
                     // This exception was expected because we are tearing down the socket as part of quitting.
@@ -163,6 +171,7 @@ namespace BitCoinSharp
                 }
                 else
                 {
+                    Disconnect();
                     throw new PeerException(e);
                 }
             }
@@ -365,7 +374,8 @@ namespace BitCoinSharp
                 // Now release the thread that is waiting. We don't need to synchronize here as the latch establishes
                 // a memory barrier.
                 _latch.CountDown();
-                _callback(this);
+                if (_callback != null)
+                    _callback(this);
                 if (_waitHandle != null)
                 {
                     _waitHandle.Close();
@@ -491,16 +501,16 @@ namespace BitCoinSharp
             lock (this)
             {
                 _running = false;
-            }
-            try
-            {
-                // This is the correct way to stop an IO bound loop
-                if (_conn != null)
-                    _conn.Shutdown();
-            }
-            catch (IOException)
-            {
-                // Don't care about this.
+                try
+                {
+                    // This is the correct way to stop an IO bound loop
+                    if (_conn != null)
+                        _conn.Shutdown();
+                }
+                catch (IOException)
+                {
+                    // Don't care about this.
+                }
             }
         }
     }
