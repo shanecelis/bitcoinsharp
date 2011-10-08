@@ -235,5 +235,33 @@ namespace BitCoinSharp
             }
             return new BigInteger(1, key.GetOctets());
         }
+
+        /// <summary>
+        /// Returns a 32 byte array containing the private key.
+        /// </summary>
+        public byte[] GetPrivKeyBytes()
+        {
+            // Getting the bytes out of a BigInteger gives us an extra zero byte on the end (for signedness)
+            // or less than 32 bytes (leading zeros).  Coerce to 32 bytes in all cases.
+            var bytes = new byte[32];
+
+            var privArray = _priv.ToByteArray();
+            var privStart = (privArray.Length == 33) ? 1 : 0;
+            var privLength = Math.Min(privArray.Length, 32);
+            Array.Copy(privArray, privStart, bytes, 32 - privLength, privLength);
+
+            return bytes;
+        }
+
+        /// <summary>
+        /// Exports the private key in the form used by the Satoshi client "dumpprivkey" and "importprivkey" commands. Use
+        /// the <see cref="DumpedPrivateKey.ToString"/> method to get the string.
+        /// </summary>
+        /// <param name="params">The network this key is intended for use on.</param>
+        /// <returns>Private key bytes as a <see cref="DumpedPrivateKey"/>.</returns>
+        public DumpedPrivateKey GetPrivateKeyEncoded(NetworkParameters @params)
+        {
+            return new DumpedPrivateKey(@params, GetPrivKeyBytes());
+        }
     }
 }

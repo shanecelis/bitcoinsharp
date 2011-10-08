@@ -48,13 +48,13 @@ namespace BitCoinSharp
 
         public override string ToString()
         {
-            // A stringified address is:
-            //   1 byte version + 20 bytes hash + 4 bytes check code (itself a truncated hash)
-            var addressBytes = new byte[1 + 20 + 4];
+            // A stringified buffer is:
+            //   1 byte version + data bytes hash + 4 bytes check code (itself a truncated hash)
+            var addressBytes = new byte[1 + Bytes.Length + 4];
             addressBytes[0] = (byte) Version;
-            Array.Copy(Bytes, 0, addressBytes, 1, 20);
-            var check = Utils.DoubleDigest(addressBytes, 0, 21);
-            Array.Copy(check, 0, addressBytes, 21, 4);
+            Array.Copy(Bytes, 0, addressBytes, 1, Bytes.Length);
+            var check = Utils.DoubleDigest(addressBytes, 0, Bytes.Length + 1);
+            Array.Copy(check, 0, addressBytes, Bytes.Length + 1, 4);
             return Base58.Encode(addressBytes);
         }
 

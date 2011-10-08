@@ -25,16 +25,12 @@ namespace BitCoinSharp
     /// </summary>
     public class DumpedPrivateKey : VersionedChecksummedBytes
     {
-        /// <summary>
-        /// Allows the output of a private key in versioned, checksummed form.
-        /// </summary>
-        /// <param name="params">The network parameters of this key, needed for the version byte. </param>
-        /// <param name="keyBytes">The 256-bit private key.</param>
-        public DumpedPrivateKey(NetworkParameters @params, byte[] keyBytes)
+        // Used by EcKey.PrivateKeyEncoded
+        internal DumpedPrivateKey(NetworkParameters @params, byte[] keyBytes)
             : base(@params.DumpedPrivateKeyHeader, keyBytes)
         {
             if (keyBytes.Length != 32) // 256 bit keys
-                throw new ArgumentException("Keys are 256 bits, so you must provide 32 bytes.", "keyBytes");
+                throw new ArgumentException("Keys are 256 bits, so you must provide 32 bytes, got " + keyBytes.Length + " bytes", "keyBytes");
         }
 
         /// <summary>

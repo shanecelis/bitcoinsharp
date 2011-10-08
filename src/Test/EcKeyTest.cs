@@ -65,5 +65,38 @@ namespace BitCoinSharp.Test
             Assert.IsTrue(roundtripKey.Verify(message, decodedKey.Sign(message)));
             Assert.IsTrue(decodedKey.Verify(message, roundtripKey.Sign(message)));
         }
+
+        [Test]
+        public void Base58Encoding()
+        {
+            const string addr = "mqAJmaxMcG5pPHHc3H3NtyXzY7kGbJLuMF";
+            const string privkey = "92shANodC6Y4evT5kFzjNFQAdjqTtHAnDTLzqBBq4BbKUPyx6CD";
+            var key = new DumpedPrivateKey(NetworkParameters.TestNet(), privkey).Key;
+            Assert.AreEqual(privkey, key.GetPrivateKeyEncoded(NetworkParameters.TestNet()).ToString());
+            Assert.AreEqual(addr, key.ToAddress(NetworkParameters.TestNet()).ToString());
+        }
+
+        [Test]
+        public void Base58EncodingLeadingZero()
+        {
+            const string privkey = "91axuYLa8xK796DnBXXsMbjuc8pDYxYgJyQMvFzrZ6UfXaGYuqL";
+            var key = new DumpedPrivateKey(NetworkParameters.TestNet(), privkey).Key;
+            Assert.AreEqual(privkey, key.GetPrivateKeyEncoded(NetworkParameters.TestNet()).ToString());
+            Assert.AreEqual(0, key.GetPrivKeyBytes()[0]);
+        }
+
+        [Test]
+        public void Base58EncodingStress()
+        {
+            // Replace the loop bound with 1000 to get some keys with leading zero byte
+            for (var i = 0; i < 20; i++)
+            {
+                var key = new EcKey();
+                var key1 = new DumpedPrivateKey(NetworkParameters.TestNet(),
+                                                key.GetPrivateKeyEncoded(NetworkParameters.TestNet()).ToString()).Key;
+                Assert.AreEqual(Utils.BytesToHexString(key.GetPrivKeyBytes()),
+                                Utils.BytesToHexString(key1.GetPrivKeyBytes()));
+            }
+        }
     }
 }
