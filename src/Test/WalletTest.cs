@@ -53,16 +53,25 @@ namespace BitCoinSharp.Test
 
             _wallet.Receive(t1, null, BlockChain.NewBlockType.BestChain);
             Assert.AreEqual(v1, _wallet.GetBalance());
+            Assert.AreEqual(1, _wallet.GetPoolSize(Wallet.Pool.Unspent));
+            Assert.AreEqual(1, _wallet.GetPoolSize(Wallet.Pool.All));
 
             var k2 = new EcKey();
             var v2 = Utils.ToNanoCoins(0, 50);
             var t2 = _wallet.CreateSend(k2.ToAddress(_params), v2);
+            Assert.AreEqual(1, _wallet.GetPoolSize(Wallet.Pool.Unspent));
+            Assert.AreEqual(1, _wallet.GetPoolSize(Wallet.Pool.All));
 
             // Do some basic sanity checks.
             Assert.AreEqual(1, t2.Inputs.Count);
             Assert.AreEqual(_myAddress, t2.Inputs[0].ScriptSig.FromAddress);
 
             // We have NOT proven that the signature is correct!
+
+            _wallet.ConfirmSend(t2);
+            Assert.AreEqual(1, _wallet.GetPoolSize(Wallet.Pool.Pending));
+            Assert.AreEqual(1, _wallet.GetPoolSize(Wallet.Pool.Spent));
+            Assert.AreEqual(2, _wallet.GetPoolSize(Wallet.Pool.All));
         }
 
         [Test]
@@ -74,10 +83,14 @@ namespace BitCoinSharp.Test
 
             _wallet.Receive(t1, null, BlockChain.NewBlockType.BestChain);
             Assert.AreEqual(v1, _wallet.GetBalance());
+            Assert.AreEqual(1, _wallet.GetPoolSize(Wallet.Pool.Unspent));
+            Assert.AreEqual(1, _wallet.GetPoolSize(Wallet.Pool.All));
 
             var v2 = Utils.ToNanoCoins(0, 50);
             var t2 = TestUtils.CreateFakeTx(_params, v2, _myAddress);
             _wallet.Receive(t2, null, BlockChain.NewBlockType.SideChain);
+            Assert.AreEqual(1, _wallet.GetPoolSize(Wallet.Pool.Inactive));
+            Assert.AreEqual(2, _wallet.GetPoolSize(Wallet.Pool.All));
 
             Assert.AreEqual(v1, _wallet.GetBalance());
         }
@@ -209,6 +222,8 @@ namespace BitCoinSharp.Test
             _wallet.Receive(inbound1, null, BlockChain.NewBlockType.BestChain);
             // Send half to some other guy. Sending only half then waiting for a confirm is important to ensure the tx is
             // in the unspent pool, not pending or spent.
+            Assert.AreEqual(1, _wallet.GetPoolSize(Wallet.Pool.Unspent));
+            Assert.AreEqual(1, _wallet.GetPoolSize(Wallet.Pool.All));
             var someOtherGuy = new EcKey().ToAddress(_params);
             var outbound1 = _wallet.CreateSend(someOtherGuy, coinHalf);
             _wallet.ConfirmSend(outbound1);

@@ -364,13 +364,19 @@ namespace BitCoinSharp
         /// <exception cref="VerificationException"/>
         private void UpdateForSpends(Transaction tx)
         {
+            // tx is on the best chain by this point.
             foreach (var input in tx.Inputs)
             {
                 var result = input.Connect(Unspent, false);
                 if (result == TransactionInput.ConnectionResult.NoSuchTx)
                 {
-                    // Doesn't spend any of our outputs or is coinbase.
-                    continue;
+                    // Not found in the unspent map. Try again with the spent map.
+                    result = input.Connect(Spent, false);
+                    if (result == TransactionInput.ConnectionResult.NoSuchTx)
+                    {
+                        // Doesn't spend any of our outputs or is coinbase.
+                        continue;
+                    }
                 }
                 if (result == TransactionInput.ConnectionResult.AlreadySpent)
                 {
@@ -412,16 +418,27 @@ namespace BitCoinSharp
                     // The outputs are already marked as spent by the connect call above, so check if there are any more for
                     // us to use. Move if not.
                     var connected = input.Outpoint.FromTx;
-                    if (connected.GetValueSentToMe(this, false).Equals(0))
+                    MaybeMoveTxToSpent(connected, "prevtx");
+                }
+            }
+        }
+
+        /// <summary>
+        /// If the transactions outputs are all marked as spent, and it's in the unspent map, move it.
+        /// </summary>
+        private void MaybeMoveTxToSpent(Transaction tx, String context)
+        {
+            if (tx.IsEveryOutputSpent())
+            {
+                // There's nothing left I can spend in this transaction.
+                if (Unspent.Remove(tx.Hash))
+                {
+                    if (_log.IsInfoEnabled)
                     {
-                        // There's nothing left I can spend in this transaction.
-                        if (Unspent.Remove(connected.Hash))
-                        {
-                            _log.Info("  prevtx <-unspent");
-                            _log.Info("  prevtx ->spent");
-                            Spent[connected.Hash] = connected;
-                        }
+                        _log.Info("  " + context + " <-unspent");
+                        _log.Info("  " + context + " ->spent");
                     }
+                    Spent[tx.Hash] = tx;
                 }
             }
         }
@@ -472,10 +489,44 @@ namespace BitCoinSharp
                 foreach (var input in tx.Inputs)
                 {
                     var connectedOutput = input.Outpoint.ConnectedOutput;
+                    var connectedTx = connectedOutput.ParentTransaction;
                     connectedOutput.MarkAsSpent(input);
+                    MaybeMoveTxToSpent(connectedTx, "spent tx");
                 }
                 // Add to the pending pool. It'll be moved out once we receive this transaction on the best chain.
                 Pending[tx.Hash] = tx;
+            }
+        }
+
+        // This is used only for unit testing, it's an internal API.
+        internal enum Pool
+        {
+            Unspent,
+            Spent,
+            Pending,
+            Inactive,
+            Dead,
+            All
+        }
+
+        internal int GetPoolSize(Pool pool)
+        {
+            switch (pool)
+            {
+                case Pool.Unspent:
+                    return Unspent.Count;
+                case Pool.Spent:
+                    return Spent.Count;
+                case Pool.Pending:
+                    return Pending.Count;
+                case Pool.Inactive:
+                    return _inactive.Count;
+                case Pool.Dead:
+                    return _dead.Count;
+                case Pool.All:
+                    return Unspent.Count + Spent.Count + Pending.Count + _inactive.Count + _dead.Count;
+                default:
+                    throw new ArgumentOutOfRangeException("pool");
             }
         }
 

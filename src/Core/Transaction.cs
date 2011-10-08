@@ -211,6 +211,17 @@ namespace BitCoinSharp
             return null;
         }
 
+        /// <returns>true if every output is marked as spent.</returns>
+        public bool IsEveryOutputSpent()
+        {
+            foreach (var output in _outputs)
+            {
+                if (output.IsAvailableForSpending)
+                    return false;
+            }
+            return true;
+        }
+
         /// <summary>
         /// These constants are a part of a scriptSig signature on the inputs. They define the details of how a
         /// transaction can be redeemed, specifically, they control how the hash of the transaction is calculated.

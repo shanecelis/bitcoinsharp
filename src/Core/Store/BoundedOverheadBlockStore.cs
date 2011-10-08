@@ -52,7 +52,7 @@ namespace BitCoinSharp.Store
         //
         // We don't care about the value in this cache. It is always notFoundMarker. Unfortunately LinkedHashSet does not
         // provide the removeEldestEntry control.
-        private readonly StoredBlock _notFoundMarker;
+        private readonly StoredBlock _notFoundMarker = new StoredBlock(null, null, uint.MaxValue);
         private readonly OrderedDictionary<Sha256Hash, StoredBlock> _notFoundCache = new OrderedDictionary<Sha256Hash, StoredBlock>();
 
         private Sha256Hash _chainHead;
@@ -64,7 +64,7 @@ namespace BitCoinSharp.Store
             // A BigInteger representing the total amount of work done so far on this chain. As of May 2011 it takes 8
             // bytes to represent this field, so 16 bytes should be plenty for a long time.
             private const int _chainWorkBytes = 16;
-            private readonly byte[] _emptyBytes = new byte[_chainWorkBytes];
+            private static readonly byte[] _emptyBytes = new byte[_chainWorkBytes];
 
             private uint _height; // 4 bytes
             private readonly byte[] _chainWork; // 16 bytes
@@ -79,9 +79,8 @@ namespace BitCoinSharp.Store
                 _blockHeader = new byte[Block.HeaderSize];
             }
 
-            // This should be static but the language does not allow for it.
             /// <exception cref="IOException"/>
-            public void Write(Stream channel, StoredBlock block)
+            public static void Write(Stream channel, StoredBlock block)
             {
                 using (var buf = ByteBuffer.Allocate(Size))
                 {
@@ -149,7 +148,6 @@ namespace BitCoinSharp.Store
         public BoundedOverheadBlockStore(NetworkParameters @params, FileInfo file)
         {
             _params = @params;
-            _notFoundMarker = new StoredBlock(null, null, uint.MaxValue);
             try
             {
                 Load(file);
@@ -217,28 +215,38 @@ namespace BitCoinSharp.Store
                 _channel.Dispose();
             }
             _channel = file.OpenRead();
-            // Read a version byte.
-            var version = _channel.Read();
-            if (version == -1)
+            try
             {
-                // No such file or the file was empty.
-                throw new FileNotFoundException(file.Name + " does not exist or is empty");
+                // Read a version byte.
+                var version = _channel.Read();
+                if (version == -1)
+                {
+                    // No such file or the file was empty.
+                    throw new FileNotFoundException(file.Name + " does not exist or is empty");
+                }
+                if (version != _fileFormatVersion)
+                {
+                    throw new BlockStoreException("Bad version number: " + version);
+                }
+                // Chain head pointer is the first thing in the file.
+                var chainHeadHash = new byte[32];
+                if (_channel.Read(chainHeadHash) < chainHeadHash.Length)
+                    throw new BlockStoreException("Truncated store: could not read chain head hash.");
+                _chainHead = new Sha256Hash(chainHeadHash);
+                _log.InfoFormat("Read chain head from disk: {0}", _chainHead);
+                _channel.Position = _channel.Length - Record.Size;
             }
-            if (version != _fileFormatVersion)
+            catch (IOException)
             {
-                throw new BlockStoreException("Bad version number: " + version);
+                _channel.Close();
+                throw;
             }
-            // Chain head pointer is the first thing in the file.
-            var chainHeadHash = new byte[32];
-            if (_channel.Read(chainHeadHash) < chainHeadHash.Length)
-                throw new BlockStoreException("Truncated store: could not read chain head hash.");
-            _chainHead = new Sha256Hash(chainHeadHash);
-            _log.InfoFormat("Read chain head from disk: {0}", _chainHead);
-            _channel.Position = _channel.Length - Record.Size;
+            catch (BlockStoreException)
+            {
+                _channel.Close();
+                throw;
+            }
         }
-
-        // TODO: This is ugly, fix!
-        private readonly Record _dummyRecord = new Record();
 
         /// <exception cref="BlockStoreException"/>
         public void Put(StoredBlock block)
@@ -249,7 +257,7 @@ namespace BitCoinSharp.Store
                 {
                     var hash = block.Header.Hash;
                     // Append to the end of the file.
-                    _dummyRecord.Write(_channel, block);
+                    Record.Write(_channel, block);
                     _blockCache[hash] = block;
                     while (_blockCache.Count > 2050)
                     {
