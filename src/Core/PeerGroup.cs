@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using BitCoinSharp.Discovery;
 using BitCoinSharp.Store;
@@ -52,7 +53,7 @@ namespace BitCoinSharp
 
         private static readonly ILog _log = LogManager.GetLogger(typeof (PeerGroup));
 
-        private const int _connectionDelayMillis = 5*1000;
+        public const int DefaultConnectionDelayMillis = 5*1000;
         private const int _coreThreads = 1;
         private const int _threadKeepAliveSeconds = 1;
 
@@ -70,24 +71,36 @@ namespace BitCoinSharp
         private Peer _downloadPeer;
         // Callback for events related to chain download
         private IPeerEventListener _downloadListener;
+        // Peer discovery sources, will be polled occasionally if there aren't enough in-actives.
+        private readonly ICollection<IPeerDiscovery> _peerDiscoverers;
 
         private readonly NetworkParameters _params;
         private readonly IBlockStore _blockStore;
         private readonly BlockChain _chain;
+        private readonly int _connectionDelayMillis;
 
         /// <summary>
-        /// Create a PeerGroup
+        /// Creates a PeerGroup with the given parameters and a default 5 second connection timeout.
         /// </summary>
         public PeerGroup(IBlockStore blockStore, NetworkParameters @params, BlockChain chain)
+            : this(blockStore, @params, chain, DefaultConnectionDelayMillis)
+        {
+        }
+
+        /// <summary>
+        /// Creates a PeerGroup with the given parameters. The connectionDelayMillis parameter controls how long the
+        /// PeerGroup will wait between attempts to connect to nodes or read from any added peer discovery sources.
+        /// </summary>
+        public PeerGroup(IBlockStore blockStore, NetworkParameters @params, BlockChain chain, int connectionDelayMillis)
         {
             _blockStore = blockStore;
             _params = @params;
             _chain = chain;
+            _connectionDelayMillis = connectionDelayMillis;
 
             _inactives = new LinkedBlockingQueue<PeerAddress>();
-
             _peers = new SynchronizedHashSet<Peer>();
-
+            _peerDiscoverers = new SynchronizedHashSet<IPeerDiscovery>();
             _peerPool = new ThreadPoolExecutor(_coreThreads, _defaultConnections,
                                                TimeSpan.FromSeconds(_threadKeepAliveSeconds),
                                                new LinkedBlockingQueue<IRunnable>(1),
@@ -127,21 +140,7 @@ namespace BitCoinSharp
         /// </summary>
         public void AddPeerDiscovery(IPeerDiscovery peerDiscovery)
         {
-            // TODO(miron) consider remembering the discovery source and retrying occasionally 
-            IEnumerable<EndPoint> addresses;
-            try
-            {
-                addresses = peerDiscovery.GetPeers();
-            }
-            catch (PeerDiscoveryException e)
-            {
-                _log.Error("Failed to discover peer addresses from discovery source", e);
-                return;
-            }
-            foreach (var address in addresses)
-            {
-                _inactives.Add(new PeerAddress((IPEndPoint) address));
-            }
+            _peerDiscoverers.Add(peerDiscovery);
         }
 
         /// <summary>
@@ -212,7 +211,14 @@ namespace BitCoinSharp
             {
                 while (_running)
                 {
-                    TryNextPeer();
+                    if (_inactives.Count == 0)
+                    {
+                        DiscoverPeers();
+                    }
+                    else
+                    {
+                        TryNextPeer();
+                    }
 
                     // We started a new peer connection, delay before trying another one
                     Thread.Sleep(_connectionDelayMillis);
@@ -225,15 +231,38 @@ namespace BitCoinSharp
                     _running = false;
                 }
             }
-
             _peerPool.ShutdownNow();
-
             lock (_peers)
             {
                 foreach (var peer in _peers)
                 {
                     peer.Disconnect();
                 }
+            }
+        }
+
+        private void DiscoverPeers()
+        {
+            foreach (var peerDiscovery in _peerDiscoverers)
+            {
+                IEnumerable<EndPoint> addresses;
+                try
+                {
+                    addresses = peerDiscovery.GetPeers();
+                }
+                catch (PeerDiscoveryException e)
+                {
+                    // Will try again later.
+                    _log.Error("Failed to discover peer addresses from discovery source", e);
+                    return;
+                }
+
+                foreach (var address in addresses)
+                {
+                    _inactives.Add(new PeerAddress((IPEndPoint) address));
+                }
+
+                if (_inactives.Count > 0) break;
             }
         }
 
@@ -249,24 +278,38 @@ namespace BitCoinSharp
             {
                 try
                 {
-                    var peer = new Peer(_params, address,
-                                        _blockStore.GetChainHead().Height, _chain);
+                    var peer = new Peer(_params, address, _blockStore.GetChainHead().Height, _chain);
                     _peerPool.Execute(
                         () =>
                         {
                             try
                             {
-                                _log.Info("connecting to " + peer);
+                                _log.Info("Connecting to " + peer);
                                 peer.Connect();
                                 _peers.Add(peer);
                                 HandleNewPeer(peer);
-                                _log.Info("running " + peer);
                                 peer.Run();
                             }
                             catch (PeerException ex)
                             {
-                                // do not propagate PeerException - log and try next peer
-                                _log.Error("error while talking to peer", ex);
+                                // Do not propagate PeerException - log and try next peer. Suppress stack traces for
+                                // exceptions we expect as part of normal network behaviour.
+                                var cause = ex.InnerException;
+                                if (cause is SocketException)
+                                {
+                                    if (((SocketException) cause).SocketErrorCode == SocketError.TimedOut)
+                                        _log.Info("Timeout talking to " + peer + ": " + cause.Message);
+                                    else
+                                        _log.Info("Could not connect to " + peer + ": " + cause.Message);
+                                }
+                                else if (cause is IOException)
+                                {
+                                    _log.Info("Error talking to " + peer + ": " + cause.Message);
+                                }
+                                else
+                                {
+                                    _log.Error("Unexpected exception whilst talking to " + peer, ex);
+                                }
                             }
                             finally
                             {
